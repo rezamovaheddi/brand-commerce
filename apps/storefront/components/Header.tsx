@@ -1,10 +1,11 @@
 import Link from "next/link";
 import LeafMark from "./LeafMark";
+import CartButton from "./cart/CartButton";
 
 /**
- * Sticky glass header (server component — no client state in this phase).
- * The /about route and the cart are honest stubs: disabled, explained via
- * tooltips, never faking functionality that does not exist yet.
+ * Sticky glass header (server component). The cart button is a client island
+ * showing the live count from CartProvider; the /about route remains an
+ * honest disabled stub until its phase.
  */
 export default function Header() {
   return (
@@ -24,15 +25,7 @@ export default function Header() {
           </span>
         </nav>
 
-        <button
-          type="button"
-          className="dv-btn dv-cart-btn"
-          disabled
-          aria-disabled="true"
-          title="سبد خرید در فاز P2 فعال می‌شود"
-        >
-          سبد خرید (۰)
-        </button>
+        <CartButton />
       </div>
     </header>
   );

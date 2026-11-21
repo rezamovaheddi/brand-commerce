@@ -801,3 +801,196 @@ button[aria-disabled="true"],
     max-width: 480px;
   }
 }
+
+/* ============================================================ cart (P2) */
+/* All values come from styles/tokens.css via the --dv-* variables. */
+
+/* Page column for the /cart route and the PDP add-to-cart island. */
+.dv-cart-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 14px;
+}
+
+.dv-add-to-cart {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Inline feedback line (add-to-cart + cart actions). Reserves height so
+   appearing text never shifts the layout around it. */
+.dv-cart-feedback {
+  min-height: 1.7em;
+  font-size: .86rem;
+  font-weight: 600;
+}
+
+.dv-cart-feedback-error {
+  color: var(--dv-danger);
+}
+
+.dv-cart-feedback-success {
+  color: var(--dv-success);
+}
+
+/* One cart line: info column (title, SKU, unit price) + controls column. */
+.dv-cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dv-cart-line {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--dv-paper);
+  border: 1px solid var(--dv-line);
+  border-radius: var(--dv-radius-card);
+  box-shadow: 0 8px 24px rgba(35, 26, 21, .04);
+}
+
+.dv-cart-line-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dv-cart-line-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--dv-ink);
+}
+
+.dv-cart-line-sku {
+  color: var(--dv-muted);
+  font-size: .76rem;
+}
+
+.dv-cart-line-unit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .85rem;
+}
+
+.dv-cart-line-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.dv-cart-line-total {
+  font-weight: 800;
+  color: var(--dv-navy);
+}
+
+/* Quantity stepper: real buttons with 44px touch targets (var(--dv-touch)). */
+.dv-qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dv-qty-btn {
+  display: inline-grid;
+  place-items: center;
+  width: var(--dv-touch);
+  height: var(--dv-touch);
+  border: 1px solid var(--dv-line);
+  border-radius: 12px;
+  background: var(--dv-cream);
+  font-weight: 800;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: background .2s var(--dv-ease);
+}
+
+.dv-qty-btn:hover:not(:disabled) {
+  background: rgba(233, 203, 138, .35);
+}
+
+.dv-qty-value {
+  min-width: 44px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.dv-cart-remove {
+  min-height: var(--dv-touch);
+  padding: 8px 16px;
+  border-radius: var(--dv-radius-pill);
+  color: var(--dv-danger);
+  font-weight: 700;
+  font-size: .86rem;
+  transition: background .2s var(--dv-ease);
+}
+
+.dv-cart-remove:hover:not(:disabled) {
+  background: rgba(141, 46, 40, .08);
+}
+
+/* Totals footer above the (P3) checkout button. */
+.dv-cart-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 20px 22px;
+  background: var(--dv-paper);
+  border: 1px solid var(--dv-line);
+  border-radius: var(--dv-radius-panel);
+  box-shadow: var(--dv-shadow);
+}
+
+.dv-cart-totals-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+  color: var(--dv-ink-soft);
+}
+
+.dv-cart-grand {
+  padding-top: 12px;
+  border-top: 1px dashed var(--dv-line);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--dv-navy);
+}
+
+/* Cart error / empty states reuse .dv-empty; center their CTA buttons. */
+.dv-cart-error,
+.dv-cart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-block: 40px;
+}
+
+/* Stacked cart lines on narrow screens. */
+@media (max-width: 640px) {
+  .dv-cart-line-side {
+    align-items: flex-start;
+    width: 100%;
+  }
+}
+
+/* Cart classes add no motion of their own; keep the global reduced-motion
+   contract (styles/tokens.css) explicit for the two interactive pieces. */
+@media (prefers-reduced-motion: reduce) {
+  .dv-qty-btn,
+  .dv-cart-remove {
+    transition: none;
+  }
+}

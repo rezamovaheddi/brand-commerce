@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import type { Product } from "@bc/contracts";
 import PriceTag from "../../../components/PriceTag";
 import SampleBadge from "../../../components/SampleBadge";
+import AddToCartButton from "../../../components/cart/AddToCartButton";
 import { NotFoundSignal, getProduct } from "../../../lib/api";
 import { getDefaultVariant } from "../../../lib/product";
 import { formatPrice } from "../../../lib/format";
@@ -89,18 +90,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <p className="dv-muted">قیمت این محصول هنوز ثبت نشده است.</p>
           )}
 
-          <button
-            type="button"
-            className="dv-btn dv-btn-block"
-            disabled
-            aria-disabled="true"
-            title="سبد خرید در فاز P2 فعال می‌شود"
-          >
-            افزودن به سبد خرید
-          </button>
-          <p className="dv-cart-note">
-            سبد خرید و پرداخت در فاز بعدی پلتفرم فعال می‌شود.
-          </p>
+          {/* Add-to-cart is a client island wired to CartProvider; this server
+              page only supplies the DEFAULT variant's id. Multi-variant
+              selection UI is a follow-up (P3 slice). */}
+          {variant ? (
+            <>
+              <AddToCartButton variantId={variant.id} titleFa={variant.titleFa} />
+              <p className="dv-cart-note">
+                پرداخت آنلاین در فاز بعدی پلتفرم فعال می‌شود — هیچ سفارشی ثبت نمی‌شود.
+              </p>
+            </>
+          ) : null}
 
           {product.variants.length > 0 ? (
             <dl className="dv-variants" aria-label="نسخه‌های محصول">

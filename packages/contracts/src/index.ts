@@ -79,3 +79,48 @@ export const ApiErrorSchema = z.object({
   error: z.string().optional(),
 });
 export type ApiError = z.infer<typeof ApiErrorSchema>;
+
+/**
+ * Cart contracts (P2 slice — guest carts).
+ * Server-authoritative: unit prices and totals are ALWAYS computed server-side
+ * from the database; the client never supplies prices.
+ */
+export const AddCartItemSchema = z.object({
+  variantId: z.string().min(1).max(64),
+  quantity: z.coerce.number().int().min(1).max(99),
+});
+export type AddCartItem = z.infer<typeof AddCartItemSchema>;
+
+export const UpdateCartItemSchema = z.object({
+  quantity: z.coerce.number().int().min(1).max(99),
+});
+export type UpdateCartItem = z.infer<typeof UpdateCartItemSchema>;
+
+export const CartItemSchema = z.object({
+  variantId: z.string(),
+  sku: z.string(),
+  /** Parent product display names — cart lines must show WHAT was bought,
+   *  not only which variant size (UX rule from the 2026-11-21 visual review). */
+  productNameFa: z.string(),
+  productNameEn: z.string(),
+  titleFa: z.string(),
+  titleEn: z.string(),
+  quantity: z.number().int().min(1).max(99),
+  /** Server-resolved unit price in minor units. */
+  unitPriceMinor: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+  /** unitPriceMinor * quantity, computed server-side. */
+  lineTotalMinor: z.number().int().nonnegative(),
+});
+export type CartItem = z.infer<typeof CartItemSchema>;
+
+export const CartSchema = z.object({
+  id: z.string(),
+  status: z.enum(["ACTIVE", "CONVERTED", "ABANDONED"]),
+  items: z.array(CartItemSchema),
+  itemCount: z.number().int().nonnegative(),
+  lineCount: z.number().int().nonnegative(),
+  subtotalMinor: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+});
+export type Cart = z.infer<typeof CartSchema>;

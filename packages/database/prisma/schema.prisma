@@ -62,6 +62,38 @@ model ProductVariant {
   status     ProductStatus @default(DRAFT)
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+  cartItems  CartItem[]
 
   @@index([productId])
+}
+
+enum CartStatus {
+  ACTIVE
+  CONVERTED
+  ABANDONED
+}
+
+// Guest cart (P2 slice). Server-authoritative: prices/quantities are never
+// trusted from the client; totals are computed by packages/domain rules.
+model Cart {
+  id        String     @id @default(cuid())
+  status    CartStatus @default(ACTIVE)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String         @id @default(cuid())
+  cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId String
+  // 1..MAX_QUANTITY enforced by domain rules AND validated at the boundary
+  quantity  Int
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([cartId, variantId])
+  @@index([cartId])
 }

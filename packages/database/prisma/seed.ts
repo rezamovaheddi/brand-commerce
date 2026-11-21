@@ -1,5 +1,18 @@
 /* eslint-disable no-console */
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { PrismaClient, ProductStatus } from "@prisma/client";
+
+// Minimal .env loader so `npm run seed` works standalone (tsx does not load .env).
+// Existing env vars (e.g. from CI) always win.
+try {
+  for (const line of readFileSync(resolve(__dirname, "../.env"), "utf8").split(/\r?\n/)) {
+    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (m && !process.env[m[1] as string]) process.env[m[1] as string] = (m[2] as string).trim();
+  }
+} catch {
+  /* no local .env — rely on provided environment */
+}
 
 /**
  * DEVELOPMENT SEED — SAMPLE DATA ONLY.
