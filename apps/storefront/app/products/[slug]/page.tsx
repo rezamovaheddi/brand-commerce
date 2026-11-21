@@ -4,10 +4,11 @@ import type { Metadata } from "next";
 import type { Product } from "@bc/contracts";
 import PriceTag from "../../../components/PriceTag";
 import SampleBadge from "../../../components/SampleBadge";
-import AddToCartButton from "../../../components/cart/AddToCartButton";
+import VariantAddToCart, {
+  type VariantOption,
+} from "../../../components/cart/VariantAddToCart";
 import { NotFoundSignal, getProduct } from "../../../lib/api";
 import { getDefaultVariant } from "../../../lib/product";
-import { formatPrice } from "../../../lib/format";
 
 type ProductPageProps = {
   /** Next 15 App Router: params is a Promise. */
@@ -56,6 +57,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const variant = getDefaultVariant(product);
 
+  // Only ACTIVE variants are sellable; the island handles selection and the
+  // add-to-cart call for whichever variant the user picks.
+  const activeVariants: VariantOption[] = product.variants
+    .filter((variantItem) => variantItem.status === "ACTIVE")
+    .map((variantItem) => ({
+      id: variantItem.id,
+      titleFa: variantItem.titleFa,
+      priceMinor: variantItem.priceMinor,
+      currency: variantItem.currency,
+      isDefault: variantItem.isDefault,
+    }));
+
   return (
     <div className="container dv-page">
       <nav aria-label="مسیر صفحه" className="dv-breadcrumb">
@@ -90,33 +103,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <p className="dv-muted">قیمت این محصول هنوز ثبت نشده است.</p>
           )}
 
-          {/* Add-to-cart is a client island wired to CartProvider; this server
-              page only supplies the DEFAULT variant's id. Multi-variant
-              selection UI is a follow-up (P3 slice). */}
-          {variant ? (
+          {/* Variant picker + add-to-cart are a client island wired to
+              CartProvider; the server page supplies every ACTIVE variant and
+              the island owns which one is selected. */}
+          {activeVariants.length > 0 ? (
             <>
-              <AddToCartButton variantId={variant.id} titleFa={variant.titleFa} />
+              <VariantAddToCart variants={activeVariants} />
               <p className="dv-cart-note">
                 پرداخت آنلاین در فاز بعدی پلتفرم فعال می‌شود — هیچ سفارشی ثبت نمی‌شود.
               </p>
             </>
-          ) : null}
-
-          {product.variants.length > 0 ? (
-            <dl className="dv-variants" aria-label="نسخه‌های محصول">
-              {product.variants.map((variantItem) => (
-                <div key={variantItem.id} className="dv-variant-row">
-                  <dt>
-                    {variantItem.titleFa}
-                    {variantItem.isDefault ? (
-                      <span className="dv-default-tag">پیش‌فرض</span>
-                    ) : null}
-                  </dt>
-                  <dd>{formatPrice(variantItem.priceMinor, variantItem.currency)}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
+          ) : (
+            <p className="dv-muted">این محصول در حال حاضر برای فروش در دسترس نیست.</p>
+          )}
 
           {product.descriptionFa ? (
             <p className="dv-pdp-desc">{product.descriptionFa}</p>

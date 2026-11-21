@@ -53,7 +53,9 @@ export class CartsService {
   /**
    * Adds a variant to the cart. The variant is resolved SERVER-SIDE: unknown,
    * non-ACTIVE variants (and variants of non-ACTIVE products) are rejected.
-   * Adding an existing line merges quantities via the domain merge rule.
+   * Adding an existing line merges quantities via the domain merge rule inside
+   * a transaction so concurrent adds cannot lose an increment. (P3 can add
+   * idempotency keys and row locks on top of this.)
    */
   async addItem(cartId: string, input: AddCartItem): Promise<Cart> {
     await this.assertCartExists(cartId);
@@ -66,37 +68,36 @@ export class CartsService {
       throw new NotFoundException('این محصول برای فروش در دسترس نیست');
     }
 
-    const existing = await this.prisma.cartItem.findUnique({
-      where: { cartId_variantId: { cartId, variantId: input.variantId } },
-    });
-    // NOTE: the read-modify-write merge below is NON-ATOMIC — two concurrent
-    // adds for the same (cartId, variantId) can interleave between findUnique
-    // and upsert and lose an increment. Hardening (SELECT ... FOR UPDATE inside
-    // an interactive transaction) is a P3 task.
-    const quantity = existing ? mergeQuantity(existing.quantity, input.quantity) : input.quantity;
-    await this.prisma.cartItem.upsert({
-      where: { cartId_variantId: { cartId, variantId: input.variantId } },
-      create: { cartId, variantId: input.variantId, quantity },
-      update: { quantity },
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.cartItem.findUnique({
+        where: { cartId_variantId: { cartId, variantId: input.variantId } },
+      });
+      const quantity = existing ? mergeQuantity(existing.quantity, input.quantity) : input.quantity;
+      await tx.cartItem.upsert({
+        where: { cartId_variantId: { cartId, variantId: input.variantId } },
+        create: { cartId, variantId: input.variantId, quantity },
+        update: { quantity },
+      });
     });
 
     return this.get(cartId);
   }
 
-  /** Replaces the quantity of an existing cart line. */
+  /** Replaces the quantity of an existing cart line (transactional). */
   async updateItem(cartId: string, variantId: string, input: UpdateCartItem): Promise<Cart> {
     await this.assertCartExists(cartId);
 
-    const existing = await this.prisma.cartItem.findUnique({
-      where: { cartId_variantId: { cartId, variantId } },
-    });
-    if (!existing) {
-      throw new NotFoundException('این مورد در سبد خرید یافت نشد');
-    }
-
-    await this.prisma.cartItem.update({
-      where: { cartId_variantId: { cartId, variantId } },
-      data: { quantity: input.quantity },
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.cartItem.findUnique({
+        where: { cartId_variantId: { cartId, variantId } },
+      });
+      if (!existing) {
+        throw new NotFoundException('این مورد در سبد خرید یافت نشد');
+      }
+      await tx.cartItem.update({
+        where: { cartId_variantId: { cartId, variantId } },
+        data: { quantity: input.quantity },
+      });
     });
 
     return this.get(cartId);

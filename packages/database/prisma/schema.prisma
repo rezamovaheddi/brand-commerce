@@ -97,3 +97,50 @@ model CartItem {
   @@unique([cartId, variantId])
   @@index([cartId])
 }
+
+enum OrderStatus {
+  // P2: draft orders only. AWAITING_PAYMENT/PAID/SHIPPED/... arrive with the
+  // P3 payment adapter — the state machine lives in packages/domain.
+  DRAFT
+  CANCELLED
+}
+
+// Guest order draft (P2). Lines are immutable SNAPSHOTs of variant data and
+// server-resolved prices at checkout time — never joined live from the catalog.
+model Order {
+  id            String      @id @default(cuid())
+  status        OrderStatus @default(DRAFT)
+  cartId        String?     @unique
+  currency      String      @default("IRR")
+  itemCount     Int
+  subtotalMinor Int
+  // Shipping address snapshot (guest checkout) — Iranian market fields pending
+  // final market decision (D-01): kept plain text, normalized at the boundary.
+  fullName      String
+  phone         String
+  province      String
+  city          String
+  postalCode    String
+  addressLine   String
+  lines         OrderLine[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model OrderLine {
+  id             String @id @default(cuid())
+  order          Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId        String
+  variantId      String
+  sku            String
+  productNameFa  String
+  productNameEn  String
+  titleFa        String
+  titleEn        String
+  quantity       Int
+  unitPriceMinor Int
+  currency       String
+  lineTotalMinor Int
+
+  @@index([orderId])
+}

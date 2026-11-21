@@ -221,6 +221,13 @@ const fakePrisma = {
   },
 } as unknown as PrismaService;
 
+// Interactive transactions run against the same in-memory state — the double is
+// single-threaded, so the callback simply re-enters the same fake client.
+Object.assign(fakePrisma, {
+  $transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> =>
+    fn(fakePrisma as unknown as PrismaService),
+});
+
 describe('Carts API (e2e, in-memory Prisma)', () => {
   let app: INestApplication;
 

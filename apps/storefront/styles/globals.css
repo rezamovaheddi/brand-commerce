@@ -994,3 +994,475 @@ button[aria-disabled="true"],
     transition: none;
   }
 }
+
+/* ==================================================== checkout (P2 orders) */
+/* All values come from styles/tokens.css via the --dv-* variables. */
+
+/* Desktop: form column + summary sidebar; stacked at 720px (below). */
+.dv-checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 24px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.dv-checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: var(--dv-paper);
+  border: 1px solid var(--dv-line);
+  border-radius: var(--dv-radius-panel);
+  box-shadow: var(--dv-shadow);
+}
+
+.dv-checkout-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Prominent honest payment note above the form. */
+.dv-checkout-banner {
+  padding: 14px 18px;
+  border: 1px solid rgba(111, 74, 20, .35);
+  border-inline-start: 4px solid var(--dv-gold);
+  border-radius: 14px;
+  background: rgba(233, 203, 138, .22);
+  color: var(--dv-ink);
+  font-weight: 600;
+  font-size: .9rem;
+  line-height: 1.9;
+}
+
+/* Inline submit failure card (server Persian message). */
+.dv-checkout-error-card {
+  padding: 12px 16px;
+  border: 1px solid rgba(141, 46, 40, .35);
+  border-radius: 12px;
+  background: rgba(141, 46, 40, .07);
+  color: var(--dv-danger);
+  font-weight: 600;
+  font-size: .88rem;
+}
+
+.dv-checkout-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Province + city share one row on wide screens. */
+.dv-checkout-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.dv-checkout-label {
+  font-weight: 700;
+  font-size: .88rem;
+  color: var(--dv-ink-soft);
+}
+
+/* Every control is at least 44px tall (var(--dv-touch)). */
+.dv-checkout-input {
+  width: 100%;
+  min-height: var(--dv-touch);
+  padding: 10px 16px;
+  border: 1px solid var(--dv-line);
+  border-radius: 12px;
+  background: var(--dv-paper);
+  font-size: .95rem;
+  transition: border-color .2s var(--dv-ease);
+}
+
+.dv-checkout-input:hover {
+  border-color: rgba(111, 74, 20, .4);
+}
+
+.dv-checkout-textarea {
+  min-height: 104px;
+  padding-block: 12px;
+  line-height: 1.9;
+  resize: vertical;
+}
+
+.dv-checkout-error {
+  color: var(--dv-danger);
+  font-weight: 600;
+  font-size: .8rem;
+}
+
+.dv-checkout-submit {
+  margin-top: 6px;
+}
+
+/* Summary sidebar: sticky on tall viewports, plain block on mobile. */
+.dv-checkout-summary {
+  padding: 22px;
+  background: var(--dv-paper);
+  border: 1px solid var(--dv-line);
+  border-radius: var(--dv-radius-panel);
+  box-shadow: var(--dv-shadow);
+}
+
+.dv-checkout-summary h2 {
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+}
+
+.dv-checkout-summary-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed var(--dv-line);
+}
+
+.dv-checkout-summary-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: .9rem;
+}
+
+.dv-checkout-summary-name {
+  font-weight: 600;
+  color: var(--dv-ink);
+}
+
+.dv-checkout-summary-qty {
+  margin-inline-start: 6px;
+  font-size: .8rem;
+}
+
+.dv-checkout-summary-total {
+  font-weight: 700;
+  color: var(--dv-navy);
+  white-space: nowrap;
+}
+
+.dv-checkout-summary-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+/* ====================================================== order detail page */
+.dv-order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.dv-order-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: var(--dv-radius-pill);
+  background: var(--dv-gold-light);
+  color: var(--dv-ink);
+  font-weight: 700;
+  font-size: .8rem;
+}
+
+/* CANCELLED carries the danger tone. */
+.dv-order-status-cancelled {
+  background: rgba(141, 46, 40, .12);
+  color: var(--dv-danger);
+}
+
+.dv-order-code {
+  margin-top: 2px;
+  font-size: .82rem;
+}
+
+/* Reserved-height live region for cancel/state announcements. */
+.dv-order-announce {
+  min-height: 1.8em;
+  font-weight: 600;
+  font-size: .9rem;
+  color: var(--dv-success);
+}
+
+/* Prominent honest payment banner — shown in every order state. */
+.dv-order-banner {
+  margin-top: 10px;
+  padding: 14px 18px;
+  border: 1px solid var(--dv-gold);
+  border-radius: 14px;
+  background: rgba(233, 203, 138, .3);
+  color: var(--dv-ink);
+  font-weight: 700;
+  font-size: .92rem;
+  line-height: 1.9;
+}
+
+.dv-order-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: 24px;
+  align-items: start;
+  margin-top: 20px;
+}
+
+.dv-order-lines,
+.dv-order-address {
+  padding: 20px 22px;
+  background: var(--dv-paper);
+  border: 1px solid var(--dv-line);
+  border-radius: var(--dv-radius-panel);
+  box-shadow: var(--dv-shadow);
+}
+
+.dv-order-lines h2,
+.dv-order-address h2 {
+  margin-bottom: 14px;
+  font-size: 1.05rem;
+}
+
+.dv-order-line-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dv-order-line {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--dv-line);
+  border-radius: 14px;
+  background: rgba(246, 241, 232, .5);
+}
+
+.dv-order-line-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dv-order-line-name {
+  font-weight: 700;
+  color: var(--dv-ink);
+}
+
+.dv-order-line-title {
+  font-size: .82rem;
+}
+
+.dv-order-line-sku {
+  color: var(--dv-muted);
+  font-size: .74rem;
+}
+
+.dv-order-line-qty {
+  font-size: .82rem;
+}
+
+.dv-order-line-total {
+  font-weight: 800;
+  color: var(--dv-navy);
+  white-space: nowrap;
+}
+
+.dv-order-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--dv-line);
+}
+
+.dv-order-address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dv-order-address-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.dv-order-address-row dt {
+  flex: 0 0 96px;
+  color: var(--dv-muted);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.dv-order-address-row dd {
+  flex: 1;
+  font-weight: 600;
+  font-size: .9rem;
+  overflow-wrap: anywhere;
+}
+
+.dv-order-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+/* Danger outline button for cancelling a DRAFT order. */
+.dv-order-cancel {
+  min-height: var(--dv-touch);
+  padding: 8px 22px;
+  border: 1.5px solid var(--dv-danger);
+  border-radius: var(--dv-radius-pill);
+  background: transparent;
+  color: var(--dv-danger);
+  font-weight: 700;
+  font-size: .9rem;
+  transition: background .2s var(--dv-ease);
+}
+
+.dv-order-cancel:hover:not(:disabled) {
+  background: rgba(141, 46, 40, .08);
+}
+
+.dv-order-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--dv-touch);
+  padding: 8px 18px;
+  border: 1px solid var(--dv-line);
+  border-radius: var(--dv-radius-pill);
+  background: var(--dv-paper);
+  font-weight: 700;
+  font-size: .9rem;
+  transition: border-color .2s var(--dv-ease), color .2s var(--dv-ease);
+}
+
+.dv-order-back:hover {
+  border-color: var(--dv-gold);
+  color: var(--dv-gold);
+}
+
+/* ======================================================= variant picker */
+/* Radio group of ACTIVE variants; native radios keep arrow-key navigation. */
+.dv-variant-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dv-variant-picker-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--dv-touch);
+  padding: 10px 16px;
+  border: 1px solid var(--dv-line);
+  border-radius: 14px;
+  background: var(--dv-paper);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: .92rem;
+  transition: border-color .2s var(--dv-ease), background .2s var(--dv-ease);
+}
+
+.dv-variant-picker-option:hover {
+  border-color: rgba(111, 74, 20, .45);
+  background: rgba(233, 203, 138, .14);
+}
+
+/* Selected option: navy outline. */
+.dv-variant-picker-option-selected {
+  border-color: var(--dv-navy);
+  box-shadow: inset 0 0 0 1px var(--dv-navy);
+}
+
+/* Keyboard focus ring lives on the option card (the radio input is sr-only). */
+.dv-variant-picker-option:focus-within {
+  box-shadow: var(--dv-focus);
+}
+
+/* Visually hidden radio input — still focusable and screen-reader reachable. */
+.dv-variant-picker-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.dv-variant-picker-title {
+  font-weight: 700;
+}
+
+.dv-variant-picker-price {
+  margin-inline-start: auto;
+  font-weight: 700;
+  font-size: .88rem;
+  color: var(--dv-navy);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------- narrow screens (checkout/order) */
+@media (max-width: 720px) {
+  .dv-checkout-layout,
+  .dv-order-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* On mobile the order summary becomes a top block above the form. */
+  .dv-checkout-summary {
+    order: -1;
+  }
+
+  .dv-checkout-field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dv-checkout-form,
+  .dv-checkout-summary,
+  .dv-order-lines,
+  .dv-order-address {
+    padding: 18px 16px;
+  }
+
+  .dv-order-address-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .dv-order-address-row dt {
+    flex: none;
+  }
+}
+
+/* Checkout/order/variant classes add no motion of their own; keep the global
+   reduced-motion contract (styles/tokens.css) explicit for the interactive
+   pieces introduced above. */
+@media (prefers-reduced-motion: reduce) {
+  .dv-checkout-input,
+  .dv-variant-picker-option,
+  .dv-order-cancel,
+  .dv-order-back {
+    transition: none;
+  }
+}

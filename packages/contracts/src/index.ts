@@ -124,3 +124,63 @@ export const CartSchema = z.object({
   currency: z.string().length(3),
 });
 export type Cart = z.infer<typeof CartSchema>;
+
+/**
+ * Checkout contracts (P2 — guest order drafts).
+ * The server re-resolves every price from the DB at checkout; the client
+ * never sends money amounts. Payment fields arrive in P3 — a checkout here
+ * NEVER records a payment.
+ */
+export const IranianPhoneSchema = z
+  .string()
+  .transform((v) => v.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))))
+  .pipe(z.string().regex(/^09\d{9}$/, "شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود"));
+export type IranianPhone = z.infer<typeof IranianPhoneSchema>;
+
+export const CheckoutAddressSchema = z.object({
+  fullName: z.string().min(2).max(80),
+  phone: IranianPhoneSchema,
+  province: z.string().min(2).max(40),
+  city: z.string().min(2).max(40),
+  postalCode: z
+    .string()
+    .transform((v) => v.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))))
+    .pipe(z.string().regex(/^\d{10}$/, "کد پستی باید دقیقاً ۱۰ رقم باشد")),
+  addressLine: z.string().min(5).max(200),
+});
+export type CheckoutAddress = z.infer<typeof CheckoutAddressSchema>;
+
+export const CheckoutRequestSchema = z.object({
+  cartId: z.string().min(1).max(64),
+  address: CheckoutAddressSchema,
+});
+export type CheckoutRequest = z.infer<typeof CheckoutRequestSchema>;
+
+export const OrderStatusSchema = z.enum(["DRAFT", "CANCELLED"]);
+export type OrderStatus = z.infer<typeof OrderStatusSchema>;
+
+export const OrderLineSchema = z.object({
+  variantId: z.string(),
+  sku: z.string(),
+  productNameFa: z.string(),
+  productNameEn: z.string(),
+  titleFa: z.string(),
+  titleEn: z.string(),
+  quantity: z.number().int().min(1).max(99),
+  unitPriceMinor: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+  lineTotalMinor: z.number().int().nonnegative(),
+});
+export type OrderLine = z.infer<typeof OrderLineSchema>;
+
+export const OrderSchema = z.object({
+  id: z.string(),
+  status: OrderStatusSchema,
+  currency: z.string().length(3),
+  itemCount: z.number().int().nonnegative(),
+  subtotalMinor: z.number().int().nonnegative(),
+  address: CheckoutAddressSchema,
+  lines: z.array(OrderLineSchema),
+  createdAt: z.string(),
+});
+export type Order = z.infer<typeof OrderSchema>;

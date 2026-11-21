@@ -64,3 +64,29 @@ export function computeCartTotals(lines: CartLineInput[]): CartTotals {
 export function displayUnit(currency: string): string {
   return currency === "IRR" ? "IRR" : currency;
 }
+
+/**
+ * Order state machine (P2 scope: DRAFT ⇄ CANCELLED). P3 payment/shipping
+ * states extend the map — transitions unknown to this map are always invalid.
+ */
+export const ORDER_TRANSITIONS: Readonly<Record<string, readonly string[]>> = {
+  DRAFT: ["CANCELLED", "AWAITING_PAYMENT"],
+  CANCELLED: [],
+  AWAITING_PAYMENT: ["PAID", "CANCELLED"],
+  PAID: ["SHIPPED", "REFUNDED"],
+  SHIPPED: ["DELIVERED"],
+  DELIVERED: [],
+  REFUNDED: [],
+} as const;
+
+export type OrderTransition = "ok" | "invalid";
+
+export function canTransitionOrder(from: string, to: string): OrderTransition {
+  return ORDER_TRANSITIONS[from]?.includes(to) ? "ok" : "invalid";
+}
+
+export function assertOrderTransition(from: string, to: string): void {
+  if (canTransitionOrder(from, to) !== "ok") {
+    throw new Error(`invalid order transition: ${from} -> ${to}`);
+  }
+}
