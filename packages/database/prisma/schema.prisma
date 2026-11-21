@@ -216,3 +216,69 @@ model InventoryLedger {
   @@index([variantId])
   @@index([refType, refId])
 }
+
+// ---- B2B onboarding scaffold (P4 slice — decision-independent parts) -------
+// Per bounded-context rules: Organization owns orgs/branches/memberships;
+// Identity owns user credentials. Cross-org scoping is enforced app-side
+// (N16); membership carries NO user credentials in this slice.
+
+enum OrgStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum OrgMemberRole {
+  OWNER
+  BUYER
+  ACCOUNTANT
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  // Sample-marked until business verification (B4) approves real distributors
+  isSample  Boolean  @default(true)
+  status    OrgStatus @default(ACTIVE)
+  members   OrganizationMembership[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrganizationMembership {
+  id             String       @id @default(cuid())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  contactName    String
+  contactPhone   String
+  role           OrgMemberRole @default(OWNER)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, contactPhone, role])
+  @@index([organizationId])
+}
+
+enum B2BApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  NEEDS_INFO
+}
+
+// Distributor/agency application (B3/B4-lite): submit → admin review →
+// approve creates the Organization + OWNER membership; reject records the note.
+model B2BApplication {
+  id           String              @id @default(cuid())
+  contactName  String
+  contactPhone String
+  orgName      String
+  economicCode String?
+  licenseRef   String?
+  status       B2BApplicationStatus @default(SUBMITTED)
+  reviewNote   String?
+  reviewedAt   DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([status])
+}

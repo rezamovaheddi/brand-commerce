@@ -157,3 +157,53 @@ export async function adminListLedger(variantId?: string): Promise<LedgerRow[]> 
     },
   );
 }
+
+/* ---- B2B application review (P4 scaffold) -------------------------------- */
+
+export type B2BApplicationRow = {
+  id: string;
+  contactName: string;
+  contactPhone: string;
+  orgName: string;
+  economicCode: string | null;
+  licenseRef: string | null;
+  status: string;
+  reviewNote: string | null;
+  createdAt: string;
+};
+
+const B2BApplicationRowSchema = z.object({
+  id: z.string(),
+  contactName: z.string(),
+  contactPhone: z.string(),
+  orgName: z.string(),
+  economicCode: z.string().nullable(),
+  licenseRef: z.string().nullable(),
+  status: z.string(),
+  reviewNote: z.string().nullable(),
+  createdAt: z.string(),
+});
+
+export async function adminListB2BApplications(status?: string): Promise<B2BApplicationRow[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  return request<B2BApplicationRow[]>(
+    `/admin/b2b/applications${query}`,
+    { method: "GET" },
+    (body) => {
+      const parsed = z.object({ items: z.array(B2BApplicationRowSchema) }).safeParse(body);
+      return parsed.success ? parsed.data.items : null;
+    },
+  );
+}
+
+export async function adminB2BDecision(
+  id: string,
+  action: "approve" | "reject" | "request-info",
+  note: string,
+): Promise<B2BApplicationRow> {
+  return request<B2BApplicationRow>(
+    `/admin/b2b/applications/${id}/${action}`,
+    { method: "POST", body: JSON.stringify({ note }) },
+    (body) => B2BApplicationRowSchema.safeParse(body).success ? (body as B2BApplicationRow) : null,
+  );
+}

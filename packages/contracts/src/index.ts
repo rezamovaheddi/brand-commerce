@@ -298,3 +298,48 @@ export const AdminLedgerResponseSchema = z.object({
   items: z.array(LedgerEntrySchema),
 });
 export type AdminLedgerResponse = z.infer<typeof AdminLedgerResponseSchema>;
+
+/**
+ * B2B onboarding contracts (P4 scaffold — decision-independent).
+ * Approve creates an Organization + OWNER membership; contract pricing/MOQ
+ * (D-11) and credit (D-12) remain feature-gated off.
+ */
+export const CreateB2BApplicationSchema = z.object({
+  contactName: z.string().min(2).max(80),
+  contactPhone: IranianPhoneSchema,
+  orgName: z.string().min(2).max(120),
+  economicCode: z
+    .string()
+    .transform((v) => v.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))))
+    .pipe(z.string().regex(/^\d{10,12}$/, "کد اقتصادی باید ۱۰ تا ۱۲ رقم باشد"))
+    .optional(),
+  licenseRef: z.string().max(200).optional(),
+});
+export type CreateB2BApplication = z.infer<typeof CreateB2BApplicationSchema>;
+
+export const B2BApplicationStatusSchema = z.enum([
+  "SUBMITTED",
+  "UNDER_REVIEW",
+  "APPROVED",
+  "REJECTED",
+  "NEEDS_INFO",
+]);
+export type B2BApplicationStatus = z.infer<typeof B2BApplicationStatusSchema>;
+
+export const B2BApplicationSchema = z.object({
+  id: z.string(),
+  contactName: z.string(),
+  contactPhone: z.string(),
+  orgName: z.string(),
+  economicCode: z.string().nullable(),
+  licenseRef: z.string().nullable(),
+  status: B2BApplicationStatusSchema,
+  reviewNote: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type B2BApplication = z.infer<typeof B2BApplicationSchema>;
+
+export const AdminB2BDecisionSchema = z.object({
+  note: z.string().min(3).max(300),
+});
+export type AdminB2BDecision = z.infer<typeof AdminB2BDecisionSchema>;

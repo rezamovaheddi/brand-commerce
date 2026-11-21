@@ -693,6 +693,212 @@
           "admin"
         ]
       }
+    },
+    "/api/v1/admin/b2b/applications": {
+      "get": {
+        "operationId": "AdminController_listB2BApplications",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "درخواست‌ها",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "فهرست درخواست‌های همکاری B2B",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/applications/{id}/approve": {
+      "post": {
+        "operationId": "AdminController_approveB2B",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "درخواست تأیید شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "وضعیت درخواست اجازه تأیید نمی‌دهد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "تأیید درخواست → ایجاد سازمان + عضویت OWNER",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/applications/{id}/reject": {
+      "post": {
+        "operationId": "AdminController_rejectB2B",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "درخواست رد شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "رد درخواست با یادداشت",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/applications/{id}/request-info": {
+      "post": {
+        "operationId": "AdminController_requestInfoB2B",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "وضعیت NEEDS_INFO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "درخواست اطلاعات تکمیلی",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/b2b/applications": {
+      "post": {
+        "operationId": "B2bController_submit",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "درخواست ثبت شد (SUBMITTED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "مقادیر نامعتبر"
+          }
+        },
+        "summary": "ثبت درخواست همکاری توزیع/آژانس",
+        "tags": [
+          "b2b"
+        ]
+      }
+    },
+    "/api/v1/b2b/applications/{id}": {
+      "get": {
+        "operationId": "B2bController_getStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "وضعیت درخواست",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "درخواست یافت نشد"
+          }
+        },
+        "summary": "پیگیری وضعیت درخواست",
+        "tags": [
+          "b2b"
+        ]
+      }
     }
   },
   "info": {

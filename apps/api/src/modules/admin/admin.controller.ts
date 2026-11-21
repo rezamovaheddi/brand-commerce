@@ -8,11 +8,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  AdminB2BDecisionSchema,
   AdminInventoryItem,
   AdminLedgerResponse,
   AdminOrderListResponse,
   AdminOrderStatusQuerySchema,
   AdjustStockSchema,
+  type AdminB2BDecision,
   type AdjustStock,
   type AdminOrderStatusQuery,
 } from '@bc/contracts';
@@ -65,5 +67,48 @@ export class AdminController {
   @ApiOkResponse({ description: 'ردیف‌های دفتر', type: Object })
   async ledger(@Query('variantId') variantId?: string): Promise<AdminLedgerResponse> {
     return this.adminService.listLedger(variantId || undefined);
+  }
+
+  // ---- B2B application review (P4 scaffold) --------------------------------
+
+  @Get('b2b/applications')
+  @ApiOperation({ summary: 'فهرست درخواست‌های همکاری B2B' })
+  @ApiOkResponse({ description: 'درخواست‌ها', type: Object })
+  async listB2BApplications(@Query('status') status?: string) {
+    return this.adminService.listB2BApplications(status || undefined);
+  }
+
+  @Post('b2b/applications/:id/approve')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'تأیید درخواست → ایجاد سازمان + عضویت OWNER' })
+  @ApiOkResponse({ description: 'درخواست تأیید شد', type: Object })
+  @ApiBadRequestResponse({ description: 'وضعیت درخواست اجازه تأیید نمی‌دهد' })
+  async approveB2B(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(AdminB2BDecisionSchema)) input: AdminB2BDecision,
+  ) {
+    return this.adminService.approveB2B(id, input.note);
+  }
+
+  @Post('b2b/applications/:id/reject')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'رد درخواست با یادداشت' })
+  @ApiOkResponse({ description: 'درخواست رد شد', type: Object })
+  async rejectB2B(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(AdminB2BDecisionSchema)) input: AdminB2BDecision,
+  ) {
+    return this.adminService.rejectB2B(id, input.note);
+  }
+
+  @Post('b2b/applications/:id/request-info')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'درخواست اطلاعات تکمیلی' })
+  @ApiOkResponse({ description: 'وضعیت NEEDS_INFO', type: Object })
+  async requestInfoB2B(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(AdminB2BDecisionSchema)) input: AdminB2BDecision,
+  ) {
+    return this.adminService.requestInfoB2B(id, input.note);
   }
 }

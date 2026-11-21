@@ -5,8 +5,10 @@ import {
   AdminLedgerResponse,
   AdminOrderListResponse,
   AdjustStock,
+  B2BApplication,
 } from '@bc/contracts';
 import { PrismaService } from '../../prisma/prisma.service';
+import { B2bService } from '../b2b/b2b.service';
 
 const ORDER_INCLUDE = { lines: true } as const;
 
@@ -16,7 +18,10 @@ const ORDER_INCLUDE = { lines: true } as const;
  */
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly b2bService: B2bService,
+  ) {}
 
   async listOrders(
     page: number,
@@ -127,5 +132,23 @@ export class AdminService {
         createdAt: row.createdAt.toISOString(),
       })),
     };
+  }
+
+  // ---- B2B application review ---------------------------------------------
+
+  async listB2BApplications(status?: string): Promise<{ items: B2BApplication[] }> {
+    return this.b2bService.list(status);
+  }
+
+  async approveB2B(id: string, note: string): Promise<B2BApplication> {
+    return this.b2bService.approve(id, note);
+  }
+
+  async rejectB2B(id: string, note: string): Promise<B2BApplication> {
+    return this.b2bService.reject(id, note);
+  }
+
+  async requestInfoB2B(id: string, note: string): Promise<B2BApplication> {
+    return this.b2bService.requestInfo(id, note);
   }
 }

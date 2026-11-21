@@ -4,14 +4,17 @@ import { useCallback, useEffect, useState } from "react";
 import {
   AdminApiError,
   adminAdjustStock,
+  adminListB2BApplications,
   adminListInventory,
   adminListLedger,
   adminListOrders,
+  adminB2BDecision,
   clearAdminKey,
   getAdminKey,
   setAdminKey,
   type AdminInventory,
   type AdminOrderList,
+  type B2BApplicationRow,
   type LedgerRow,
 } from "../../lib/admin-client";
 import { formatFaNumber, formatPrice } from "../../lib/format";
@@ -32,7 +35,7 @@ const STATUS_LABELS: Record<string, string> = {
   REFUNDED: "بازگشت وجه",
 };
 
-type Section = "orders" | "inventory";
+type Section = "orders" | "inventory" | "b2b";
 
 export default function AdminPage() {
   const [key, setKey] = useState<string>("");
@@ -43,6 +46,8 @@ export default function AdminPage() {
   const [page, setPage] = useState<number>(1);
   const [inventory, setInventory] = useState<AdminInventory[] | null>(null);
   const [ledger, setLedger] = useState<LedgerRow[] | null>(null);
+  const [b2bApps, setB2bApps] = useState<B2BApplicationRow[] | null>(null);
+  const [b2bNote, setB2bNote] = useState<{ id: string; note: string; action: "approve" | "reject" | "request-info" } | null>(null);
   const [adjust, setAdjust] = useState<{ variantId: string; delta: string; note: string }>({
     variantId: "",
     delta: "",
@@ -59,6 +64,8 @@ export default function AdminPage() {
       try {
         if (which === "orders") {
           setOrders(await adminListOrders(orderPage, filter || undefined));
+        } else if (which === "b2b") {
+          setB2bApps(await adminListB2BApplications());
         } else {
           const [inv, led] = await Promise.all([adminListInventory(), adminListLedger()]);
           setInventory(inv);
@@ -123,6 +130,26 @@ export default function AdminPage() {
     }
   };
 
+  const handleB2BDecision = async (id: string): Promise<void> => {
+    if (b2bNote === null || b2bNote.id !== id) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = await adminB2BDecision(id, b2bNote.action, b2bNote.note);
+      setB2bApps((prev) =>
+        prev ? prev.map((row) => (row.id === updated.id ? updated : row)) : prev,
+      );
+      setNotice(`درخواست ${updated.id.slice(-8)} به وضعیت «${updated.status}» رفت.`);
+      setB2bNote(null);
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در بررسی درخواست.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // ---- key gate -------------------------------------------------------------
   if (!authed) {
     return (
@@ -182,6 +209,15 @@ export default function AdminPage() {
           onClick={() => setSection("inventory")}
         >
           موجودی و دفتر
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "b2b"}
+          className={section === "b2b" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
+          onClick={() => setSection("b2b")}
+        >
+          درخواست‌های B2B
         </button>
         <button
           type="button"
@@ -275,6 +311,84 @@ export default function AdminPage() {
               </button>
             </div>
           ) : null}
+        </section>
+      ) : section === "b2b" ? (
+        <section aria-label="درخواست‌های همکاری B2B">
+          {b2bApps !== null && b2bApps.length === 0 ? (
+            <div className="dv-empty">درخواستی ثبت نشده است.</div>
+          ) : null}
+          {b2bApps !== null
+            ? b2bApps.map((row) => (
+                <article key={row.id} className="dv-card dv-b2b-app">
+                  <h3>{row.orgName}</h3>
+                  <p className="dv-muted">
+                    {row.contactName} — <span dir="ltr">{row.contactPhone}</span>
+                    {row.economicCode ? (
+                      <>
+                        {" "}— کد اقتصادی: <span dir="ltr">{row.economicCode}</span>
+                      </>
+                    ) : null}
+                  </p>
+                  <p>
+                    وضعیت: <strong>{row.status}</strong>
+                    {row.reviewNote ? ` — ${row.reviewNote}` : ""}
+                  </p>
+                  {b2bNote !== null && b2bNote.id === row.id ? (
+                    <div className="dv-admin-adjust">
+                      <input
+                        type="text"
+                        aria-label="یادداشت بررسی"
+                        placeholder="یادداشت بررسی (حداقل ۳ نویسه)"
+                        value={b2bNote.note}
+                        onChange={(event) => setB2bNote({ ...b2bNote, note: event.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="dv-btn dv-btn-gold"
+                        disabled={busy}
+                        onClick={() => void handleB2BDecision(row.id)}
+                      >
+                        ثبت
+                      </button>
+                      <button
+                        type="button"
+                        className="dv-admin-tab"
+                        onClick={() => setB2bNote(null)}
+                      >
+                        انصراف
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="dv-pay-actions">
+                      <button
+                        type="button"
+                        className="dv-btn dv-btn-gold"
+                        disabled={busy}
+                        onClick={() => setB2bNote({ id: row.id, note: "", action: "approve" })}
+                      >
+                        تأیید
+                      </button>
+                      <button
+                        type="button"
+                        className="dv-order-cancel dv-pay-fail"
+                        disabled={busy}
+                        onClick={() => setB2bNote({ id: row.id, note: "", action: "reject" })}
+                      >
+                        رد
+                      </button>
+                      <button
+                        type="button"
+                        className="dv-admin-tab"
+                        disabled={busy}
+                        onClick={() => setB2bNote({ id: row.id, note: "", action: "request-info" })}
+                      >
+                        درخواست اطلاعات
+                      </button>
+                    </div>
+                  )}
+                </article>
+              ))
+            : null}
         </section>
       ) : (
         <section aria-label="موجودی و دفتر">

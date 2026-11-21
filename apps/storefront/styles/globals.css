@@ -1697,3 +1697,16 @@ button[aria-disabled="true"],
   gap: 10px;
   max-width: 380px;
 }
+
+/* ---- B2B apply + admin review (P4 scaffold) ------------------------------ */
+.dv-b2b-apply .dv-checkout-form {
+  max-width: 560px;
+}
+
+.dv-b2b-app {
+  margin-bottom: 14px;
+}
+
+.dv-b2b-app h3 {
+  margin: 0 0 6px;
+}
