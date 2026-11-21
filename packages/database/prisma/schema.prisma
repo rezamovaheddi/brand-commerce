@@ -1,0 +1,67 @@
+// Brand Commerce Platform — PostgreSQL data model (initial vertical slice)
+// Domain ownership: packages/database owns the schema; other modules must not
+// alter domain data directly (see docs/adr/).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  nameFa    String
+  nameEn    String
+  isActive  Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  nameFa        String
+  nameEn        String
+  descriptionFa String?
+  descriptionEn String?
+  status        ProductStatus  @default(DRAFT)
+  // true ⇒ seed/sample data; production must never display these as real catalog
+  isSample      Boolean        @default(true)
+  category      Category?      @relation(fields: [categoryId], references: [id])
+  categoryId    String?
+  variants      ProductVariant[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([categoryId])
+  @@index([status])
+}
+
+model ProductVariant {
+  id         String        @id @default(cuid())
+  sku        String        @unique
+  product    Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String
+  titleFa    String
+  titleEn    String
+  // Minor units (IRR rial). Real pricing/taxation is a pending business decision.
+  priceMinor Int
+  currency   String        @default("IRR")
+  isDefault  Boolean       @default(false)
+  status     ProductStatus @default(DRAFT)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([productId])
+}

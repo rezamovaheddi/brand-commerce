@@ -1,0 +1,37 @@
+version: "3.9"
+
+# Local development infrastructure.
+# NOTE: Docker was not available on the build machine at creation time;
+# these services are the declared dev baseline (P0 gate). Run `docker compose up -d`.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: bc-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: brand_commerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - bc-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d brand_commerce"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: bc-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  bc-db-data:

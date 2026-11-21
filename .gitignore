@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.local
+.env*.local
+*.pem
+*.key
+
+# misc
+.DS_Store
+Thumbs.db
+coverage/
+.npm/
+npm-debug.log*
+.turbo/
+.vercel
+
+# prisma generated
+packages/database/generated/
