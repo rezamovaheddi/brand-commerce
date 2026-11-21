@@ -1,0 +1,980 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20261121T121010217Z-10400-7cb23b267d77",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "candidate-select",
+      "target": "apps/api/src/app.module.ts",
+      "reason": "candidate_limit_exceeded: 15 changed reviewable file(s) were not scanned because the limit is 20"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "package-lock.json",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/lib/api.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/lib/format.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/lib/product.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/components/Footer.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/components/Header.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/components/LeafMark.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/components/PriceTag.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/components/ProductCard.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/components/SampleBadge.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/app/error.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/app/layout.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/app/not-found.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/app/page.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/app/products/loading.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/app/products/page.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/storefront/app/products/[slug]/page.tsx",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "apps/api/test/products.e2e-spec.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/lib/api.ts",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/lib/format.ts",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/lib/product.ts",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/components/Footer.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/components/Header.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/components/LeafMark.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/components/PriceTag.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/components/ProductCard.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/components/SampleBadge.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/app/error.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/app/layout.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/app/not-found.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/app/page.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/app/products/loading.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/app/products/page.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/storefront/app/products/[slug]/page.tsx",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "apps/api/test/products.e2e-spec.ts",
+      "reason": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "supply-chain-check",
+      "target": ".",
+      "reason": "stop_budget_exhausted: focused supply-chain check was not run before the gate budget"
+    },
+    {
+      "stage": "agent-check",
+      "target": ".",
+      "reason": "stop_budget_exhausted: focused agent configuration check was not run before the gate budget"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": true,
+      "captured_files": 10,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 0,
+      "compensated_target_count": 2
+    },
+    "change_tracking": {
+      "touched_observed": 2,
+      "touched_retained": 2,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 35,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 35,
+      "selected_files": 20,
+      "limit": 20,
+      "truncated": true
+    },
+    "scanning": {
+      "required_files": 17,
+      "scanned_files": 0,
+      "skipped_files": 0,
+      "failed_files": 17,
+      "project_checks_required": 2,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "candidate_limit_exceeded": 1,
+      "baseline_snapshot_unreadable": 18,
+      "scanner_failed": 17,
+      "stop_budget_exhausted": 2,
+      "project_check_failed": 38
+    },
+    "reasons": [
+      {
+        "code": "candidate_limit_exceeded",
+        "stage": "candidate-select",
+        "target": "apps/api/src/app.module.ts",
+        "detail": "15 changed reviewable file(s) were not scanned because the limit is 20",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "package-lock.json",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/lib/api.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/lib/format.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/lib/product.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/Footer.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/Header.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/LeafMark.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/PriceTag.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/ProductCard.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/SampleBadge.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/error.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/layout.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/not-found.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/page.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/products/loading.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/products/page.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/products/[slug]/page.tsx",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "apps/api/test/products.e2e-spec.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/lib/api.ts",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/lib/format.ts",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/lib/product.ts",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/Footer.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/Header.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/LeafMark.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/PriceTag.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/ProductCard.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/SampleBadge.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/app/error.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/app/layout.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/app/not-found.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/app/page.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/app/products/loading.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/app/products/page.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/storefront/app/products/[slug]/page.tsx",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "apps/api/test/products.e2e-spec.ts",
+        "detail": "spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "stop_budget_exhausted",
+        "stage": "supply-chain-check",
+        "target": ".",
+        "detail": "focused supply-chain check was not run before the gate budget",
+        "affects_completion": true
+      },
+      {
+        "code": "stop_budget_exhausted",
+        "stage": "agent-check",
+        "target": ".",
+        "detail": "focused agent configuration check was not run before the gate budget",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "candidate-select",
+        "target": "apps/api/src/app.module.ts",
+        "detail": "candidate_limit_exceeded: 15 changed reviewable file(s) were not scanned because the limit is 20",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "package-lock.json",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/lib/api.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/lib/format.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/lib/product.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/Footer.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/Header.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/LeafMark.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/PriceTag.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/ProductCard.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/components/SampleBadge.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/error.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/layout.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/not-found.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/page.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/products/loading.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/products/page.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/storefront/app/products/[slug]/page.tsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "apps/api/test/products.e2e-spec.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "apps/storefront/lib/api.ts",
+        "detail": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "apps/storefront/lib/format.ts",
+        "detail": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "apps/storefront/lib/product.ts",
+        "detail": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/Footer.tsx",
+        "detail": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/Header.tsx",
+        "detail": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/LeafMark.tsx",
+        "detail": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "apps/storefront/components/PriceTag.tsx",
+        "detail": "scanner_failed: spawnSync C:\\Users\\talas\\AppData\\Local\\Programs\\node22\\node-v22.23.3-win-x64\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": true
+  },
+  "generated_at": "2026-11-21T12:10:10.217Z",
+  "session_id": "sess_5d3e609a-ae32-44ef-bf40-9879789136ad",
+  "target": ".",
+  "revision": "1948c733e7f76fdb5aed74035ddcd580305429cb",
+  "rules_version": "unavailable",
+  "diff_hash": "6dd29bcba8c95d1854f2c37a65a78fef7434a61956cd987b4050ffbd061d2e37",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 20,
+    "changed_files": [
+      {
+        "file": ".github/workflows/ci.yml",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 56
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "85404b88b8b91e38180faf33ae01fe2e3b83907700824cca31318a78bd653787"
+      },
+      {
+        "file": "apps/api/package.json",
+        "ranges": [
+          {
+            "start": 19,
+            "end": 19
+          }
+        ],
+        "before_hash": "53ddcab0cfca0342e459ae861eb6da1b0a44b5f470a766f780977fb4115db51a",
+        "after_hash": "6a5c0994a8c0ffd2abb371ed05ae63e622892483809c02af0f492e7cf8f89ba3"
+      },
+      {
+        "file": "apps/api/test/products.e2e-spec.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 299
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "fdae3c4a6da4fec86e2a637a61922eb23befeafc56e504d5f4db99e66be53ded"
+      },
+      {
+        "file": "apps/storefront/app/error.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 23
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "ffcb74ebdc239b7e6dfe027cbb5b05e8f038f266c9242b86a03c8def80a82374"
+      },
+      {
+        "file": "apps/storefront/app/layout.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 33
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "18f9667ea50b9e477c2c6af270fdf7aba69dcba0098d5b5d83afe9a662050bd6"
+      },
+      {
+        "file": "apps/storefront/app/not-found.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 19
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "6e56cdb2c14878c2063876e3a9faa2f4e1a503dce4c12f011bc1d03986dbf98c"
+      },
+      {
+        "file": "apps/storefront/app/page.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 84
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "fd8cab0428a19c51115aedca38c508d739950f6f29d6e8a816558efe58cfb358"
+      },
+      {
+        "file": "apps/storefront/app/products/[slug]/page.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 134
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "57a2c9e167338e16a5bc59b07089ac946f727239b667d8a948925c18be23df75"
+      },
+      {
+        "file": "apps/storefront/app/products/loading.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 20
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "99db25e870459bd5109bc8eb3da98d7f8c1d4faf157c2c907386cd2eb6fa4658"
+      },
+      {
+        "file": "apps/storefront/app/products/page.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 127
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "81e89f38b8f89f9f37012339407df692c4b311bf173ff5df2665d83f05f8b0cf"
+      },
+      {
+        "file": "apps/storefront/components/Footer.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 27
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "f91bbdd270e017c0cf7ddb36603498f97fb5c42e78443065a29c1842974b0935"
+      },
+      {
+        "file": "apps/storefront/components/Header.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 39
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "1e82c0a3b5dbd984c65c751e654f2d234e99cd3dc25fcad9702b138b32111ad0"
+      },
+      {
+        "file": "apps/storefront/components/LeafMark.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 35
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "5a35dd8d07e6b2eb994c19a7ec292dc27a1ce63d045678e56cd9c558eee64106"
+      },
+      {
+        "file": "apps/storefront/components/PriceTag.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 23
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "d6e059e4b5bbaa5bee4888eedf505dc6a26862ab991180b62b310379a67d38f4"
+      },
+      {
+        "file": "apps/storefront/components/ProductCard.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 44
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "d29222ad205bffbd43b67cacbeca19b8f25debfec9587605e99349c19600f50e"
+      },
+      {
+        "file": "apps/storefront/components/SampleBadge.tsx",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 19
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "bd83a5209e629b5316fcd13e0ded8f834f265bda587830277c040f250698e6ff"
+      },
+      {
+        "file": "apps/storefront/lib/api.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 130
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "9ea95e784b5b5129c4d8083fd75aaf7d9be0f72e484d649f066177b26aa1c7f2"
+      },
+      {
+        "file": "apps/storefront/lib/format.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 26
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "3c426a50580e902c56cb247bd7a9239b0a9fe4ae239f7be0bf3c094dde9e83d9"
+      },
+      {
+        "file": "apps/storefront/lib/product.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 10
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "64f9d64609f76499d37dd18002ea69ca7b96f31bebaad46a9b83f8c901aaafd6"
+      },
+      {
+        "file": "package-lock.json",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 9965
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "fa7fa6aaf3d992add2cfd006ba1c19d18b6f33c10a5f3487365eb19e857e8118"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-11-21T12:10:07.427Z",
+    "completed_at": "2026-11-21T12:10:10.217Z",
+    "duration_ms": 2790,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 2790,
+    "peakMemoryBytes": 91230208,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 0,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-sess_5d3e609a-ae32-44ef-bf40-9879789136ad-20261121T121010217Z-10400-7cb23b267d77.json",
+    "latest_report": ".mimosa/reports/task-review-sess_5d3e609a-ae32-44ef-bf40-9879789136ad.json",
+    "history_summary": ".mimosa/history/run-20261121T121010217Z-10400-7cb23b267d77.json"
+  }
+}

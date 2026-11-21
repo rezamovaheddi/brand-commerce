@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: brand_commerce
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d brand_commerce"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/brand_commerce?schema=public
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Build (contracts → api → storefront)
+        run: npm run build
+
+      - name: Apply migrations
+        run: npm run migrate:deploy -w @bc/database
+
+      - name: Seed sample data
+        run: npm run prisma:seed
+
+      - name: Unit + e2e tests (DB integration included)
+        run: npm run test
+
+      - name: API smoke (health + products)
+        run: |
+          node apps/api/dist/main.js &
+          sleep 5
+          curl -sf http://localhost:3001/api/v1/health | tee /dev/stderr | grep -q '"status":"ok"'
+          curl -sf "http://localhost:3001/api/v1/products?limit=3" | grep -q '"totalPages"'

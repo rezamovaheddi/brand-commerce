@@ -22,6 +22,7 @@ Thumbs.db
 coverage/
 .npm/
 npm-debug.log*
+install.log
 .turbo/
 .vercel
 

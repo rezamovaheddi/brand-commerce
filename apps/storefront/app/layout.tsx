@@ -1,0 +1,33 @@
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { Vazirmatn } from "next/font/google";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import "../styles/tokens.css";
+import "../styles/globals.css";
+
+const vazir = Vazirmatn({
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-vazir",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "DERMAVIA — مراقبت طبیعی، اعتماد پایدار",
+  description:
+    "فروشگاه محصولات مراقبت از پوست DERMAVIA؛ فرمول‌های ملایم و علمی با شفافیت کامل در ترکیبات.",
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="fa" dir="rtl">
+      <body className={vazir.variable}>
+        <a href="#main" className="skip-link">پرش به محتوای اصلی</a>
+        <Header />
+        <main id="main">{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
