@@ -31,4 +31,5 @@ packages/database/generated/
 
 # tooling session artifacts
 .mimosa/
+docs/.mimosa/
 docs/execution/.mimosa/
