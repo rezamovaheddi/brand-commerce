@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { createHash, randomBytes } from 'crypto';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
   AdminInventoryItem,
@@ -6,10 +7,40 @@ import {
   AdminOrderListResponse,
   AdjustStock,
   B2BApplication,
+  CreateOrgMember,
+  OrgMember,
 } from '@bc/contracts';
 import { PrismaService } from '../../prisma/prisma.service';
 import { B2bService } from '../b2b/b2b.service';
 import type { Rfq } from '@bc/contracts';
+
+interface MembershipRow {
+  id: string;
+  organizationId: string;
+  contactName: string;
+  contactPhone: string;
+  email: string | null;
+  role: 'OWNER' | 'BUYER' | 'ACCOUNTANT';
+  keyHash: string | null;
+  keyLast4: string | null;
+  keyRevokedAt: Date | null;
+  createdAt: Date;
+}
+
+function toOrgMemberContract(row: MembershipRow): OrgMember {
+  return {
+    id: row.id,
+    organizationId: row.organizationId,
+    contactName: row.contactName,
+    contactPhone: row.contactPhone,
+    email: row.email ?? '',
+    role: row.role,
+    hasKey: row.keyHash !== null,
+    keyLast4: row.keyLast4,
+    keyRevokedAt: row.keyRevokedAt ? row.keyRevokedAt.toISOString() : null,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
 
 const ORDER_INCLUDE = { lines: true } as const;
 
@@ -163,5 +194,106 @@ export class AdminService {
 
   async addRevision(id: string, input: Parameters<B2bService['addRevision']>[1]): Promise<unknown> {
     return this.b2bService.addRevision(id, input);
+  }
+
+  // ---- Organization members + access keys (N16) ------------------------------
+
+  async listOrganizations(): Promise<{
+    items: Array<{ id: string; name: string; isSample: boolean; status: string; memberCount: number; createdAt: string }>;
+  }> {
+    const rows = await this.prisma.organization.findMany({
+      include: { _count: { select: { members: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    return {
+      items: rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        isSample: row.isSample,
+        status: row.status,
+        memberCount: row._count.members,
+        createdAt: row.createdAt.toISOString(),
+      })),
+    };
+  }
+
+  async listOrgMembers(organizationId: string): Promise<{ items: OrgMember[] }> {
+    const rows = await this.prisma.organizationMembership.findMany({
+      where: { organizationId },
+      orderBy: { createdAt: 'asc' },
+      take: 200,
+    });
+    return { items: rows.map((row) => toOrgMemberContract(row as unknown as MembershipRow)) };
+  }
+
+  /**
+   * Creates a member and issues their access key. The plaintext key is
+   * returned EXACTLY ONCE here — only the SHA-256 hash is stored, so a lost
+   * key is replaced (re-issued), never recovered.
+   */
+  async createOrgMember(organizationId: string, input: CreateOrgMember): Promise<OrgMember & { accessKey: string }> {
+    const org = await this.prisma.organization.findUnique({ where: { id: organizationId } });
+    if (!org) {
+      throw new NotFoundException('سازمان یافت نشد');
+    }
+    const accessKey = `dvorg_${randomBytes(16).toString('hex')}`;
+    let row: MembershipRow;
+    try {
+      const created = await this.prisma.organizationMembership.create({
+        data: {
+          organizationId,
+          contactName: input.contactName,
+          contactPhone: input.contactPhone,
+          email: input.email,
+          role: input.role,
+          keyHash: createHash('sha256').update(accessKey).digest('hex'),
+          keyLast4: accessKey.slice(-4),
+        },
+      });
+      row = created as unknown as MembershipRow;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('عضوی با این شماره/نقش یا ایمیل در سازمان وجود دارد');
+      }
+      throw error;
+    }
+    return { ...toOrgMemberContract(row), accessKey };
+  }
+
+  /** Re-issues a member's key: old key stops working immediately. */
+  async issueOrgMemberKey(memberId: string): Promise<OrgMember & { accessKey: string }> {
+    const member = await this.prisma.organizationMembership.findUnique({ where: { id: memberId } });
+    if (!member) {
+      throw new NotFoundException('عضو یافت نشد');
+    }
+    const accessKey = `dvorg_${randomBytes(16).toString('hex')}`;
+    const updated = await this.prisma.organizationMembership.update({
+      where: { id: memberId },
+      data: {
+        keyHash: createHash('sha256').update(accessKey).digest('hex'),
+        keyLast4: accessKey.slice(-4),
+        keyRevokedAt: null,
+      },
+    });
+    return { ...toOrgMemberContract(updated as unknown as MembershipRow), accessKey };
+  }
+
+  async revokeOrgMemberKey(memberId: string): Promise<OrgMember> {
+    const member = await this.prisma.organizationMembership.findUnique({ where: { id: memberId } });
+    if (!member) {
+      throw new NotFoundException('عضو یافت نشد');
+    }
+    if (member.keyRevokedAt !== null) {
+      throw new BadRequestException('کلید این عضو قبلاً باطل شده است');
+    }
+    if (member.keyHash === null) {
+      throw new BadRequestException('این عضو کلید سازمانی ندارد');
+    }
+    const updated = await this.prisma.organizationMembership.update({
+      where: { id: memberId },
+      data: { keyRevokedAt: new Date() },
+    });
+    return toOrgMemberContract(updated as unknown as MembershipRow);
   }
 }

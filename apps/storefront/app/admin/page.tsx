@@ -19,8 +19,15 @@ import {
 } from "../../lib/admin-client";
 import {
   adminAddQuoteRevision,
+  adminCreateOrgMember,
+  adminIssueMemberKey,
   adminIssueQuote,
+  adminListOrgMembers,
+  adminListOrgs,
   adminListRfqs,
+  adminRevokeMemberKey,
+  type AdminMemberRow,
+  type AdminOrgRow,
   type AdminRfqRow,
 } from "../../lib/b2b-client";
 import { formatFaNumber, formatPrice } from "../../lib/format";
@@ -41,7 +48,7 @@ const STATUS_LABELS: Record<string, string> = {
   REFUNDED: "بازگشت وجه",
 };
 
-type Section = "orders" | "inventory" | "b2b" | "rfq";
+type Section = "orders" | "inventory" | "b2b" | "rfq" | "org";
 
 export default function AdminPage() {
   const [key, setKey] = useState<string>("");
@@ -63,6 +70,16 @@ export default function AdminPage() {
     paymentTerms: string;
     note: string;
   } | null>(null);
+  const [orgRows, setOrgRows] = useState<AdminOrgRow[] | null>(null);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [memberRows, setMemberRows] = useState<AdminMemberRow[] | null>(null);
+  const [memberForm, setMemberForm] = useState<{
+    contactName: string;
+    contactPhone: string;
+    email: string;
+    role: string;
+  } | null>(null);
+  const [issuedKey, setIssuedKey] = useState<{ memberName: string; accessKey: string } | null>(null);
   const [adjust, setAdjust] = useState<{ variantId: string; delta: string; note: string }>({
     variantId: "",
     delta: "",
@@ -83,6 +100,8 @@ export default function AdminPage() {
           setB2bApps(await adminListB2BApplications());
         } else if (which === "rfq") {
           setRfqRows(await adminListRfqs(getAdminKey() ?? ""));
+        } else if (which === "org") {
+          setOrgRows(await adminListOrgs(getAdminKey() ?? ""));
         } else {
           const [inv, led] = await Promise.all([adminListInventory(), adminListLedger()]);
           setInventory(inv);
@@ -195,6 +214,83 @@ export default function AdminPage() {
     }
   };
 
+  // ---- organizations / members (N16) -----------------------------------------
+
+  const openOrg = async (orgId: string): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    try {
+      setSelectedOrgId(orgId);
+      setMemberForm(null);
+      setIssuedKey(null);
+      setMemberRows(await adminListOrgMembers(getAdminKey() ?? "", orgId));
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در دریافت اعضا.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const reloadMembers = async (orgId: string): Promise<void> => {
+    setMemberRows(await adminListOrgMembers(getAdminKey() ?? "", orgId));
+  };
+
+  const handleCreateMember = async (): Promise<void> => {
+    if (selectedOrgId === null || memberForm === null) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const created = await adminCreateOrgMember(getAdminKey() ?? "", selectedOrgId, {
+        contactName: memberForm.contactName,
+        contactPhone: memberForm.contactPhone,
+        email: memberForm.email,
+        role: memberForm.role,
+      });
+      setIssuedKey({ memberName: created.contactName, accessKey: created.accessKey });
+      setMemberForm(null);
+      await reloadMembers(selectedOrgId);
+      setOrgRows(await adminListOrgs(getAdminKey() ?? ""));
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در ایجاد عضو.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleRotateKey = async (memberId: string): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    try {
+      const rotated = await adminIssueMemberKey(getAdminKey() ?? "", memberId);
+      setIssuedKey({ memberName: rotated.contactName, accessKey: rotated.accessKey });
+      if (selectedOrgId !== null) {
+        await reloadMembers(selectedOrgId);
+      }
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در صدور کلید.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleRevokeKey = async (memberId: string): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    try {
+      await adminRevokeMemberKey(getAdminKey() ?? "", memberId);
+      setNotice("کلید عضو باطل شد.");
+      if (selectedOrgId !== null) {
+        await reloadMembers(selectedOrgId);
+      }
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در ابطال کلید.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // ---- key gate -------------------------------------------------------------
   if (!authed) {
     return (
@@ -272,6 +368,15 @@ export default function AdminPage() {
           onClick={() => setSection("rfq")}
         >
           درخواست‌های قیمت
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "org"}
+          className={section === "org" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
+          onClick={() => setSection("org")}
+        >
+          سازمان‌ها و اعضا
         </button>
         <button
           type="button"
@@ -461,6 +566,208 @@ export default function AdminPage() {
                 </article>
               ))
             : null}
+        </section>
+      ) : section === "org" ? (
+        <section aria-label="سازمان‌ها و اعضا">
+          <p className="dv-muted">
+            کلیدهای دسترسی اعضا برای پورتال سازمانی است؛ کلید فقط یک‌بار پس از
+            صدور نمایش داده می‌شود و فقط هش آن ذخیره می‌شود.
+          </p>
+          {orgRows !== null && orgRows.length === 0 ? (
+            <div className="dv-empty">سازمانی وجود ندارد — با تأیید درخواست B2B ساخته می‌شود.</div>
+          ) : null}
+          {orgRows !== null ? (
+            <table className="dv-admin-table">
+              <thead>
+                <tr>
+                  <th>سازمان</th>
+                  <th>وضعیت</th>
+                  <th>اعضا</th>
+                  <th>نمونه؟</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {orgRows.map((org) => (
+                  <tr key={org.id}>
+                    <td>{org.name}</td>
+                    <td>{org.status === "ACTIVE" ? "فعال" : "تعلیق"}</td>
+                    <td>{formatFaNumber(org.memberCount)}</td>
+                    <td>{org.isSample ? "نمونه" : "تأییدشده"}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="dv-btn dv-btn-gold"
+                        disabled={busy}
+                        onClick={() => void openOrg(org.id)}
+                      >
+                        اعضا و کلیدها
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : null}
+
+          {selectedOrgId !== null ? (
+            <div className="dv-card dv-b2b-app" style={{ marginTop: "16px" }}>
+              <h3>
+                اعضای <span dir="ltr">{selectedOrgId.slice(-8)}</span>
+              </h3>
+              {memberRows !== null && memberRows.length === 0 ? (
+                <div className="dv-empty">عضوی ثبت نشده است.</div>
+              ) : null}
+              {memberRows !== null ? (
+                <table className="dv-admin-table">
+                  <thead>
+                    <tr>
+                      <th>نام</th>
+                      <th>ایمیل</th>
+                      <th>موبایل</th>
+                      <th>نقش</th>
+                      <th>کلید</th>
+                      <th>اقدام</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {memberRows.map((member) => (
+                      <tr key={member.id}>
+                        <td>{member.contactName}</td>
+                        <td dir="ltr">{member.email}</td>
+                        <td dir="ltr">{member.contactPhone}</td>
+                        <td>
+                          {member.role === "OWNER"
+                            ? "مالک"
+                            : member.role === "BUYER"
+                              ? "خرید"
+                              : "حساب‌دار"}
+                        </td>
+                        <td>
+                          {member.hasKey
+                            ? member.keyRevokedAt !== null
+                              ? `باطل (…${member.keyLast4 ?? ""})`
+                              : `فعال (…${member.keyLast4 ?? ""})`
+                            : "ندارد"}
+                        </td>
+                        <td className="dv-pay-actions">
+                          <button
+                            type="button"
+                            className="dv-btn dv-btn-gold"
+                            disabled={busy}
+                            onClick={() => void handleRotateKey(member.id)}
+                          >
+                            صدور/تعویض کلید
+                          </button>
+                          {member.hasKey && member.keyRevokedAt === null ? (
+                            <button
+                              type="button"
+                              className="dv-admin-tab"
+                              disabled={busy}
+                              onClick={() => void handleRevokeKey(member.id)}
+                            >
+                              ابطال
+                            </button>
+                          ) : null}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : null}
+
+              {issuedKey !== null ? (
+                <div className="dv-sandbox-panel" role="alert">
+                  <h4 className="dv-sandbox-title">
+                    کلید جدید برای {issuedKey.memberName}
+                  </h4>
+                  <p dir="ltr" className="dv-cart-grand">
+                    {issuedKey.accessKey}
+                  </p>
+                  <p className="dv-muted">
+                    ⚠️ این کلید فقط همین یک‌بار نمایش داده می‌شود — همین حالا به
+                    عضو بدهید. فقط هش آن ذخیره شده است.
+                  </p>
+                  <button
+                    type="button"
+                    className="dv-admin-tab"
+                    onClick={() => {
+                      void navigator.clipboard?.writeText(issuedKey.accessKey);
+                      setNotice("کلید در حافظه کپی شد.");
+                    }}
+                  >
+                    کپی
+                  </button>
+                </div>
+              ) : null}
+
+              {memberForm !== null ? (
+                <div className="dv-admin-adjust" style={{ marginTop: "12px" }}>
+                  <input
+                    type="text"
+                    aria-label="نام عضو"
+                    placeholder="نام و نام خانوادگی"
+                    value={memberForm.contactName}
+                    onChange={(event) => setMemberForm({ ...memberForm, contactName: event.target.value })}
+                  />
+                  <input
+                    type="text"
+                    dir="ltr"
+                    aria-label="موبایل عضو"
+                    placeholder="0912…"
+                    value={memberForm.contactPhone}
+                    onChange={(event) => setMemberForm({ ...memberForm, contactPhone: event.target.value })}
+                  />
+                  <input
+                    type="email"
+                    dir="ltr"
+                    aria-label="ایمیل عضو"
+                    placeholder="name@org.test"
+                    value={memberForm.email}
+                    onChange={(event) => setMemberForm({ ...memberForm, email: event.target.value })}
+                  />
+                  <select
+                    aria-label="نقش عضو"
+                    value={memberForm.role}
+                    onChange={(event) => setMemberForm({ ...memberForm, role: event.target.value })}
+                  >
+                    <option value="BUYER">کارشناس خرید</option>
+                    <option value="OWNER">مالک سازمان</option>
+                    <option value="ACCOUNTANT">حساب‌دار (فقط مشاهده)</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="dv-btn dv-btn-gold"
+                    disabled={busy}
+                    onClick={() => void handleCreateMember()}
+                  >
+                    ایجاد عضو + صدور کلید
+                  </button>
+                  <button type="button" className="dv-admin-tab" onClick={() => setMemberForm(null)}>
+                    انصراف
+                  </button>
+                </div>
+              ) : (
+                <div className="dv-pay-actions" style={{ marginTop: "12px" }}>
+                  <button
+                    type="button"
+                    className="dv-btn dv-btn-gold"
+                    disabled={busy}
+                    onClick={() =>
+                      setMemberForm({
+                        contactName: "",
+                        contactPhone: "",
+                        email: "",
+                        role: "BUYER",
+                      })
+                    }
+                  >
+                    افزودن عضو
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : null}
         </section>
       ) : section === "b2b" ? (
         <section aria-label="درخواست‌های همکاری B2B">

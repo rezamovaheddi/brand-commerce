@@ -2,6 +2,8 @@ import {
   MAX_QUANTITY,
   MIN_QUANTITY,
   CartLineInput,
+  canActAsOrgBuyer,
+  canReadOrgData,
   checkQuantity,
   computeCartTotals,
   displayUnit,
@@ -133,5 +135,22 @@ describe('displayUnit', () => {
   it('passes other currencies through untouched', () => {
     expect(displayUnit('USD')).toBe('USD');
     expect(displayUnit('EUR')).toBe('EUR');
+  });
+});
+
+describe('organization roles (N16)', () => {
+  it('lets OWNER and BUYER raise/accept org RFQs', () => {
+    expect(canActAsOrgBuyer('OWNER')).toBe(true);
+    expect(canActAsOrgBuyer('BUYER')).toBe(true);
+  });
+
+  it('denies ACCOUNTANT purchasing actions (finance-only role)', () => {
+    expect(canActAsOrgBuyer('ACCOUNTANT')).toBe(false);
+  });
+
+  it('lets every active member read their own organization data', () => {
+    expect(canReadOrgData('OWNER')).toBe(true);
+    expect(canReadOrgData('BUYER')).toBe(true);
+    expect(canReadOrgData('ACCOUNTANT')).toBe(true);
   });
 });

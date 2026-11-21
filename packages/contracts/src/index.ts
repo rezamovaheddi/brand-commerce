@@ -345,6 +345,52 @@ export const AdminB2BDecisionSchema = z.object({
 export type AdminB2BDecision = z.infer<typeof AdminB2BDecisionSchema>;
 
 /**
+ * Organization members + access keys (N16 bootstrap access control).
+ * Real credentials stay with the Identity context (P7); until then each
+ * member holds an operator-issued high-entropy access key. Only the SHA-256
+ * hash is stored — the plaintext key is returned exactly once at issuance.
+ */
+export const OrgMemberRoleSchema = z.enum(["OWNER", "BUYER", "ACCOUNTANT"]);
+export type OrgMemberRole = z.infer<typeof OrgMemberRoleSchema>;
+
+export const CreateOrgMemberSchema = z.object({
+  contactName: z.string().min(2).max(80),
+  contactPhone: IranianPhoneSchema,
+  email: z.string().email("ایمیل نامعتبر است").max(120),
+  role: OrgMemberRoleSchema,
+});
+export type CreateOrgMember = z.infer<typeof CreateOrgMemberSchema>;
+
+export const OrgMemberSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  contactName: z.string(),
+  contactPhone: z.string(),
+  email: z.string(),
+  role: OrgMemberRoleSchema,
+  hasKey: z.boolean(),
+  keyLast4: z.string().nullable(),
+  keyRevokedAt: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type OrgMember = z.infer<typeof OrgMemberSchema>;
+
+export const CreateOrgMemberResponseSchema = OrgMemberSchema.extend({
+  /** Plaintext access key — returned exactly once, never stored. */
+  accessKey: z.string().regex(/^dvorg_[0-9a-f]{32}$/, "کلید نامعتبر"),
+});
+export type CreateOrgMemberResponse = z.infer<typeof CreateOrgMemberResponseSchema>;
+
+export const OrgMeSchema = z.object({
+  organizationId: z.string(),
+  organizationName: z.string(),
+  isSample: z.boolean(),
+  memberName: z.string(),
+  role: OrgMemberRoleSchema,
+});
+export type OrgMe = z.infer<typeof OrgMeSchema>;
+
+/**
  * RFQ / Quote contracts (P4 scaffold, N11 immutable revisions).
  * Revision prices are SAMPLE-marked (isSandbox-style honesty): real contract
  * pricing awaits D-11. Accept converts to a real Order with inventory reserve.
@@ -422,6 +468,7 @@ export type Quote = z.infer<typeof QuoteSchema>;
 export const RfqSchema = z.object({
   id: z.string(),
   status: RfqStatusSchema,
+  orgId: z.string().nullable(),
   contactName: z.string(),
   contactPhone: z.string(),
   items: z.array(RfqItemSchema),

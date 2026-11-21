@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -15,10 +16,12 @@ import {
   AdminOrderListResponse,
   AdminOrderStatusQuerySchema,
   AdjustStockSchema,
+  CreateOrgMemberSchema,
   IssueQuoteSchema,
   type AdminB2BDecision,
   type AdjustStock,
   type AdminOrderStatusQuery,
+  type CreateOrgMember,
   type IssueQuote,
 } from '@bc/contracts';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
@@ -144,5 +147,52 @@ export class AdminController {
     @Body(new ZodValidationPipe(IssueQuoteSchema)) input: IssueQuote,
   ) {
     return this.adminService.addRevision(id, input);
+  }
+
+  // ---- Organization members + access keys (N16) -------------------------------
+
+  @Get('b2b/orgs')
+  @ApiOperation({ summary: 'فهرست سازمان‌ها + تعداد اعضا' })
+  @ApiOkResponse({ description: 'سازمان‌ها', type: Object })
+  async listOrganizations() {
+    return this.adminService.listOrganizations();
+  }
+
+  @Get('b2b/orgs/:id/members')
+  @ApiOperation({ summary: 'اعضای یک سازمان (بدون کلید)' })
+  @ApiOkResponse({ description: 'اعضای سازمان', type: Object })
+  @ApiNotFoundResponse({ description: 'سازمان یافت نشد' })
+  async listOrgMembers(@Param('id') id: string) {
+    return this.adminService.listOrgMembers(id);
+  }
+
+  @Post('b2b/orgs/:id/members')
+  @ApiOperation({ summary: 'ایجاد عضو + صدور کلید (کلید فقط یک‌بار نمایش داده می‌شود)' })
+  @ApiCreatedResponse({ description: 'عضو ساخته شد؛ accessKey یک‌بار نمایش داده می‌شود', type: Object })
+  @ApiConflictResponse({ description: 'عضو تکراری (شماره/نقش یا ایمیل)' })
+  @ApiNotFoundResponse({ description: 'سازمان یافت نشد' })
+  async createOrgMember(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(CreateOrgMemberSchema)) input: CreateOrgMember,
+  ) {
+    return this.adminService.createOrgMember(id, input);
+  }
+
+  @Post('b2b/members/:id/key')
+  @ApiOperation({ summary: 'صدور مجدد کلید عضو (کلید قبلی بی‌اعتبار می‌شود)' })
+  @ApiCreatedResponse({ description: 'کلید جدید یک‌بار نمایش داده می‌شود', type: Object })
+  @ApiNotFoundResponse({ description: 'عضو یافت نشد' })
+  async issueOrgMemberKey(@Param('id') id: string) {
+    return this.adminService.issueOrgMemberKey(id);
+  }
+
+  @Post('b2b/members/:id/revoke')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'باطل‌سازی کلید عضو' })
+  @ApiOkResponse({ description: 'وضعیت عضو پس از ابطال', type: Object })
+  @ApiBadRequestResponse({ description: 'قبلاً باطل شده یا کلید ندارد' })
+  @ApiNotFoundResponse({ description: 'عضو یافت نشد' })
+  async revokeOrgMemberKey(@Param('id') id: string) {
+    return this.adminService.revokeOrgMemberKey(id);
   }
 }

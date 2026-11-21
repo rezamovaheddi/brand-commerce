@@ -64,7 +64,7 @@ describe('ProductsService', () => {
       expect(productFindMany).toHaveBeenCalledTimes(1);
       expect(lastFindManyArgs()).toEqual({
         where: { status: 'ACTIVE' },
-        include: { variants: true, category: true },
+        include: { variants: { include: { inventory: true } }, category: true },
         skip: 0,
         take: 12,
         orderBy: { createdAt: 'desc' },

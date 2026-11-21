@@ -250,10 +250,19 @@ model OrganizationMembership {
   organizationId String
   contactName    String
   contactPhone   String
+  email          String?
   role           OrgMemberRole @default(OWNER)
+  // N16 bootstrap access control: operator-issued high-entropy key; only the
+  // SHA-256 hash is stored (plaintext returned once at issuance). Replaced by
+  // real Identity credentials in P7.
+  keyHash        String?      @unique
+  keyLast4       String?
+  keyRevokedAt   DateTime?
+  lastUsedAt     DateTime?
   createdAt      DateTime     @default(now())
 
   @@unique([organizationId, contactPhone, role])
+  @@unique([organizationId, email])
   @@index([organizationId])
 }
 
@@ -311,6 +320,7 @@ model Rfq {
   updatedAt    DateTime  @updatedAt
 
   @@index([status])
+  @@index([orgId])
 }
 
 model RfqItem {

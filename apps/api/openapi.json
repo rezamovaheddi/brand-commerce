@@ -952,6 +952,193 @@
         ]
       }
     },
+    "/api/v1/admin/b2b/orgs": {
+      "get": {
+        "operationId": "AdminController_listOrganizations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "سازمان‌ها",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "فهرست سازمان‌ها + تعداد اعضا",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/orgs/{id}/members": {
+      "get": {
+        "operationId": "AdminController_listOrgMembers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "اعضای سازمان",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "سازمان یافت نشد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "اعضای یک سازمان (بدون کلید)",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "AdminController_createOrgMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "عضو ساخته شد؛ accessKey یک‌بار نمایش داده می‌شود",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "سازمان یافت نشد"
+          },
+          "409": {
+            "description": "عضو تکراری (شماره/نقش یا ایمیل)"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "ایجاد عضو + صدور کلید (کلید فقط یک‌بار نمایش داده می‌شود)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/members/{id}/key": {
+      "post": {
+        "operationId": "AdminController_issueOrgMemberKey",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "کلید جدید یک‌بار نمایش داده می‌شود",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "عضو یافت نشد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "صدور مجدد کلید عضو (کلید قبلی بی‌اعتبار می‌شود)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/members/{id}/revoke": {
+      "post": {
+        "operationId": "AdminController_revokeOrgMemberKey",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "وضعیت عضو پس از ابطال",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "قبلاً باطل شده یا کلید ندارد"
+          },
+          "404": {
+            "description": "عضو یافت نشد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "باطل‌سازی کلید عضو",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/b2b/applications": {
       "post": {
         "operationId": "B2bController_submit",
@@ -1101,6 +1288,187 @@
         "summary": "پذیرش پیش‌فاکتور → تبدیل اتمیک به سفارش (با رزرو موجودی)",
         "tags": [
           "b2b"
+        ]
+      }
+    },
+    "/api/v1/b2b/org/me": {
+      "get": {
+        "operationId": "OrgPortalController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "اطلاعات عضو سازمان",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "کلید سازمانی نامعتبر/باطل"
+          },
+          "403": {
+            "description": "کلید باطل شده یا سازمان تعلیق است"
+          }
+        },
+        "security": [
+          {
+            "x-org-key": []
+          }
+        ],
+        "summary": "هویت سازمانی کلید (نام سازمان، عضو، نقش)",
+        "tags": [
+          "b2b-org"
+        ]
+      }
+    },
+    "/api/v1/b2b/org/rfqs": {
+      "post": {
+        "operationId": "OrgPortalController_submitRfq",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "RFQ سازمانی ثبت شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "نقش ACCOUNTANT اجازه ثبت ندارد"
+          }
+        },
+        "security": [
+          {
+            "x-org-key": []
+          }
+        ],
+        "summary": "ثبت درخواست قیمت متعلق به سازمان (نقش OWNER/BUYER)",
+        "tags": [
+          "b2b-org"
+        ]
+      },
+      "get": {
+        "operationId": "OrgPortalController_listRfqs",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RFQهای سازمان",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-org-key": []
+          }
+        ],
+        "summary": "فهرست درخواست‌های قیمت همین سازمان",
+        "tags": [
+          "b2b-org"
+        ]
+      }
+    },
+    "/api/v1/b2b/org/rfqs/{id}": {
+      "get": {
+        "operationId": "OrgPortalController_getRfq",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RFQ با quote",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "یافت نشد یا متعلق به سازمان دیگری است"
+          }
+        },
+        "security": [
+          {
+            "x-org-key": []
+          }
+        ],
+        "summary": "مشاهده RFQ سازمانی (سایر سازمان‌ها: 404)",
+        "tags": [
+          "b2b-org"
+        ]
+      }
+    },
+    "/api/v1/b2b/org/quotes/{id}/accept": {
+      "post": {
+        "operationId": "OrgPortalController_acceptQuote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "سفارش DRAFT ساخته شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "منقضی/پذیرفته‌شده"
+          },
+          "403": {
+            "description": "نقش ACCOUNTANT اجازه پذیرش ندارد"
+          },
+          "404": {
+            "description": "متعلق به سازمان دیگر است"
+          }
+        },
+        "security": [
+          {
+            "x-org-key": []
+          }
+        ],
+        "summary": "پذیرش پیش‌فاکتور سازمانی → سفارش (نقش OWNER/BUYER)",
+        "tags": [
+          "b2b-org"
         ]
       }
     }

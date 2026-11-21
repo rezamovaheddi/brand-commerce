@@ -194,3 +194,175 @@ export async function adminAddQuoteRevision(
 function adminJsonHeaders(key: string): HeadersInit {
   return { "Content-Type": "application/json", "x-admin-key": key };
 }
+
+/* ---- org portal (N16: x-org-key access) ------------------------------------ */
+
+const ORG_KEY_STORAGE = "dv-org-key";
+
+export function getOrgKey(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return window.sessionStorage.getItem(ORG_KEY_STORAGE);
+}
+
+export function setOrgKey(key: string): void {
+  window.sessionStorage.setItem(ORG_KEY_STORAGE, key.trim());
+}
+
+export function clearOrgKey(): void {
+  window.sessionStorage.removeItem(ORG_KEY_STORAGE);
+}
+
+const OrgMe = z.object({
+  organizationId: z.string(),
+  organizationName: z.string(),
+  isSample: z.boolean(),
+  memberName: z.string(),
+  role: z.string(),
+});
+export type OrgMe = z.infer<typeof OrgMe>;
+
+function orgHeaders(key: string, json: boolean = false): HeadersInit {
+  return json
+    ? { "Content-Type": "application/json", "x-org-key": key }
+    : { "x-org-key": key };
+}
+
+/** Who the org key belongs to. 401/403 → key entry / honest error. */
+export async function orgMe(key: string): Promise<OrgMe> {
+  return requestJson<OrgMe>(
+    `${BASE}/b2b/org/me`,
+    { method: "GET", headers: orgHeaders(key) },
+    (body) => (OrgMe.safeParse(body).success ? (body as OrgMe) : null),
+  );
+}
+
+/** Org-scoped RFQ submit (role OWNER/BUYER; ACCOUNTANT → 403 from the API). */
+export async function orgSubmitRfq(key: string, input: CreateRfq): Promise<Rfq> {
+  const check = CreateRfqSchema.safeParse(input);
+  if (!check.success) {
+    const first = check.error.issues[0];
+    throw new CartApiError("parse", first ? first.message : "مقادیر نامعتبر است.");
+  }
+  return requestJson<Rfq>(
+    `${BASE}/b2b/org/rfqs`,
+    { method: "POST", headers: orgHeaders(key, true), body: JSON.stringify(input) },
+    (body) => (RfqSchema.safeParse(body).success ? (body as Rfq) : null),
+  );
+}
+
+export async function orgListRfqs(key: string): Promise<Rfq[]> {
+  return requestJson<Rfq[]>(
+    `${BASE}/b2b/org/rfqs`,
+    { method: "GET", headers: orgHeaders(key) },
+    (body) => {
+      const parsed = z.object({ items: z.array(RfqSchema) }).safeParse(body);
+      return parsed.success ? parsed.data.items : null;
+    },
+  );
+}
+
+export async function orgAcceptQuote(
+  key: string,
+  quoteId: string,
+  address: Record<string, string>,
+): Promise<{ order: { id: string; status: string }; quote: Quote }> {
+  return requestJson<{ order: { id: string; status: string }; quote: Quote }>(
+    `${BASE}/b2b/org/quotes/${encodeURIComponent(quoteId)}/accept`,
+    { method: "POST", headers: orgHeaders(key, true), body: JSON.stringify(address) },
+    (body) => {
+      const obj = body as { order?: { id: string; status: string }; quote?: unknown } | null;
+      if (!obj?.order || typeof obj.order.status !== "string") {
+        return null;
+      }
+      const quote = QuoteSchema.safeParse(obj.quote);
+      return quote.success ? { order: obj.order, quote: quote.data } : null;
+    },
+  );
+}
+
+/* ---- admin: organization member/key management (N16) ------------------------ */
+
+const AdminOrg = z.object({
+  id: z.string(),
+  name: z.string(),
+  isSample: z.boolean(),
+  status: z.string(),
+  memberCount: z.number(),
+  createdAt: z.string(),
+});
+export type AdminOrgRow = z.infer<typeof AdminOrg>;
+
+const AdminMember = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  contactName: z.string(),
+  contactPhone: z.string(),
+  email: z.string(),
+  role: z.string(),
+  hasKey: z.boolean(),
+  keyLast4: z.string().nullable(),
+  keyRevokedAt: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type AdminMemberRow = z.infer<typeof AdminMember>;
+
+export async function adminListOrgs(key: string): Promise<AdminOrgRow[]> {
+  return requestJson<AdminOrgRow[]>(
+    `${BASE}/admin/b2b/orgs`,
+    { method: "GET", headers: { "x-admin-key": key } },
+    (body) => {
+      const parsed = z.object({ items: z.array(AdminOrg) }).safeParse(body);
+      return parsed.success ? parsed.data.items : null;
+    },
+  );
+}
+
+export async function adminListOrgMembers(key: string, orgId: string): Promise<AdminMemberRow[]> {
+  return requestJson<AdminMemberRow[]>(
+    `${BASE}/admin/b2b/orgs/${encodeURIComponent(orgId)}/members`,
+    { method: "GET", headers: { "x-admin-key": key } },
+    (body) => {
+      const parsed = z.object({ items: z.array(AdminMember) }).safeParse(body);
+      return parsed.success ? parsed.data.items : null;
+    },
+  );
+}
+
+export async function adminCreateOrgMember(
+  key: string,
+  orgId: string,
+  input: { contactName: string; contactPhone: string; email: string; role: string },
+): Promise<AdminMemberRow & { accessKey: string }> {
+  return requestJson<AdminMemberRow & { accessKey: string }>(
+    `${BASE}/admin/b2b/orgs/${encodeURIComponent(orgId)}/members`,
+    { method: "POST", headers: adminJsonHeaders(key), body: JSON.stringify(input) },
+    (body) => {
+      const parsed = AdminMember.extend({ accessKey: z.string() }).safeParse(body);
+      return parsed.success ? parsed.data : null;
+    },
+  );
+}
+
+export async function adminIssueMemberKey(
+  key: string,
+  memberId: string,
+): Promise<AdminMemberRow & { accessKey: string }> {
+  return requestJson<AdminMemberRow & { accessKey: string }>(
+    `${BASE}/admin/b2b/members/${encodeURIComponent(memberId)}/key`,
+    { method: "POST", headers: { "x-admin-key": key } },
+    (body) => {
+      const parsed = AdminMember.extend({ accessKey: z.string() }).safeParse(body);
+      return parsed.success ? parsed.data : null;
+    },
+  );
+}
+
+export async function adminRevokeMemberKey(key: string, memberId: string): Promise<AdminMemberRow> {
+  return requestJson<AdminMemberRow>(
+    `${BASE}/admin/b2b/members/${encodeURIComponent(memberId)}/revoke`,
+    { method: "POST", headers: { "x-admin-key": key } },
+    (body) => (AdminMember.safeParse(body).success ? (body as AdminMemberRow) : null),
+  );
+}

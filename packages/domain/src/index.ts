@@ -90,3 +90,19 @@ export function assertOrderTransition(from: string, to: string): void {
     throw new Error(`invalid order transition: ${from} -> ${to}`);
   }
 }
+
+// ---- Organization roles (N16) ----------------------------------------------
+// Real credentials land with the Identity context (P7); these rules are pure
+// so the API layer, admin console and tests share one source of truth.
+
+export type OrgMemberRole = "OWNER" | "BUYER" | "ACCOUNTANT";
+
+/** Purchasing roles may raise/accept org RFQs; a finance-only role may not. */
+export function canActAsOrgBuyer(role: OrgMemberRole): boolean {
+  return role === "OWNER" || role === "BUYER";
+}
+
+/** Any active member may read their own organization's data. */
+export function canReadOrgData(role: OrgMemberRole): boolean {
+  return role === "OWNER" || role === "BUYER" || role === "ACCOUNTANT";
+}

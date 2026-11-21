@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
   AcceptQuote,
@@ -6,14 +6,17 @@ import {
   CreateB2BApplication,
   CreateRfq,
   IssueQuote,
+  OrgMe,
   Order,
   Quote,
   QuoteRevision,
   Rfq,
 } from '@bc/contracts';
+import { canActAsOrgBuyer } from '@bc/domain';
 import { PrismaService } from '../../prisma/prisma.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { toOrderContract } from '../orders/order.mapper';
+import type { OrgMemberContext } from './org-member.guard';
 
 const RFQ_INCLUDE = {
   items: true,
@@ -39,6 +42,7 @@ interface RfqItemRow {
 interface RfqRowWithRelations {
   id: string;
   status: 'SUBMITTED' | 'PRICED' | 'QUOTED' | 'ACCEPTED' | 'REJECTED' | 'CLOSED';
+  orgId: string | null;
   contactName: string;
   contactPhone: string;
   note: string | null;
@@ -221,10 +225,26 @@ export class B2bService {
 
   /** Public RFQ submit (items with/without variantId — custom lines allowed at intake). */
   async submitRfq(input: CreateRfq): Promise<Rfq> {
+    return this.createRfq(input, null);
+  }
+
+  /**
+   * Org-scoped RFQ submit (N16): bound to the member's organization. Role
+   * enforcement is a domain rule — ACCOUNTANT is finance-only.
+   */
+  async submitOrgRfq(member: OrgMemberContext, input: CreateRfq): Promise<Rfq> {
+    if (!canActAsOrgBuyer(member.role)) {
+      throw new ForbiddenException('نقش شما (حساب‌دار) اجازه ثبت درخواست قیمت ندارد');
+    }
+    return this.createRfq(input, member.organizationId);
+  }
+
+  private async createRfq(input: CreateRfq, orgId: string | null): Promise<Rfq> {
     const rfq = await this.prisma.rfq.create({
       data: {
         contactName: input.contactName,
         contactPhone: input.contactPhone,
+        orgId,
         note: input.note ?? null,
         status: 'SUBMITTED',
         items: {
@@ -239,6 +259,43 @@ export class B2bService {
       include: RFQ_INCLUDE,
     });
     return this.toRfqContract(rfq as unknown as RfqRowWithRelations);
+  }
+
+  /** Who the org key belongs to (portal identity banner). */
+  async orgMe(member: OrgMemberContext): Promise<OrgMe> {
+    return {
+      organizationId: member.organizationId,
+      organizationName: member.organizationName,
+      isSample: member.organizationIsSample,
+      memberName: member.memberName,
+      role: member.role,
+    };
+  }
+
+  /** Only THIS organization's RFQs — scoping is in the where clause. */
+  async listOrgRfqs(member: OrgMemberContext, status?: string): Promise<{ items: Rfq[] }> {
+    const rows = await this.prisma.rfq.findMany({
+      where: {
+        orgId: member.organizationId,
+        ...(status ? { status: status as Prisma.EnumRfqStatusFilter['equals'] } : {}),
+      },
+      include: RFQ_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    return { items: rows.map((row) => this.toRfqContract(row as unknown as RfqRowWithRelations)) };
+  }
+
+  /**
+   * Cross-org read is answered with 404 — an org must not learn that another
+   * organization's RFQ id exists.
+   */
+  async getOrgRfq(member: OrgMemberContext, id: string): Promise<Rfq> {
+    const row = await this.prisma.rfq.findUnique({ where: { id }, include: RFQ_INCLUDE });
+    if (!row || row.orgId !== member.organizationId) {
+      throw new NotFoundException('درخواست قیمت یافت نشد');
+    }
+    return this.toRfqContract(row as unknown as RfqRowWithRelations);
   }
 
   async getRfq(id: string): Promise<Rfq> {
@@ -360,13 +417,47 @@ export class B2bService {
    * shortage). The order then flows through the normal payment path.
    */
   async acceptQuote(quoteId: string, address: AcceptQuote): Promise<{ order: Order; quote: Quote }> {
-    const quote = await this.prisma.quote.findUnique({
-      where: { id: quoteId },
-      include: { rfq: true, revisions: { orderBy: { revisionNo: 'desc' }, take: 1 } },
-    });
+    const quote = await this.fetchQuoteWithRevisions(quoteId);
     if (!quote) {
       throw new NotFoundException('پیش‌فاکتور یافت نشد');
     }
+    await this.assertAcceptable(quote);
+    return this.convertQuoteToOrder(quote, address);
+  }
+
+  /**
+   * Org-scoped accept (N16). Scoping runs BEFORE any status gate: a foreign
+   * org gets 404 whether the quote is SENT, ACCEPTED or expired — no
+   * existence/status leak. Role rule (ACCOUNTANT) is next, then the shared
+   * state gates.
+   */
+  async acceptOrgQuote(member: OrgMemberContext, quoteId: string, address: AcceptQuote): Promise<{ order: Order; quote: Quote }> {
+    const quote = await this.fetchQuoteWithRevisions(quoteId);
+    if (!quote || quote.rfq === null || quote.rfq.orgId !== member.organizationId) {
+      throw new NotFoundException('پیش‌فاکتور یافت نشد');
+    }
+    if (!canActAsOrgBuyer(member.role)) {
+      throw new ForbiddenException('نقش شما (حساب‌دار) اجازه پذیرش پیش‌فاکتور ندارد');
+    }
+    await this.assertAcceptable(quote);
+    return this.convertQuoteToOrder(quote, address);
+  }
+
+  /** Fetch quote + latest revision + owning RFQ's orgId (no state gates). */
+  private async fetchQuoteWithRevisions(
+    quoteId: string,
+  ): Promise<(QuoteRowWithRevisions & { rfq: { orgId: string | null } | null }) | null> {
+    const quote = await this.prisma.quote.findUnique({
+      where: { id: quoteId },
+      include: { rfq: { select: { orgId: true } }, revisions: { orderBy: { revisionNo: 'desc' }, take: 1 } },
+    });
+    return (quote as unknown as QuoteRowWithRevisions & { rfq: { orgId: string | null } | null }) ?? null;
+  }
+
+  /** Shared status/expiry gate for both public and org-scoped accept. */
+  private async assertAcceptable(
+    quote: QuoteRowWithRevisions & { rfq: { orgId: string | null } | null },
+  ): Promise<void> {
     if (quote.status === 'ACCEPTED') {
       throw new BadRequestException('این پیش‌فاکتور قبلاً پذیرفته شده است');
     }
@@ -374,13 +465,22 @@ export class B2bService {
       throw new BadRequestException('این پیش‌فاکتور قابل پذیرش نیست');
     }
     if (quote.validUntil.getTime() < Date.now()) {
-      await this.prisma.quote.update({ where: { id: quoteId }, data: { status: 'EXPIRED' } });
+      await this.prisma.quote.update({ where: { id: quote.id }, data: { status: 'EXPIRED' } });
       throw new BadRequestException('پیش‌فاکتور منقضی شده است');
     }
     const latest = quote.revisions[0];
     if (!latest || latest.linesJson === null) {
       throw new BadRequestException('پیش‌فاکتور بدون قلم قابل پذیرش نیست');
     }
+  }
+
+  /** Atomic conversion: order + immutable line snapshots + inventory reserve. */
+  private async convertQuoteToOrder(
+    quote: QuoteRowWithRevisions & { rfq: { orgId: string | null } | null },
+    address: AcceptQuote,
+  ): Promise<{ order: Order; quote: Quote }> {
+    const quoteId = quote.id;
+    const latest = quote.revisions[0] as QuoteRevisionRow;
     const lines = latest.linesJson as unknown as QuoteLine[];
 
     let createdId: string;
@@ -504,6 +604,7 @@ export class B2bService {
     return {
       id: row.id,
       status: row.status,
+      orgId: row.orgId ?? null,
       contactName: row.contactName,
       contactPhone: row.contactPhone,
       items: row.items.map((item) => ({

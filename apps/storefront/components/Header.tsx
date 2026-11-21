@@ -19,6 +19,7 @@ export default function Header() {
           <Link href="/" className="dv-nav-link">خانه</Link>
           <Link href="/products" className="dv-nav-link">محصولات</Link>
           <Link href="/about" className="dv-nav-link">درباره ما</Link>
+          <Link href="/b2b/portal" className="dv-nav-link">فروش سازمانی</Link>
         </nav>
 
         <CartButton />
