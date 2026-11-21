@@ -18,6 +18,7 @@ interface FakeVariantRow {
   currency: string;
   isDefault: boolean;
   status: ProductStatusLiteral;
+  inventory: { onHand: number; reserved: number } | null;
 }
 
 interface FakeProductRow {
@@ -81,6 +82,7 @@ function variant(id: string, sku: string, priceMinor: number): FakeVariantRow {
     currency: 'IRR',
     isDefault: true,
     status: 'ACTIVE',
+    inventory: { onHand: 25, reserved: 0 },
   };
 }
 

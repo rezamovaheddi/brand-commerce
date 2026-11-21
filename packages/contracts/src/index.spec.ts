@@ -49,6 +49,7 @@ const validProduct = {
       currency: "IRR",
       isDefault: true,
       status: "ACTIVE",
+      availableToSell: 25,
     },
   ],
 };

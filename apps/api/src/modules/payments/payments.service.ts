@@ -10,6 +10,7 @@ import { Payment, SandboxCallback, type PayOrderResponse } from '@bc/contracts';
 import { PrismaService } from '../../prisma/prisma.service';
 import { OrdersService } from '../orders/orders.service';
 import { toOrderContract } from '../orders/order.mapper';
+import { InventoryService } from '../inventory/inventory.service';
 import { toPaymentContract, type PaymentRow } from './payment.mapper';
 
 const PAYMENT_SELECT = {
@@ -35,6 +36,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ordersService: OrdersService,
+    private readonly inventoryService: InventoryService,
     private readonly config: ConfigService,
   ) {}
 
@@ -94,6 +96,8 @@ export class PaymentsService {
       if (body.result === 'succeeded') {
         await this.prisma.payment.update({ where: { id: paymentId }, data: { status: 'SUCCEEDED' } });
         await this.ordersService.transition(row.orderId, 'PAID');
+        // P5-lite: the reservation becomes a real stock deduction (ledger SALE).
+        await this.inventoryService.convertToSale(row.orderId);
         row.status = 'SUCCEEDED';
       } else {
         await this.prisma.payment.update({ where: { id: paymentId }, data: { status: 'FAILED' } });
@@ -130,6 +134,8 @@ export class PaymentsService {
     }
     await this.prisma.payment.update({ where: { id: paymentId }, data: { status: 'REFUNDED' } });
     const order = await this.ordersService.transition(row.orderId, 'REFUNDED');
+    // P5-lite: sandbox refund restocks the goods (ledger RESTOCK).
+    await this.inventoryService.restockForOrder(row.orderId);
     row.status = 'REFUNDED';
     return { order, payment: toPaymentContract(row) };
   }

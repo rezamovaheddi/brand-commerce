@@ -67,6 +67,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       priceMinor: variantItem.priceMinor,
       currency: variantItem.currency,
       isDefault: variantItem.isDefault,
+      availableToSell: variantItem.availableToSell,
     }));
 
   return (

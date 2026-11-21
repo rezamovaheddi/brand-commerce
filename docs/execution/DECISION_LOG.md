@@ -78,3 +78,10 @@
 - چرا (الف) رد شد: ماشین حالت، وب‌هوک و idempotency دقیقاً همان بخش‌های پرریسک‌اند که باید قبل از PSP وصل و تست شوند؛ sandbox این را بدون ریسک مالی ممکن می‌کند.
 - تصمیم: Payment با provider='sandbox' + isSandbox=true (literal در قرارداد)؛ UI مکلف به نشان SANDBOX؛ callback با HMAC-SHA256 واقعی (timingSafeEqual)؛ endpoint sandbox-confirm فقط با PAYMENT_SANDBOX_MODE=true؛ swap آینده به PSP بدون تغییر ماشین حالت.
 - وضعیت: ACCEPTED | 2026-11-21
+
+## DEC-012 — Inventory-lite با گارد اتمیک raw-SQL و دفتر فقط-افزودنی
+- زمینه: P5 کامل (FEFO/lot/انبار چندگانه) سنگین است؛ اما یکپارچگی موجودی (رزرو اتمیک، مسابقه concurrent) پرریسک‌ترین نقطه تجارت است و باید از همین حالا درست باشد.
+- گزینه‌ها: (الف) محاسبه موجودی در لایه اپلیکیشن با read-modify-write، (ب) UPDATE گارددار اتمیک + ledger.
+- چرا (الف) رد شد: مسابقه دو checkout هم‌زمان می‌تواند oversell بسازد؛ Prisma updateMany نمی‌تواند ستون‌به‌ستون مقایسه کند.
+- تصمیم: UPDATEهای raw با شرط «onHand - reserved >= qty» در همان تراکنش checkout + ردیف ledger برای هر جهش (RESERVE/RELEASE/SALE/RESTOCK/INITIAL)؛ نمایش عمومی فقط availableToSell.
+- وضعیت: ACCEPTED | 2026-11-21

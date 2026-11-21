@@ -26,7 +26,7 @@ export class ProductsService {
     const [rows, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
-        include: { variants: true, category: true },
+        include: { variants: { include: { inventory: true } }, category: true },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -47,7 +47,7 @@ export class ProductsService {
   async findBySlug(slug: string): Promise<Product | null> {
     const row = await this.prisma.product.findUnique({
       where: { slug },
-      include: { variants: true, category: true },
+      include: { variants: { include: { inventory: true } }, category: true },
     });
     if (!row || row.status !== 'ACTIVE') {
       return null;

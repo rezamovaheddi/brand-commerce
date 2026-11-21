@@ -12,6 +12,8 @@ export type VariantOption = {
   priceMinor: number;
   currency: string;
   isDefault: boolean;
+  /** P5-lite: server-computed onHand - reserved. 0 ⇒ ناموجود. */
+  availableToSell: number;
 };
 
 type VariantAddToCartProps = {
@@ -67,6 +69,7 @@ export default function VariantAddToCart({ variants }: VariantAddToCartProps) {
   };
 
   const selectedVariant = variants.find((variant) => variant.id === selectedId) ?? null;
+  const selectedAvailable = (selectedVariant?.availableToSell ?? 0) > 0;
 
   const handleClick = async (): Promise<void> => {
     if (feedback.kind === "busy" || selectedVariant === null) {
@@ -125,6 +128,9 @@ export default function VariantAddToCart({ variants }: VariantAddToCartProps) {
                 aria-label={`${variant.titleFa} — ${formatPrice(variant.priceMinor, variant.currency)}`}
               />
               <span className="dv-variant-picker-title">{variant.titleFa}</span>
+              {variant.availableToSell === 0 ? (
+                <span className="dv-badge dv-badge-oos">ناموجود</span>
+              ) : null}
               {variant.isDefault ? (
                 <span className="dv-default-tag">پیش‌فرض</span>
               ) : null}
@@ -140,7 +146,7 @@ export default function VariantAddToCart({ variants }: VariantAddToCartProps) {
         type="button"
         className="dv-btn dv-btn-block"
         onClick={handleClick}
-        disabled={busy || selectedVariant === null}
+        disabled={busy || selectedVariant === null || !selectedAvailable}
         aria-busy={busy}
         aria-label={
           selectedVariant !== null
@@ -151,6 +157,11 @@ export default function VariantAddToCart({ variants }: VariantAddToCartProps) {
         {busy ? "در حال افزودن…" : "افزودن به سبد خرید"}
       </button>
       {/* Live region: announces success/error feedback without stealing focus. */}
+      {!selectedAvailable ? (
+        <p className="dv-cart-feedback" role="status">
+          این نسخه در حال حاضر موجود نیست.
+        </p>
+      ) : null}
       <p className="dv-cart-feedback" role="status" aria-live="polite">
         {feedback.kind === "success" ? "به سبد اضافه شد ✓" : null}
         {feedback.kind === "error" ? (

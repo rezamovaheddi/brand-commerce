@@ -156,6 +156,10 @@ const fakePrismaCore = {
       return state.orders.find((o) => o.id === args?.where?.id) ?? null;
     }),
   },
+  $executeRaw: jest.fn(async (): Promise<number> => 1),
+  inventoryLedger: {
+    create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => data),
+  },
   orderLine: {
     createMany: jest.fn(async ({ data }: { data: Array<Record<string, unknown>> }) => {
       const orderId = data[0]?.orderId as string;

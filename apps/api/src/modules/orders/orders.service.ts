@@ -3,6 +3,7 @@ import { Order, OrderStatus } from '@bc/contracts';
 import { assertOrderTransition } from '@bc/domain';
 import { PrismaService } from '../../prisma/prisma.service';
 import { toOrderContract } from './order.mapper';
+import { InventoryService } from '../inventory/inventory.service';
 
 const ORDER_INCLUDE = { lines: true } as const;
 
@@ -13,7 +14,10 @@ const ORDER_INCLUDE = { lines: true } as const;
  */
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly inventoryService: InventoryService,
+  ) {}
 
   async get(id: string): Promise<Order> {
     const row = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
@@ -35,6 +39,8 @@ export class OrdersService {
       throw new BadRequestException('این وضعیت سفارش قابل لغو نیست');
     }
     await this.prisma.order.update({ where: { id }, data: { status: 'CANCELLED' } });
+    // P5-lite: release the stock reservation held by this unpaid order.
+    await this.inventoryService.releaseForOrder(id);
     const updated = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
     if (!updated) {
       throw new NotFoundException('سفارش یافت نشد');

@@ -198,6 +198,29 @@ async function main() {
         status: ProductStatus.ACTIVE,
       },
     });
+
+    // P5-lite: sample stock (25 on hand) + INITIAL ledger row. Idempotent.
+    const variant = await prisma.productVariant.findUniqueOrThrow({ where: { sku: p.sku } });
+    const inventory = await prisma.inventoryItem.upsert({
+      where: { variantId: variant.id },
+      update: {},
+      create: { variantId: variant.id, onHand: 25, reserved: 0 },
+    });
+    const initial = await prisma.inventoryLedger.findFirst({
+      where: { variantId: variant.id, reason: "INITIAL" },
+    });
+    if (!initial) {
+      await prisma.inventoryLedger.create({
+        data: {
+          variantId: variant.id,
+          deltaOnHand: inventory.onHand,
+          deltaReserved: 0,
+          reason: "INITIAL",
+          refType: "seed",
+          refId: "sample-stock",
+        },
+      });
+    }
   }
 
   console.log(`Seed complete: ${categories.length} categories, ${products.length} sample products.`);

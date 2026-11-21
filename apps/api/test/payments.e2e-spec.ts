@@ -78,6 +78,13 @@ function resetState(sandboxMode: string): void {
 const fakePrismaCore = {
   $connect: async (): Promise<void> => undefined,
   $disconnect: async (): Promise<void> => undefined,
+  $executeRaw: jest.fn(async (): Promise<number> => 1),
+  inventoryLedger: {
+    create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => data),
+  },
+  orderLine: {
+    findMany: jest.fn(async (): Promise<Array<Record<string, unknown>>> => []),
+  },
   order: {
     findUnique: jest.fn(async (args?: { where?: { id?: string } }) => {
       return state.orders.find((o) => o.id === args?.where?.id) ?? null;

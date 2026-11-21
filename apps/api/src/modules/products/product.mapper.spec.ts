@@ -10,6 +10,7 @@ const defaultVariant: ProductVariantRow = {
   currency: 'IRR',
   isDefault: true,
   status: 'ACTIVE',
+  inventory: { onHand: 25, reserved: 5 },
 };
 
 const backupVariant: ProductVariantRow = {
@@ -21,6 +22,7 @@ const backupVariant: ProductVariantRow = {
   currency: 'IRR',
   isDefault: false,
   status: 'ACTIVE',
+  inventory: null,
 };
 
 function buildRow(overrides: Partial<ProductRowWithRelations> = {}): ProductRowWithRelations {

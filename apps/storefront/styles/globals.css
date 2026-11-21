@@ -1582,3 +1582,9 @@ button[aria-disabled="true"],
     padding: 14px;
   }
 }
+
+/* ---- Inventory availability (P5-lite) ------------------------------------ */
+.dv-badge-oos {
+  background: rgba(141, 46, 40, 0.12);
+  color: var(--dv-danger);
+}

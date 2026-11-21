@@ -73,9 +73,16 @@ const ORDER: FakeOrderRow = {
 
 const state = { orders: [] as FakeOrderRow[] };
 
-const fakePrisma = {
+const fakePrismaCore = {
   $connect: async (): Promise<void> => undefined,
   $disconnect: async (): Promise<void> => undefined,
+  $executeRaw: jest.fn(async (): Promise<number> => 1),
+  inventoryLedger: {
+    create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => data),
+  },
+  orderLine: {
+    findMany: jest.fn(async (): Promise<Array<Record<string, unknown>>> => []),
+  },
   order: {
     findUnique: jest.fn(async (args?: { where?: { id?: string } }) => {
       return state.orders.find((o) => o.id === args?.where?.id) ?? null;
@@ -89,7 +96,15 @@ const fakePrisma = {
       return row;
     }),
   },
-} as unknown as PrismaService;
+};
+
+// Interactive transactions run against the same in-memory state.
+Object.assign(fakePrismaCore, {
+  $transaction: async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> =>
+    fn(fakePrismaCore as unknown),
+});
+
+const fakePrisma = fakePrismaCore as unknown as PrismaService;
 
 describe('Orders API (e2e, in-memory Prisma)', () => {
   let app: INestApplication;

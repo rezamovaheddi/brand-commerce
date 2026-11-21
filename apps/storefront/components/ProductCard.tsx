@@ -14,6 +14,9 @@ type ProductCardProps = {
  */
 export default function ProductCard({ product }: ProductCardProps) {
   const variant = getDefaultVariant(product);
+  // P5-lite: a product is ناموجود when every variant has zero available stock.
+  const totalAvailable = product.variants.reduce((sum, v) => sum + v.availableToSell, 0);
+  const outOfStock = totalAvailable === 0;
 
   return (
     <Link href={`/products/${product.slug}`} className="dv-product-card">
@@ -23,6 +26,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         ) : (
           <span />
         )}
+        {outOfStock ? <span className="dv-badge dv-badge-oos">ناموجود</span> : null}
         {product.isSample ? <SampleBadge /> : null}
       </span>
 

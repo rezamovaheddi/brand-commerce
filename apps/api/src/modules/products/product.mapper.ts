@@ -15,6 +15,8 @@ export interface ProductVariantRow {
   currency: string;
   isDefault: boolean;
   status: ProductStatus;
+  /** P5-lite inventory row (optional include): null ⇒ treated as out of stock. */
+  inventory: { onHand: number; reserved: number } | null;
 }
 
 export interface ProductRowWithRelations {
@@ -57,6 +59,10 @@ export function toContract(row: ProductRowWithRelations): Product {
       currency: variant.currency,
       isDefault: variant.isDefault,
       status: variant.status,
+      availableToSell: Math.max(
+        0,
+        variant.inventory ? variant.inventory.onHand - variant.inventory.reserved : 0,
+      ),
     })),
   };
 }

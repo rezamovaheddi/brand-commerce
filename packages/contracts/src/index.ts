@@ -19,6 +19,8 @@ export const ProductVariantSchema = z.object({
   currency: z.string().length(3),
   isDefault: z.boolean(),
   status: ProductStatusSchema,
+  /** onHand - reserved, computed SERVER-SIDE (P5-lite inventory). 0 ⇒ ناموجود. */
+  availableToSell: z.number().int().nonnegative(),
 });
 export type ProductVariant = z.infer<typeof ProductVariantSchema>;
 

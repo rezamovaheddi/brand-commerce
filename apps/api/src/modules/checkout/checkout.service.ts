@@ -4,6 +4,7 @@ import { CheckoutRequest, Order } from '@bc/contracts';
 import { PrismaService } from '../../prisma/prisma.service';
 import { toCartContract } from '../carts/cart.mapper';
 import { toOrderContract } from '../orders/order.mapper';
+import { InventoryService } from '../inventory/inventory.service';
 
 const ORDER_INCLUDE = { lines: true } as const;
 
@@ -16,7 +17,10 @@ const ORDER_INCLUDE = { lines: true } as const;
  */
 @Injectable()
 export class CheckoutService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly inventoryService: InventoryService,
+  ) {}
 
   async checkout(input: CheckoutRequest): Promise<Order> {
     const cartRow = await this.prisma.cart.findUnique({
@@ -74,6 +78,13 @@ export class CheckoutService {
             lineTotalMinor: item.lineTotalMinor,
           })),
         });
+        // P5-lite: atomically reserve stock inside the same transaction — a
+        // shortage rolls the whole checkout back (409 via ConflictException).
+        await this.inventoryService.reserveInTx(
+          tx,
+          order.id,
+          cart.items.map((item) => ({ variantId: item.variantId, quantity: item.quantity })),
+        );
         await tx.cart.update({ where: { id: input.cartId }, data: { status: 'CONVERTED' } });
         return order.id;
       });
