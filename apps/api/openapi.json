@@ -841,6 +841,117 @@
         ]
       }
     },
+    "/api/v1/admin/b2b/rfqs": {
+      "get": {
+        "operationId": "AdminController_listRfqs",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RFQها",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "فهرست درخواست‌های قیمت",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/rfqs/{id}/quote": {
+      "post": {
+        "operationId": "AdminController_issueQuote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "پیش‌فاکتور SENT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "قابل قیمت‌گذاری نیست / خط بدون محصول"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "صدور پیش‌فاکتور + Revision 1 (قیمت‌ها SAMPLE)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/quotes/{id}/revisions": {
+      "post": {
+        "operationId": "AdminController_addRevision",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision n+1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "افزودن Revision جدید (تغییرناپذیر)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/b2b/applications": {
       "post": {
         "operationId": "B2bController_submit",
@@ -895,6 +1006,99 @@
           }
         },
         "summary": "پیگیری وضعیت درخواست",
+        "tags": [
+          "b2b"
+        ]
+      }
+    },
+    "/api/v1/b2b/rfqs": {
+      "post": {
+        "operationId": "B2bController_submitRfq",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "RFQ ثبت شد (SUBMITTED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "مقادیر نامعتبر"
+          }
+        },
+        "summary": "ثبت درخواست قیمت (RFQ)",
+        "tags": [
+          "b2b"
+        ]
+      }
+    },
+    "/api/v1/b2b/rfqs/{id}": {
+      "get": {
+        "operationId": "B2bController_getRfq",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RFQ با quote",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "درخواست قیمت یافت نشد"
+          }
+        },
+        "summary": "مشاهده RFQ و پیش‌فاکتورهای آن",
+        "tags": [
+          "b2b"
+        ]
+      }
+    },
+    "/api/v1/b2b/quotes/{id}/accept": {
+      "post": {
+        "operationId": "B2bController_acceptQuote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "سفارش DRAFT ساخته شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "منقضی/پذیرفته‌شده/قابل پذیرش نیست"
+          }
+        },
+        "summary": "پذیرش پیش‌فاکتور → تبدیل اتمیک به سفارش (با رزرو موجودی)",
         "tags": [
           "b2b"
         ]

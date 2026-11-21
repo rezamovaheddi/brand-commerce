@@ -17,6 +17,12 @@ import {
   type B2BApplicationRow,
   type LedgerRow,
 } from "../../lib/admin-client";
+import {
+  adminAddQuoteRevision,
+  adminIssueQuote,
+  adminListRfqs,
+  type AdminRfqRow,
+} from "../../lib/b2b-client";
 import { formatFaNumber, formatPrice } from "../../lib/format";
 
 /**
@@ -35,7 +41,7 @@ const STATUS_LABELS: Record<string, string> = {
   REFUNDED: "بازگشت وجه",
 };
 
-type Section = "orders" | "inventory" | "b2b";
+type Section = "orders" | "inventory" | "b2b" | "rfq";
 
 export default function AdminPage() {
   const [key, setKey] = useState<string>("");
@@ -48,6 +54,15 @@ export default function AdminPage() {
   const [ledger, setLedger] = useState<LedgerRow[] | null>(null);
   const [b2bApps, setB2bApps] = useState<B2BApplicationRow[] | null>(null);
   const [b2bNote, setB2bNote] = useState<{ id: string; note: string; action: "approve" | "reject" | "request-info" } | null>(null);
+  const [rfqRows, setRfqRows] = useState<AdminRfqRow[] | null>(null);
+  const [quoteForm, setQuoteForm] = useState<{
+    rfqId: string;
+    quoteId: string;
+    validityDays: string;
+    leadTimeDays: string;
+    paymentTerms: string;
+    note: string;
+  } | null>(null);
   const [adjust, setAdjust] = useState<{ variantId: string; delta: string; note: string }>({
     variantId: "",
     delta: "",
@@ -66,6 +81,8 @@ export default function AdminPage() {
           setOrders(await adminListOrders(orderPage, filter || undefined));
         } else if (which === "b2b") {
           setB2bApps(await adminListB2BApplications());
+        } else if (which === "rfq") {
+          setRfqRows(await adminListRfqs(getAdminKey() ?? ""));
         } else {
           const [inv, led] = await Promise.all([adminListInventory(), adminListLedger()]);
           setInventory(inv);
@@ -150,6 +167,34 @@ export default function AdminPage() {
     }
   };
 
+  const handleIssue = async (): Promise<void> => {
+    if (quoteForm === null) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const input = {
+        validityDays: Number(quoteForm.validityDays),
+        leadTimeDays:
+          quoteForm.leadTimeDays.trim() === "" ? undefined : Number(quoteForm.leadTimeDays),
+        paymentTerms: quoteForm.paymentTerms.trim() === "" ? undefined : quoteForm.paymentTerms,
+        note: quoteForm.note.trim() === "" ? undefined : quoteForm.note,
+      };
+      const quote =
+        quoteForm.quoteId === ""
+          ? await adminIssueQuote(getAdminKey() ?? "", quoteForm.rfqId, input)
+          : await adminAddQuoteRevision(getAdminKey() ?? "", quoteForm.quoteId, input);
+      setNotice(`پیش‌فاکتور ${quote.id.slice(-8)} با Revision ${quote.revisions.length} ثبت شد.`);
+      setQuoteForm(null);
+      setRfqRows(await adminListRfqs(getAdminKey() ?? ""));
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در صدور پیش‌فاکتور.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // ---- key gate -------------------------------------------------------------
   if (!authed) {
     return (
@@ -218,6 +263,15 @@ export default function AdminPage() {
           onClick={() => setSection("b2b")}
         >
           درخواست‌های B2B
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "rfq"}
+          className={section === "rfq" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
+          onClick={() => setSection("rfq")}
+        >
+          درخواست‌های قیمت
         </button>
         <button
           type="button"
@@ -311,6 +365,102 @@ export default function AdminPage() {
               </button>
             </div>
           ) : null}
+        </section>
+      ) : section === "rfq" ? (
+        <section aria-label="درخواست‌های قیمت">
+          {rfqRows !== null && rfqRows.length === 0 ? (
+            <div className="dv-empty">درخواست قیمتی ثبت نشده است.</div>
+          ) : null}
+          {rfqRows !== null
+            ? rfqRows.map((row) => (
+                <article key={row.id} className="dv-card dv-b2b-app">
+                  <h3>
+                    <span dir="ltr">{row.id.slice(-8)}</span> — {row.contactName}
+                  </h3>
+                  <p className="dv-muted">
+                    وضعیت: {row.status} | اقلام:{" "}
+                    {row.items.map((item) => `${item.productName}×${item.quantity}`).join("، ")}
+                  </p>
+                  {row.quote !== null ? (
+                    <p className="dv-muted">
+                      پیش‌فاکتور: {row.quote.status} | Revisions:{" "}
+                      {row.quote.revisions
+                        .map((rev) => `#${rev.revisionNo} (${rev.subtotalMinor})`)
+                        .join("، ")}
+                    </p>
+                  ) : null}
+                  {quoteForm !== null && quoteForm.rfqId === row.id ? (
+                    <div className="dv-admin-adjust">
+                      <input
+                        type="number"
+                        dir="ltr"
+                        aria-label="اعتبار (روز)"
+                        placeholder="اعتبار (روز)"
+                        value={quoteForm.validityDays}
+                        onChange={(event) => setQuoteForm({ ...quoteForm, validityDays: event.target.value })}
+                      />
+                      <input
+                        type="number"
+                        dir="ltr"
+                        aria-label="زمان تحویل (روز، اختیاری)"
+                        placeholder="تحویل (روز)"
+                        value={quoteForm.leadTimeDays}
+                        onChange={(event) => setQuoteForm({ ...quoteForm, leadTimeDays: event.target.value })}
+                      />
+                      <input
+                        type="text"
+                        aria-label="شرایط پرداخت"
+                        placeholder="شرایط پرداخت"
+                        value={quoteForm.paymentTerms}
+                        onChange={(event) => setQuoteForm({ ...quoteForm, paymentTerms: event.target.value })}
+                      />
+                      <input
+                        type="text"
+                        aria-label="یادداشت"
+                        placeholder="یادداشت"
+                        value={quoteForm.note}
+                        onChange={(event) => setQuoteForm({ ...quoteForm, note: event.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="dv-btn dv-btn-gold"
+                        disabled={busy}
+                        onClick={() => void handleIssue()}
+                      >
+                        {quoteForm.quoteId === "" ? "صدور پیش‌فاکتور" : "Revision جدید"}
+                      </button>
+                      <button
+                        type="button"
+                        className="dv-admin-tab"
+                        onClick={() => setQuoteForm(null)}
+                      >
+                        انصراف
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="dv-pay-actions">
+                      <button
+                        type="button"
+                        className="dv-btn dv-btn-gold"
+                        disabled={busy}
+                        onClick={() =>
+                          setQuoteForm({
+                            rfqId: row.id,
+                            quoteId: row.quote?.id ?? "",
+                            validityDays: "14",
+                            leadTimeDays: "",
+                            paymentTerms: "",
+                            note: "",
+                          })
+                        }
+                      >
+                        {row.quote === null ? "صدور پیش‌فاکتور (قیمت SAMPLE)" : "Revision جدید"}
+                      </button>
+                    </div>
+                  )}
+                </article>
+              ))
+            : null}
         </section>
       ) : section === "b2b" ? (
         <section aria-label="درخواست‌های همکاری B2B">

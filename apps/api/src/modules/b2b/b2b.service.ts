@@ -1,7 +1,76 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { B2BApplication, CreateB2BApplication } from '@bc/contracts';
+import {
+  AcceptQuote,
+  B2BApplication,
+  CreateB2BApplication,
+  CreateRfq,
+  IssueQuote,
+  Order,
+  Quote,
+  QuoteRevision,
+  Rfq,
+} from '@bc/contracts';
 import { PrismaService } from '../../prisma/prisma.service';
+import { InventoryService } from '../inventory/inventory.service';
+import { toOrderContract } from '../orders/order.mapper';
+
+const RFQ_INCLUDE = {
+  items: true,
+  quote: { include: { revisions: { orderBy: { revisionNo: 'asc' as const } } } },
+} as const;
+
+interface QuoteLine {
+  variantId: string | null;
+  productName: string;
+  quantity: number;
+  unitPriceMinor: number;
+  lineTotalMinor: number;
+}
+
+interface RfqItemRow {
+  id: string;
+  variantId: string | null;
+  productName: string;
+  quantity: number;
+  note: string | null;
+}
+
+interface RfqRowWithRelations {
+  id: string;
+  status: 'SUBMITTED' | 'PRICED' | 'QUOTED' | 'ACCEPTED' | 'REJECTED' | 'CLOSED';
+  contactName: string;
+  contactPhone: string;
+  note: string | null;
+  createdAt: Date;
+  items: RfqItemRow[];
+  quote: (QuoteRowWithRevisions & { rfqId: string; status: QuoteRowStatus }) | null;
+}
+
+type QuoteRowStatus = 'SENT' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED';
+
+interface QuoteRevisionRow {
+  id: string;
+  revisionNo: number;
+  linesJson: unknown;
+  subtotalMinor: number;
+  currency: string;
+  leadTimeDays: number | null;
+  paymentTerms: string | null;
+  isSample: boolean;
+  note: string | null;
+  createdAt: Date;
+}
+
+interface QuoteRowWithRevisions {
+  id: string;
+  rfqId: string;
+  status: QuoteRowStatus;
+  currency: string;
+  validUntil: Date;
+  createdAt: Date;
+  revisions: QuoteRevisionRow[];
+}
 
 const APP_SELECT = {
   id: true,
@@ -49,7 +118,10 @@ function toApplicationContract(row: B2BApplicationRow): B2BApplication {
  */
 @Injectable()
 export class B2bService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly inventoryService: InventoryService,
+  ) {}
 
   async submit(input: CreateB2BApplication): Promise<B2BApplication> {
     const row = await this.prisma.b2BApplication.create({
@@ -143,5 +215,307 @@ export class B2bService {
       throw new NotFoundException('درخواست یافت نشد');
     }
     return row as unknown as B2BApplicationRow;
+  }
+
+  // ---- RFQ / Quote (N11 immutable revisions) ---------------------------------
+
+  /** Public RFQ submit (items with/without variantId — custom lines allowed at intake). */
+  async submitRfq(input: CreateRfq): Promise<Rfq> {
+    const rfq = await this.prisma.rfq.create({
+      data: {
+        contactName: input.contactName,
+        contactPhone: input.contactPhone,
+        note: input.note ?? null,
+        status: 'SUBMITTED',
+        items: {
+          create: input.items.map((item) => ({
+            variantId: item.variantId ?? null,
+            productName: item.productName,
+            quantity: item.quantity,
+            note: item.note ?? null,
+          })),
+        },
+      },
+      include: RFQ_INCLUDE,
+    });
+    return this.toRfqContract(rfq as unknown as RfqRowWithRelations);
+  }
+
+  async getRfq(id: string): Promise<Rfq> {
+    const row = await this.prisma.rfq.findUnique({ where: { id }, include: RFQ_INCLUDE });
+    if (!row) {
+      throw new NotFoundException('درخواست قیمت یافت نشد');
+    }
+    return this.toRfqContract(row as unknown as RfqRowWithRelations);
+  }
+
+  async listRfqs(status?: string): Promise<{ items: Rfq[] }> {
+    const rows = await this.prisma.rfq.findMany({
+      where: status ? { status: status as Prisma.EnumRfqStatusFilter['equals'] } : undefined,
+      include: RFQ_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    return { items: rows.map((row) => this.toRfqContract(row as unknown as RfqRowWithRelations)) };
+  }
+
+  /**
+   * Admin issues Quote + Revision 1 (APPEND-ONLY). Every RFQ line must carry a
+   * variantId — unit prices are resolved SERVER-SIDE from the catalog and
+   * marked isSample=true (real contract pricing awaits D-11).
+   */
+  async issueQuote(rfqId: string, input: IssueQuote): Promise<Quote> {
+    const rfq = await this.prisma.rfq.findUnique({ where: { id: rfqId }, include: RFQ_INCLUDE });
+    if (!rfq) {
+      throw new NotFoundException('درخواست قیمت یافت نشد');
+    }
+    if (rfq.status === 'ACCEPTED' || rfq.status === 'CLOSED' || rfq.status === 'REJECTED') {
+      throw new BadRequestException('این درخواست قیمت قابل قیمت‌گذاری نیست');
+    }
+    if (rfq.items.some((item) => item.variantId === null)) {
+      throw new BadRequestException(
+        'برای صدور پیش‌فاکتور همه اقلام باید محصول مشخص داشته باشند (خط سفارشی در فاز OEM)',
+      );
+    }
+    const lines = await this.resolveLines(rfq.items);
+    const subtotalMinor = lines.reduce((sum, line) => sum + line.lineTotalMinor, 0);
+    const validUntil = new Date(Date.now() + input.validityDays * 24 * 60 * 60 * 1000);
+    const quote = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.quote.create({
+        data: {
+          rfqId,
+          status: 'SENT',
+          currency: 'IRR',
+          validUntil,
+        },
+      });
+      await tx.quoteRevision.create({
+        data: {
+          quoteId: created.id,
+          revisionNo: 1,
+          linesJson: lines as unknown as Prisma.InputJsonValue,
+          subtotalMinor,
+          currency: 'IRR',
+          leadTimeDays: input.leadTimeDays ?? null,
+          paymentTerms: input.paymentTerms ?? null,
+          isSample: true,
+          note: input.note ?? null,
+        },
+      });
+      await tx.rfq.update({ where: { id: rfqId }, data: { status: 'QUOTED' } });
+      return created;
+    });
+    return this.getQuote(quote.id);
+  }
+
+  /** Appends an immutable Revision n+1 (prior revisions are never edited). */
+  async addRevision(quoteId: string, input: IssueQuote): Promise<Quote> {
+    const quote = await this.prisma.quote.findUnique({
+      where: { id: quoteId },
+      include: { rfq: true, revisions: { orderBy: { revisionNo: 'desc' }, take: 1 } },
+    });
+    if (!quote) {
+      throw new NotFoundException('پیش‌فاکتور یافت نشد');
+    }
+    if (quote.status === 'ACCEPTED') {
+      throw new BadRequestException('پیش‌فاکتور پذیرفته‌شده قابل بازنگری نیست');
+    }
+    const rfq = await this.prisma.rfq.findUnique({
+      where: { id: quote.rfqId },
+      include: RFQ_INCLUDE,
+    });
+    if (!rfq) {
+      throw new NotFoundException('درخواست قیمت یافت نشد');
+    }
+    const lines = await this.resolveLines(rfq.items);
+    const subtotalMinor = lines.reduce((sum, line) => sum + line.lineTotalMinor, 0);
+    const validUntil = new Date(Date.now() + input.validityDays * 24 * 60 * 60 * 1000);
+    const nextRevisionNo = (quote.revisions[0]?.revisionNo ?? 0) + 1;
+    await this.prisma.$transaction(async (tx) => {
+      await tx.quoteRevision.create({
+        data: {
+          quoteId,
+          revisionNo: nextRevisionNo,
+          linesJson: lines as unknown as Prisma.InputJsonValue,
+          subtotalMinor,
+          currency: 'IRR',
+          leadTimeDays: input.leadTimeDays ?? null,
+          paymentTerms: input.paymentTerms ?? null,
+          isSample: true,
+          note: input.note ?? null,
+        },
+      });
+      await tx.quote.update({
+        where: { id: quoteId },
+        data: { status: 'SENT', validUntil },
+      });
+      await tx.rfq.update({ where: { id: quote.rfqId }, data: { status: 'QUOTED' } });
+    });
+    return this.getQuote(quoteId);
+  }
+
+  /**
+   * Customer accepts a SENT, unexpired quote → atomic conversion to a real
+   * DRAFT order with server-side snapshots + inventory reservation (409 on
+   * shortage). The order then flows through the normal payment path.
+   */
+  async acceptQuote(quoteId: string, address: AcceptQuote): Promise<{ order: Order; quote: Quote }> {
+    const quote = await this.prisma.quote.findUnique({
+      where: { id: quoteId },
+      include: { rfq: true, revisions: { orderBy: { revisionNo: 'desc' }, take: 1 } },
+    });
+    if (!quote) {
+      throw new NotFoundException('پیش‌فاکتور یافت نشد');
+    }
+    if (quote.status === 'ACCEPTED') {
+      throw new BadRequestException('این پیش‌فاکتور قبلاً پذیرفته شده است');
+    }
+    if (quote.status !== 'SENT') {
+      throw new BadRequestException('این پیش‌فاکتور قابل پذیرش نیست');
+    }
+    if (quote.validUntil.getTime() < Date.now()) {
+      await this.prisma.quote.update({ where: { id: quoteId }, data: { status: 'EXPIRED' } });
+      throw new BadRequestException('پیش‌فاکتور منقضی شده است');
+    }
+    const latest = quote.revisions[0];
+    if (!latest || latest.linesJson === null) {
+      throw new BadRequestException('پیش‌فاکتور بدون قلم قابل پذیرش نیست');
+    }
+    const lines = latest.linesJson as unknown as QuoteLine[];
+
+    let createdId: string;
+    try {
+      createdId = await this.prisma.$transaction(async (tx) => {
+        const order = await tx.order.create({
+          data: {
+            status: 'DRAFT',
+            currency: quote.currency,
+            itemCount: lines.reduce((sum, line) => sum + line.quantity, 0),
+            subtotalMinor: latest.subtotalMinor,
+            fullName: address.fullName,
+            phone: address.phone,
+            province: address.province,
+            city: address.city,
+            postalCode: address.postalCode,
+            addressLine: address.addressLine,
+          },
+        });
+        await tx.orderLine.createMany({
+          data: lines.map((line) => ({
+            orderId: order.id,
+            variantId: line.variantId ?? '',
+            sku: 'RFQ',
+            productNameFa: line.productName,
+            productNameEn: line.productName,
+            titleFa: line.productName,
+            titleEn: line.productName,
+            quantity: line.quantity,
+            unitPriceMinor: line.unitPriceMinor,
+            currency: latest.currency,
+            lineTotalMinor: line.lineTotalMinor,
+          })),
+        });
+        await this.inventoryService.reserveInTx(
+          tx,
+          order.id,
+          lines
+            .filter((line) => line.variantId !== null)
+            .map((line) => ({ variantId: line.variantId as string, quantity: line.quantity })),
+        );
+        await tx.quote.update({ where: { id: quoteId }, data: { status: 'ACCEPTED' } });
+        await tx.rfq.update({ where: { id: quote.rfqId }, data: { status: 'ACCEPTED' } });
+        return order.id;
+      });
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error; // 409 'موجودی کافی نیست' — inventory guard
+      }
+      throw error;
+    }
+
+    const orderRow = await this.prisma.order.findUnique({
+      where: { id: createdId },
+      include: { lines: true },
+    });
+    if (!orderRow) {
+      throw new Error('quote accept: order vanished after transaction');
+    }
+    return { order: toOrderContract(orderRow), quote: await this.getQuote(quoteId) };
+  }
+
+  async getQuote(id: string): Promise<Quote> {
+    const quote = await this.prisma.quote.findUnique({
+      where: { id },
+      include: { revisions: { orderBy: { revisionNo: 'asc' } } },
+    });
+    if (!quote) {
+      throw new NotFoundException('پیش‌فاکتور یافت نشد');
+    }
+    return this.toQuoteContract(quote as unknown as QuoteRowWithRevisions);
+  }
+
+  /** Resolves RFQ lines to server-priced catalog lines (all must have variantId). */
+  private async resolveLines(
+    items: Array<{ variantId: string | null; productName: string; quantity: number }>,
+  ): Promise<QuoteLine[]> {
+    const lines: QuoteLine[] = [];
+    for (const item of items) {
+      const variant = await this.prisma.productVariant.findUnique({
+        where: { id: item.variantId as string },
+        include: { product: true },
+      });
+      if (!variant || variant.status !== 'ACTIVE' || variant.product.status !== 'ACTIVE') {
+        throw new NotFoundException(`محصول خط «${item.productName}» برای فروش در دسترس نیست`);
+      }
+      lines.push({
+        variantId: variant.id,
+        productName: variant.product.nameFa,
+        quantity: item.quantity,
+        unitPriceMinor: variant.priceMinor,
+        lineTotalMinor: variant.priceMinor * item.quantity,
+      });
+    }
+    return lines;
+  }
+
+  private toQuoteContract(quote: QuoteRowWithRevisions): Quote {
+    return {
+      id: quote.id,
+      rfqId: quote.rfqId,
+      status: quote.status,
+      currency: quote.currency,
+      validUntil: quote.validUntil.toISOString(),
+      revisions: quote.revisions.map((revision) => ({
+        id: revision.id,
+        revisionNo: revision.revisionNo,
+        lines: revision.linesJson as unknown as QuoteRevision['lines'],
+        subtotalMinor: revision.subtotalMinor,
+        currency: revision.currency,
+        leadTimeDays: revision.leadTimeDays,
+        paymentTerms: revision.paymentTerms,
+        isSample: true,
+        note: revision.note,
+        createdAt: revision.createdAt.toISOString(),
+      })),
+    };
+  }
+
+  private toRfqContract(row: RfqRowWithRelations): Rfq {
+    return {
+      id: row.id,
+      status: row.status,
+      contactName: row.contactName,
+      contactPhone: row.contactPhone,
+      items: row.items.map((item) => ({
+        id: item.id,
+        variantId: item.variantId,
+        productName: item.productName,
+        quantity: item.quantity,
+        note: item.note,
+      })),
+      note: row.note,
+      quote: row.quote ? this.toQuoteContract(row.quote as unknown as QuoteRowWithRevisions) : null,
+      createdAt: row.createdAt.toISOString(),
+    };
   }
 }

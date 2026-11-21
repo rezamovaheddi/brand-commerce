@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -14,9 +15,11 @@ import {
   AdminOrderListResponse,
   AdminOrderStatusQuerySchema,
   AdjustStockSchema,
+  IssueQuoteSchema,
   type AdminB2BDecision,
   type AdjustStock,
   type AdminOrderStatusQuery,
+  type IssueQuote,
 } from '@bc/contracts';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { AdminKeyGuard } from './admin-key.guard';
@@ -110,5 +113,36 @@ export class AdminController {
     @Body(new ZodValidationPipe(AdminB2BDecisionSchema)) input: AdminB2BDecision,
   ) {
     return this.adminService.requestInfoB2B(id, input.note);
+  }
+
+  // ---- RFQ pricing + revisions (admin) --------------------------------------
+
+  @Get('b2b/rfqs')
+  @ApiOperation({ summary: 'فهرست درخواست‌های قیمت' })
+  @ApiOkResponse({ description: 'RFQها', type: Object })
+  async listRfqs(@Query('status') status?: string) {
+    return this.adminService.listRfqs(status || undefined);
+  }
+
+  @Post('b2b/rfqs/:id/quote')
+  @ApiOperation({ summary: 'صدور پیش‌فاکتور + Revision 1 (قیمت‌ها SAMPLE)' })
+  @ApiCreatedResponse({ description: 'پیش‌فاکتور SENT', type: Object })
+  @ApiBadRequestResponse({ description: 'قابل قیمت‌گذاری نیست / خط بدون محصول' })
+  async issueQuote(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(IssueQuoteSchema)) input: IssueQuote,
+  ) {
+    return this.adminService.issueQuote(id, input);
+  }
+
+  @Post('b2b/quotes/:id/revisions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'افزودن Revision جدید (تغییرناپذیر)' })
+  @ApiOkResponse({ description: 'Revision n+1', type: Object })
+  async addRevision(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(IssueQuoteSchema)) input: IssueQuote,
+  ) {
+    return this.adminService.addRevision(id, input);
   }
 }

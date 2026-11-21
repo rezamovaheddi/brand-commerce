@@ -282,3 +282,86 @@ model B2BApplication {
 
   @@index([status])
 }
+
+// ---- RFQ / Quote (P4 slice, N11: immutable revisions) ----------------------
+// Rfq: public request for quote (contact-based until Identity lands; orgId
+// set when the submitter belongs to an approved organization).
+// Quote revisions are APPEND-ONLY snapshots — never updated in place.
+// Prices inside revisions are SAMPLE-marked (D-11 pending): isSample=true.
+
+enum RfqStatus {
+  SUBMITTED
+  PRICED
+  QUOTED
+  ACCEPTED
+  REJECTED
+  CLOSED
+}
+
+model Rfq {
+  id           String    @id @default(cuid())
+  status       RfqStatus @default(SUBMITTED)
+  orgId        String?
+  contactName  String
+  contactPhone String
+  note         String?
+  items        RfqItem[]
+  quote        Quote?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status])
+}
+
+model RfqItem {
+  id         String   @id @default(cuid())
+  rfq        Rfq      @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  rfqId      String
+  variantId  String?
+  productName String
+  quantity   Int
+  note       String?
+
+  @@index([rfqId])
+}
+
+enum QuoteStatus {
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model Quote {
+  id        String      @id @default(cuid())
+  rfq       Rfq         @relation(fields: [rfqId], references: [id])
+  rfqId     String      @unique
+  status    QuoteStatus @default(SENT)
+  currency  String      @default("IRR")
+  validUntil DateTime
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  revisions QuoteRevision[]
+
+  @@index([rfqId])
+}
+
+model QuoteRevision {
+  id           String @id @default(cuid())
+  quote        Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteId      String
+  revisionNo   Int
+  // Immutable line snapshot: [{ variantId?, productName, quantity, unitPriceMinor, lineTotalMinor }]
+  linesJson    Json
+  subtotalMinor Int
+  currency     String @default("IRR")
+  leadTimeDays Int?
+  paymentTerms String?
+  // SAMPLE pricing marker: real contract pricing awaits D-11
+  isSample     Boolean @default(true)
+  note         String?
+  createdAt    DateTime @default(now())
+
+  @@unique([quoteId, revisionNo])
+  @@index([quoteId])
+}

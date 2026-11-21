@@ -343,3 +343,107 @@ export const AdminB2BDecisionSchema = z.object({
   note: z.string().min(3).max(300),
 });
 export type AdminB2BDecision = z.infer<typeof AdminB2BDecisionSchema>;
+
+/**
+ * RFQ / Quote contracts (P4 scaffold, N11 immutable revisions).
+ * Revision prices are SAMPLE-marked (isSandbox-style honesty): real contract
+ * pricing awaits D-11. Accept converts to a real Order with inventory reserve.
+ */
+export const RfqItemInputSchema = z.object({
+  variantId: z.string().max(64).optional(),
+  productName: z.string().min(2).max(120),
+  quantity: z.coerce.number().int().min(1).max(999),
+  note: z.string().max(200).optional(),
+});
+export type RfqItemInput = z.infer<typeof RfqItemInputSchema>;
+
+export const CreateRfqSchema = z.object({
+  contactName: z.string().min(2).max(80),
+  contactPhone: IranianPhoneSchema,
+  items: z.array(RfqItemInputSchema).min(1).max(20),
+  note: z.string().max(500).optional(),
+});
+export type CreateRfq = z.infer<typeof CreateRfqSchema>;
+
+export const RfqStatusSchema = z.enum([
+  "SUBMITTED",
+  "PRICED",
+  "QUOTED",
+  "ACCEPTED",
+  "REJECTED",
+  "CLOSED",
+]);
+export type RfqStatus = z.infer<typeof RfqStatusSchema>;
+
+export const RfqItemSchema = z.object({
+  id: z.string(),
+  variantId: z.string().nullable(),
+  productName: z.string(),
+  quantity: z.number().int().min(1),
+  note: z.string().nullable(),
+});
+export type RfqItem = z.infer<typeof RfqItemSchema>;
+
+export const QuoteRevisionSchema = z.object({
+  id: z.string(),
+  revisionNo: z.number().int().min(1),
+  lines: z.array(
+    z.object({
+      variantId: z.string().nullable(),
+      productName: z.string(),
+      quantity: z.number().int().min(1),
+      unitPriceMinor: z.number().int().nonnegative(),
+      lineTotalMinor: z.number().int().nonnegative(),
+    }),
+  ),
+  subtotalMinor: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+  leadTimeDays: z.number().int().min(1).nullable(),
+  paymentTerms: z.string().nullable(),
+  isSample: z.literal(true),
+  note: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type QuoteRevision = z.infer<typeof QuoteRevisionSchema>;
+
+export const QuoteStatusSchema = z.enum(["SENT", "ACCEPTED", "REJECTED", "EXPIRED"]);
+export type QuoteStatus = z.infer<typeof QuoteStatusSchema>;
+
+export const QuoteSchema = z.object({
+  id: z.string(),
+  rfqId: z.string(),
+  status: QuoteStatusSchema,
+  currency: z.string().length(3),
+  validUntil: z.string(),
+  revisions: z.array(QuoteRevisionSchema),
+});
+export type Quote = z.infer<typeof QuoteSchema>;
+
+export const RfqSchema = z.object({
+  id: z.string(),
+  status: RfqStatusSchema,
+  contactName: z.string(),
+  contactPhone: z.string(),
+  items: z.array(RfqItemSchema),
+  note: z.string().nullable(),
+  quote: QuoteSchema.nullable(),
+  createdAt: z.string(),
+});
+export type Rfq = z.infer<typeof RfqSchema>;
+
+export const IssueQuoteSchema = z.object({
+  validityDays: z.coerce.number().int().min(1).max(90),
+  leadTimeDays: z.coerce.number().int().min(1).max(180).optional(),
+  paymentTerms: z.string().max(200).optional(),
+  note: z.string().max(300).optional(),
+});
+export type IssueQuote = z.infer<typeof IssueQuoteSchema>;
+
+export const AcceptQuoteSchema = CheckoutAddressSchema;
+export type AcceptQuote = z.infer<typeof AcceptQuoteSchema>;
+
+export const QuoteAcceptResponseSchema = z.object({
+  order: OrderSchema,
+  quote: QuoteSchema,
+});
+export type QuoteAcceptResponse = z.infer<typeof QuoteAcceptResponseSchema>;

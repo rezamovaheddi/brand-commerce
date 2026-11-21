@@ -9,6 +9,7 @@ import {
 } from '@bc/contracts';
 import { PrismaService } from '../../prisma/prisma.service';
 import { B2bService } from '../b2b/b2b.service';
+import type { Rfq } from '@bc/contracts';
 
 const ORDER_INCLUDE = { lines: true } as const;
 
@@ -150,5 +151,17 @@ export class AdminService {
 
   async requestInfoB2B(id: string, note: string): Promise<B2BApplication> {
     return this.b2bService.requestInfo(id, note);
+  }
+
+  async listRfqs(status?: string): Promise<{ items: Rfq[] }> {
+    return this.b2bService.listRfqs(status);
+  }
+
+  async issueQuote(id: string, input: Parameters<B2bService['issueQuote']>[1]): Promise<unknown> {
+    return this.b2bService.issueQuote(id, input);
+  }
+
+  async addRevision(id: string, input: Parameters<B2bService['addRevision']>[1]): Promise<unknown> {
+    return this.b2bService.addRevision(id, input);
   }
 }
