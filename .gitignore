@@ -28,3 +28,7 @@ install.log
 
 # prisma generated
 packages/database/generated/
+
+# tooling session artifacts
+.mimosa/
+docs/execution/.mimosa/
