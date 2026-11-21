@@ -1466,3 +1466,119 @@ button[aria-disabled="true"],
     transition: none;
   }
 }
+
+/* ---- SANDBOX payment section (P3) --------------------------------------- */
+.dv-pay-section {
+  margin-top: var(--dv-space, 24px);
+  border: 1px solid var(--dv-line);
+  border-radius: var(--dv-radius-card);
+  background: var(--dv-paper);
+  padding: 16px;
+  box-shadow: var(--dv-shadow);
+}
+
+.dv-pay-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dv-ink);
+  margin: 0 0 12px;
+}
+
+.dv-sandbox-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--dv-radius-pill);
+  background: var(--dv-gold-light);
+  color: var(--dv-ink);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-family: ui-monospace, monospace;
+}
+
+.dv-pay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.dv-pay-start,
+.dv-pay-success {
+  min-height: var(--dv-touch);
+}
+
+.dv-pay-fail {
+  color: var(--dv-danger);
+  border: 1px solid rgba(141, 46, 40, 0.35);
+  background: transparent;
+}
+
+.dv-pay-note {
+  font-size: 0.85rem;
+  color: var(--dv-muted);
+  margin: 8px 0 0;
+}
+
+.dv-sandbox-panel {
+  border: 1px dashed rgba(111, 74, 20, 0.4);
+  border-radius: 12px;
+  background: var(--dv-cream);
+  padding: 14px;
+}
+
+.dv-sandbox-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--dv-ink);
+  margin: 0 0 10px;
+}
+
+/* ---- About page ---------------------------------------------------------- */
+.dv-about-lede {
+  max-width: 60ch;
+  color: var(--dv-ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.9;
+}
+
+.dv-about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.dv-about-value h3 {
+  font-size: 1.02rem;
+  margin: 0 0 6px;
+}
+
+.dv-about-value p {
+  font-size: 0.9rem;
+  color: var(--dv-muted);
+  line-height: 1.8;
+  margin: 0;
+}
+
+.dv-about-note {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.dv-about-cta {
+  margin-top: 28px;
+}
+
+.dv-order-status-paid {
+  background: rgba(36, 82, 60, 0.12);
+  color: var(--dv-success);
+}
+
+@media (max-width: 720px) {
+  .dv-pay-section {
+    padding: 14px;
+  }
+}

@@ -54,3 +54,11 @@ jobs:
           sleep 5
           curl -sf http://localhost:3001/api/v1/health | tee /dev/stderr | grep -q '"status":"ok"'
           curl -sf "http://localhost:3001/api/v1/products?limit=3" | grep -q '"totalPages"'
+
+      - name: Export OpenAPI artifact (GAP-004)
+        run: npm run openapi:export
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: apps/api/openapi.json

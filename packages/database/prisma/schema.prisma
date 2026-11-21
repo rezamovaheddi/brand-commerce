@@ -99,10 +99,15 @@ model CartItem {
 }
 
 enum OrderStatus {
-  // P2: draft orders only. AWAITING_PAYMENT/PAID/SHIPPED/... arrive with the
-  // P3 payment adapter — the state machine lives in packages/domain.
+  // Widenend in P3 with the sandbox payment slice; the pure state machine in
+  // packages/domain remains the single authority on legal transitions.
   DRAFT
   CANCELLED
+  AWAITING_PAYMENT
+  PAID
+  SHIPPED
+  DELIVERED
+  REFUNDED
 }
 
 // Guest order draft (P2). Lines are immutable SNAPSHOTs of variant data and
@@ -123,6 +128,7 @@ model Order {
   postalCode    String
   addressLine   String
   lines         OrderLine[]
+  payments      Payment[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -141,6 +147,33 @@ model OrderLine {
   unitPriceMinor Int
   currency       String
   lineTotalMinor Int
+
+  @@index([orderId])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+// Sandbox payment records (P3 slice). provider='sandbox' + isSandbox=true are
+// hard markers: these are NEVER real money and the UI must label them SANDBOX.
+// The real PSP adapter replaces this module without changing the state machine.
+model Payment {
+  id             String        @id @default(cuid())
+  order          Order         @relation(fields: [orderId], references: [id])
+  orderId        String
+  amountMinor    Int
+  currency       String        @default("IRR")
+  status         PaymentStatus @default(PENDING)
+  provider       String        @default("sandbox")
+  isSandbox      Boolean       @default(true)
+  // optional client-supplied Idempotency-Key (unique per intent)
+  idempotencyKey String?       @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@index([orderId])
 }

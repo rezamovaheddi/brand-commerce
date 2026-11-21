@@ -156,7 +156,18 @@ export const CheckoutRequestSchema = z.object({
 });
 export type CheckoutRequest = z.infer<typeof CheckoutRequestSchema>;
 
-export const OrderStatusSchema = z.enum(["DRAFT", "CANCELLED"]);
+// Order statuses widen with the P3 payment slice; DRAFT/CANCELLED shipped in
+// P2. The domain state machine (packages/domain) is the authority on
+// transitions — this enum only mirrors what the API can emit.
+export const OrderStatusSchema = z.enum([
+  "DRAFT",
+  "CANCELLED",
+  "AWAITING_PAYMENT",
+  "PAID",
+  "REFUNDED",
+  "SHIPPED",
+  "DELIVERED",
+]);
 export type OrderStatus = z.infer<typeof OrderStatusSchema>;
 
 export const OrderLineSchema = z.object({
@@ -184,3 +195,37 @@ export const OrderSchema = z.object({
   createdAt: z.string(),
 });
 export type Order = z.infer<typeof OrderSchema>;
+
+/**
+ * Payment contracts (P3 — SANDBOX adapter).
+ * isSandbox is LITERAL true in this slice: every payment record here is test
+ * money and the UI must label it SANDBOX. The real PSP adapter will widen this
+ * to a provider enum without changing the payment state machine.
+ */
+export const PaymentStatusSchema = z.enum(["PENDING", "SUCCEEDED", "FAILED", "REFUNDED"]);
+export type PaymentStatus = z.infer<typeof PaymentStatusSchema>;
+
+export const PaymentSchema = z.object({
+  id: z.string(),
+  orderId: z.string(),
+  amountMinor: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+  status: PaymentStatusSchema,
+  provider: z.string(),
+  isSandbox: z.literal(true),
+  createdAt: z.string(),
+});
+export type Payment = z.infer<typeof PaymentSchema>;
+
+export const PayOrderResponseSchema = z.object({
+  order: OrderSchema,
+  payment: PaymentSchema,
+});
+export type PayOrderResponse = z.infer<typeof PayOrderResponseSchema>;
+
+/** Sandbox gateway callback — HMAC-SHA256 signature over `${paymentId}.${result}`. */
+export const SandboxCallbackSchema = z.object({
+  result: z.enum(["succeeded", "failed"]),
+  signature: z.string().min(16).max(128),
+});
+export type SandboxCallback = z.infer<typeof SandboxCallbackSchema>;

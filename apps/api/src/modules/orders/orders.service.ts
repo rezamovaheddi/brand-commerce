@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Order } from '@bc/contracts';
+import { Order, OrderStatus } from '@bc/contracts';
 import { assertOrderTransition } from '@bc/domain';
 import { PrismaService } from '../../prisma/prisma.service';
 import { toOrderContract } from './order.mapper';
@@ -35,6 +35,28 @@ export class OrdersService {
       throw new BadRequestException('این وضعیت سفارش قابل لغو نیست');
     }
     await this.prisma.order.update({ where: { id }, data: { status: 'CANCELLED' } });
+    const updated = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
+    if (!updated) {
+      throw new NotFoundException('سفارش یافت نشد');
+    }
+    return toOrderContract(updated);
+  }
+
+  /**
+   * Domain-guarded status transition used by sibling modules (payments). The
+   * pure machine in @bc/domain is the single authority on legal moves.
+   */
+  async transition(id: string, to: OrderStatus): Promise<Order> {
+    const row = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
+    if (!row) {
+      throw new NotFoundException('سفارش یافت نشد');
+    }
+    try {
+      assertOrderTransition(row.status, to);
+    } catch {
+      throw new BadRequestException('این تغییر وضعیت سفارش مجاز نیست');
+    }
+    await this.prisma.order.update({ where: { id }, data: { status: to } });
     const updated = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
     if (!updated) {
       throw new NotFoundException('سفارش یافت نشد');

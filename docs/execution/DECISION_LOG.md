@@ -71,3 +71,10 @@
 - تصمیم: PostgreSQL نیتیو به‌عنوان پایگاه داده توسعه محلی؛ docker-compose.yml همچنان baseline اعلام‌شده برای محیط‌های Docker-محور باقی می‌ماند (GAP-001 → RESOLVED_ALTERNATIVE).
 - شواهد: سرویس postgresql-x64-16 روی پورت 5432؛ migration init و seed موفق؛ تست DB-integration واقعی پاس شد.
 - وضعیت: ACCEPTED | 2026-11-21
+
+## DEC-011 — پرداخت Sandbox با نشان‌گذاری اجباری و امضای HMAC واقعی
+- زمینه: فاز P3 بدون تصمیم PSP (D-08 باز)؛ قانون اصلی: هیچ پرداخت شبیه‌سازی‌شده‌ای «واقعی/موفق» جلوه داده نمی‌شود.
+- گزینه‌ها: (الف) صرفنظرکردن از پرداخت تا تصمیم PSP، (ب) adapter sandbox با مارکر اجباری.
+- چرا (الف) رد شد: ماشین حالت، وب‌هوک و idempotency دقیقاً همان بخش‌های پرریسک‌اند که باید قبل از PSP وصل و تست شوند؛ sandbox این را بدون ریسک مالی ممکن می‌کند.
+- تصمیم: Payment با provider='sandbox' + isSandbox=true (literal در قرارداد)؛ UI مکلف به نشان SANDBOX؛ callback با HMAC-SHA256 واقعی (timingSafeEqual)؛ endpoint sandbox-confirm فقط با PAYMENT_SANDBOX_MODE=true؛ swap آینده به PSP بدون تغییر ماشین حالت.
+- وضعیت: ACCEPTED | 2026-11-21

@@ -1,7 +1,14 @@
 import { Order } from '@bc/contracts';
 
 /** Order status literals matching the Prisma OrderStatus enum and OrderStatusSchema. */
-export type OrderStatusLiteral = 'DRAFT' | 'CANCELLED';
+export type OrderStatusLiteral =
+  | 'DRAFT'
+  | 'CANCELLED'
+  | 'AWAITING_PAYMENT'
+  | 'PAID'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'REFUNDED';
 
 /**
  * Structural row types kept independent of the generated Prisma client so the

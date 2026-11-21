@@ -1,0 +1,586 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Health snapshot of the API and its database dependency",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "uptime": {
+                      "type": "number",
+                      "example": 12.34
+                    },
+                    "database": {
+                      "type": "string",
+                      "example": "up"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/products": {
+      "get": {
+        "operationId": "ProductsController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive search over Persian/English names",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category slug",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page, 1-50 (default 12)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "1-based page number (default 1)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated product list (ProductListResponse contract)"
+          }
+        },
+        "summary": "List ACTIVE products (paginated, filterable)",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/v1/products/{slug}": {
+      "get": {
+        "operationId": "ProductsController_findBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "Unique product slug",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product contract"
+          },
+          "404": {
+            "description": "محصول یافت نشد (no ACTIVE product with this slug)"
+          }
+        },
+        "summary": "Fetch a single ACTIVE product by slug",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/v1/categories": {
+      "get": {
+        "operationId": "ProductsController_listCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Array of Category contracts with productCount"
+          }
+        },
+        "summary": "List active categories with counts of ACTIVE products",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/v1/carts": {
+      "post": {
+        "operationId": "CartsController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "New ACTIVE cart (Cart contract) with zero totals"
+          }
+        },
+        "summary": "Create an empty guest cart",
+        "tags": [
+          "carts"
+        ]
+      }
+    },
+    "/api/v1/carts/{id}": {
+      "get": {
+        "operationId": "CartsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Cart id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cart contract (lines with inactive variants are skipped at read time)"
+          },
+          "404": {
+            "description": "سبد خرید یافت نشد (unknown cart id)"
+          }
+        },
+        "summary": "Fetch a cart with server-computed totals",
+        "tags": [
+          "carts"
+        ]
+      }
+    },
+    "/api/v1/carts/{id}/items": {
+      "post": {
+        "operationId": "CartsController_addItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Cart id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Updated Cart contract"
+          },
+          "400": {
+            "description": "Body failed AddCartItemSchema (message is an array)"
+          },
+          "404": {
+            "description": "سبد خرید یافت نشد (unknown cart) / این محصول برای فروش در دسترس نیست (inactive variant)"
+          }
+        },
+        "summary": "Add a variant to the cart (merges with an existing line, quantity clamped 1..99)",
+        "tags": [
+          "carts"
+        ]
+      }
+    },
+    "/api/v1/carts/{id}/items/{variantId}": {
+      "patch": {
+        "operationId": "CartsController_updateItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Cart id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "path",
+            "description": "Product variant id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated Cart contract"
+          },
+          "400": {
+            "description": "Body failed UpdateCartItemSchema (message is an array)"
+          },
+          "404": {
+            "description": "سبد خرید یافت نشد (unknown cart) / این مورد در سبد خرید یافت نشد (unknown line)"
+          }
+        },
+        "summary": "Replace the quantity of a cart line",
+        "tags": [
+          "carts"
+        ]
+      },
+      "delete": {
+        "operationId": "CartsController_removeItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Cart id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "path",
+            "description": "Product variant id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated Cart contract"
+          },
+          "404": {
+            "description": "سبد خرید یافت نشد (unknown cart) / این مورد در سبد خرید یافت نشد (unknown line)"
+          }
+        },
+        "summary": "Remove a line from the cart",
+        "tags": [
+          "carts"
+        ]
+      }
+    },
+    "/api/v1/checkout": {
+      "post": {
+        "operationId": "CheckoutController_checkout",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "سفارش پیش‌نویس با اسنپ‌شات اقلام",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "سبد خالی/قابل تسویه نیست/مقدار نامعتبر"
+          },
+          "404": {
+            "description": "سبد خرید یافت نشد"
+          }
+        },
+        "summary": "تبدیل سبد خرید به سفارش پیش‌نویس (بدون پرداخت)",
+        "tags": [
+          "checkout"
+        ]
+      }
+    },
+    "/api/v1/orders/{id}": {
+      "get": {
+        "operationId": "OrdersController_getOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "شناسه سفارش",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "سفارش با اسنپ‌شات اقلام",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "سفارش یافت نشد"
+          }
+        },
+        "summary": "مشاهده سفارش",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{id}/cancel": {
+      "post": {
+        "operationId": "OrdersController_cancelOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "شناسه سفارش",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "سفارش لغو‌شده",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "سفارش یافت نشد"
+          }
+        },
+        "summary": "لغو سفارش پیش‌نویس",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/payments/orders/{id}/pay": {
+      "post": {
+        "operationId": "PaymentsController_pay",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-idempotency-key",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "پرداخت آزمایشی ایجاد شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "وضعیت سفارش قابل پرداخت نیست"
+          },
+          "404": {
+            "description": "سفارش یافت نشد"
+          }
+        },
+        "summary": "شروع پرداخت SANDBOX برای سفارش پیش‌نویس",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/api/v1/payments/{id}/callback": {
+      "post": {
+        "operationId": "PaymentsController_callback",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "وضعیت پرداخت به‌روزرسانی شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "پرداخت در وضعیت نهایی است"
+          },
+          "401": {
+            "description": "امضای درگاه معتبر نیست"
+          }
+        },
+        "summary": "وب‌هوک درگاه (امضای HMAC الزامی)",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/api/v1/payments/{id}": {
+      "get": {
+        "operationId": "PaymentsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "پرداخت",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "پرداخت یافت نشد"
+          }
+        },
+        "summary": "مشاهده پرداخت",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/api/v1/payments/{id}/refund": {
+      "post": {
+        "operationId": "PaymentsController_refund",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "پرداخت بازگشت داده شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "وضعیت پرداخت قابل بازگشت نیست"
+          }
+        },
+        "summary": "بازگشت وجه SANDBOX",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/api/v1/payments/{id}/sandbox-confirm": {
+      "post": {
+        "operationId": "PaymentsController_sandboxConfirm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "پرداخت به‌روزرسانی شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "در حالت تولید این مسیر وجود ندارد"
+          }
+        },
+        "summary": "تأیید شبیه‌ساز درگاه (فقط در حالت SANDBOX)",
+        "tags": [
+          "payments"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Brand Commerce API",
+    "description": "",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "products",
+      "description": ""
+    },
+    {
+      "name": "health",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {}
+  }
+}
