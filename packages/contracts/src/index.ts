@@ -231,3 +231,70 @@ export const SandboxCallbackSchema = z.object({
   signature: z.string().min(16).max(128),
 });
 export type SandboxCallback = z.infer<typeof SandboxCallbackSchema>;
+
+/**
+ * Bootstrap backoffice contracts (operator console).
+ * SECURITY: these endpoints sit behind a shared admin key until real RBAC
+ * (P4) lands — they are operator tooling, never public surface.
+ */
+export const AdminOrderStatusQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  status: z.enum(["DRAFT", "CANCELLED", "AWAITING_PAYMENT", "PAID", "SHIPPED", "DELIVERED", "REFUNDED"]).optional(),
+});
+export type AdminOrderStatusQuery = z.infer<typeof AdminOrderStatusQuerySchema>;
+
+export const AdminOrderListItemSchema = z.object({
+  id: z.string(),
+  status: OrderStatusSchema,
+  itemCount: z.number().int().nonnegative(),
+  subtotalMinor: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+  customerName: z.string(),
+  customerPhone: z.string(),
+  lineCount: z.number().int().nonnegative(),
+  createdAt: z.string(),
+});
+export type AdminOrderListItem = z.infer<typeof AdminOrderListItemSchema>;
+
+export const AdminOrderListResponseSchema = z.object({
+  items: z.array(AdminOrderListItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().min(1),
+  limit: z.number().int().min(1),
+  totalPages: z.number().int().nonnegative(),
+});
+export type AdminOrderListResponse = z.infer<typeof AdminOrderListResponseSchema>;
+
+export const AdminInventoryItemSchema = z.object({
+  variantId: z.string(),
+  sku: z.string(),
+  productNameFa: z.string(),
+  onHand: z.number().int().nonnegative(),
+  reserved: z.number().int().nonnegative(),
+  availableToSell: z.number().int().nonnegative(),
+});
+export type AdminInventoryItem = z.infer<typeof AdminInventoryItemSchema>;
+
+export const AdjustStockSchema = z.object({
+  deltaOnHand: z.coerce.number().int().refine((n) => n !== 0, "مقدار تغییر باید غیرصفر باشد"),
+  note: z.string().min(3).max(200),
+});
+export type AdjustStock = z.infer<typeof AdjustStockSchema>;
+
+export const LedgerEntrySchema = z.object({
+  id: z.string(),
+  variantId: z.string(),
+  deltaOnHand: z.number().int(),
+  deltaReserved: z.number().int(),
+  reason: z.enum(["INITIAL", "RESERVE", "RELEASE", "SALE", "RESTOCK", "ADJUSTMENT"]),
+  refType: z.string(),
+  refId: z.string(),
+  createdAt: z.string(),
+});
+export type LedgerEntry = z.infer<typeof LedgerEntrySchema>;
+
+export const AdminLedgerResponseSchema = z.object({
+  items: z.array(LedgerEntrySchema),
+});
+export type AdminLedgerResponse = z.infer<typeof AdminLedgerResponseSchema>;

@@ -561,6 +561,138 @@
           "payments"
         ]
       }
+    },
+    "/api/v1/admin/orders": {
+      "get": {
+        "operationId": "AdminController_listOrders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "صفحه سفارش‌ها",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "فهرست همه سفارش‌ها (اپراتور)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/inventory": {
+      "get": {
+        "operationId": "AdminController_listInventory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "موجودی واریانت‌ها",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "فهرست موجودی واریانت‌ها",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/inventory/{variantId}/adjust": {
+      "post": {
+        "operationId": "AdminController_adjust",
+        "parameters": [
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "موجودی پس از اصلاح",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "موجودی منفی یا مقدار نامعتبر"
+          },
+          "404": {
+            "description": "واریانت موجودی ندارد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "اصلاح موجودی (با ردیف دفتر ADJUSTMENT)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ledger": {
+      "get": {
+        "operationId": "AdminController_ledger",
+        "parameters": [
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ردیف‌های دفتر",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "۱۰۰ ردیف آخر دفتر موجودی",
+        "tags": [
+          "admin"
+        ]
+      }
     }
   },
   "info": {

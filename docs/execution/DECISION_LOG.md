@@ -85,3 +85,10 @@
 - چرا (الف) رد شد: مسابقه دو checkout هم‌زمان می‌تواند oversell بسازد؛ Prisma updateMany نمی‌تواند ستون‌به‌ستون مقایسه کند.
 - تصمیم: UPDATEهای raw با شرط «onHand - reserved >= qty» در همان تراکنش checkout + ردیف ledger برای هر جهش (RESERVE/RELEASE/SALE/RESTOCK/INITIAL)؛ نمایش عمومی فقط availableToSell.
 - وضعیت: ACCEPTED | 2026-11-21
+
+## DEC-013 — Backoffice-lite با گیت کلید بوت‌استرپ (نه RBAC ناقص)
+- زمینه: معیار موفقیت پروژه «Backoffice واقعی» است اما RBAC/هویت (P4/P7) هنوز ساخته نشده؛ ادغام پشت‌درگاه بدون احراز هویت نقض گیت امنیتی است.
+- گزینه‌ها: (الف) بدون احراز هویت بسازیم و بعداً قفل کنیم، (ب) feature-off پیش‌فرض با کلید مشترک.
+- چرا (الف) رد شد: endpoints ادمین بدون auth یعنی افشای عمومی داده مشتری و کنترل موجودی.
+- تصمیم: AdminKeyGuard — ADMIN_API_KEY تنظیم‌نشده ⇒ همه مسیرهای /admin 404 (خاموش)؛ کلید غلط ⇒ 401؛ در UI نشان BOOTSTRAP و جایگزینی صریح با RBAC در P4.
+- وضعیت: ACCEPTED | 2026-11-21
