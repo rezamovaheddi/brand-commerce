@@ -3,6 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import LeafMark from "../../components/LeafMark";
+import { CartApiError, createLead } from "../../lib/support-client";
+
+const TOPIC_LABELS: Record<string, string> = {
+  consultation: "مشاوره انتخاب محصول و روتین پوست",
+  order: "پیگیری سفارش و ارسال",
+  ingredients: "پرسش فنی درباره ترکیبات و ایمنی",
+  b2b: "همکاری تجاری و خرید عمده (B2B)",
+};
 
 const FAQS = [
   {
@@ -31,11 +39,30 @@ export default function ContactPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (busy) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await createLead({
+        contactName: formData.fullName.trim(),
+        contactPhone: formData.phone.trim(),
+        message: `[${TOPIC_LABELS[formData.topic] ?? formData.topic}] ${formData.message.trim()}`,
+        source: "CONTACT_FORM",
+      });
+      setSubmitted(true);
+    } catch (cause) {
+      setError(cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در ثبت درخواست. لطفاً مجدداً تلاش فرمایید.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -54,18 +81,33 @@ export default function ContactPage() {
         <section className="contact-form-card">
           <h2 className="contact-card-title">ارسال پیام یا درخواست مشاوره</h2>
 
+          {error !== null ? (
+            <p className="dv-cart-feedback dv-cart-feedback-error" role="alert" style={{ marginBottom: 16 }}>
+              {error}
+            </p>
+          ) : null}
+
           {submitted ? (
             <div className="contact-success-box">
               <span className="success-icon">✓</span>
-              <h3>پیام شما با موفقیت ثبت شد</h3>
-              <p>کارشناسان درماویا ظرف ساعات کاری آینده با شما تماس خواهند گرفت.</p>
-              <button
-                type="button"
-                className="dv-btn"
-                onClick={() => { setSubmitted(false); setFormData({ fullName: "", phone: "", topic: "consultation", message: "" }); }}
-              >
-                ارسال پیام جدید
-              </button>
+              <h3>درخواست شما با موفقیت در سامانه ثبت شد</h3>
+              <p>کارشناسان درماویا درخواست مشاوره شما را دریافت کرده و در اسرع وقت تماس خواهند گرفت.</p>
+              <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginTop: 14 }}>
+                <button
+                  type="button"
+                  className="dv-btn"
+                  onClick={() => {
+                    setSubmitted(false);
+                    setError(null);
+                    setFormData({ fullName: "", phone: "", topic: "consultation", message: "" });
+                  }}
+                >
+                  ارسال پیام جدید
+                </button>
+                <Link href="/support" className="dv-btn dv-btn-gold">
+                  ورود به مرکز تیکت و گفت‌وگو →
+                </Link>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="dv-form">
@@ -124,8 +166,8 @@ export default function ContactPage() {
                 />
               </div>
 
-              <button type="submit" className="dv-btn contact-submit-btn">
-                ارسال پیام به مشاورین درماویا
+              <button type="submit" className="dv-btn contact-submit-btn" disabled={busy} aria-busy={busy}>
+                {busy ? "در حال ارسال به سامانه…" : "ارسال پیام به مشاورین درماویا"}
               </button>
             </form>
           )}
