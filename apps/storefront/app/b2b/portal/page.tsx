@@ -249,347 +249,514 @@ export default function OrgPortalPage() {
 
   if (key === null || me === null) {
     return (
-      <div className="container dv-page dv-b2b-apply">
-        <h1>پورتال سازمانی</h1>
-        <p className="dv-about-lede">
-          اگر سازمان شما توسط فروش تأیید شده است، کلید دسترسی سازمانی خود را از
-          اپراتور دریافت و وارد کنید. شناسایی واقعی کاربران (ورود با رمز) در فاز
-          Identity فعال می‌شود و این کلید جانشین می‌شود.
-        </p>
-        <form className="dv-checkout-form" onSubmit={handleKeySubmit}>
-          <label htmlFor="org-key">کلید دسترسی سازمانی</label>
-          <input
-            id="org-key"
-            dir="ltr"
-            placeholder="dvorg_…"
-            value={keyInput}
-            onChange={(event) => setKeyInput(event.target.value)}
-            required
-          />
-          <button type="submit" className="dv-btn dv-btn-block" disabled={busy} aria-busy={busy}>
-            {busy ? "در حال بررسی…" : "ورود به پورتال"}
-          </button>
-          {error !== null ? (
-            <p className="dv-cart-feedback-error" role="alert">
-              {error}
+      <div className="dv-b2b-container">
+        <div className="dv-b2b-hero">
+          <h1 className="dv-b2b-header-title">پورتال تجاری و سازمانی DERMAVIA</h1>
+          <p className="dv-b2b-header-desc">
+            درگاه یکپارچه تأمین عمده، فرمولاسیون اختصاصی (OEM) و استعلام قیمت سازمانی.
+            اگر مجموعه شما توسط واحد فروش تأیید شده است، کلید دسترسی سازمان را وارد کنید.
+          </p>
+        </div>
+
+        <div className="dv-b2b-card" style={{ maxWidth: 520, margin: "0 auto" }}>
+          <h2>ورود با کلید دسترسی سازمان</h2>
+          <form className="dv-checkout-form" onSubmit={handleKeySubmit}>
+            <label htmlFor="org-key" style={{ fontWeight: 600 }}>کلید دسترسی سازمانی (Access Key)</label>
+            <input
+              id="org-key"
+              dir="ltr"
+              className="dv-checkout-input"
+              placeholder="dvorg_..."
+              value={keyInput}
+              onChange={(event) => setKeyInput(event.target.value)}
+              required
+            />
+            <button type="submit" className="dv-btn dv-btn-gold dv-btn-block" disabled={busy} aria-busy={busy} style={{ marginTop: 12 }}>
+              {busy ? "در حال بررسی…" : "ورود به پیشخوان سازمان"}
+            </button>
+            {error !== null ? (
+              <p className="dv-cart-feedback dv-cart-feedback-error" role="alert" style={{ marginTop: 10 }}>
+                {error}
+              </p>
+            ) : null}
+          </form>
+
+          <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--dv-line)", textAlign: "center" }}>
+            <p className="dv-muted" style={{ fontSize: "0.88rem" }}>
+              هنوز عضو شبکه سازمانی نشده‌اید؟{" "}
+              <Link href="/b2b/apply" className="dv-link" style={{ fontWeight: 700 }}>
+                ثبت درخواست همکاری
+              </Link>{" "}
+              یا{" "}
+              <Link href="/b2b/rfq" className="dv-link" style={{ fontWeight: 700 }}>
+                استعلام قیمت کاتالوگ و OEM
+              </Link>
             </p>
-          ) : null}
-        </form>
-        <p className="dv-muted">
-          هنوز سازمان ندارید؟{" "}
-          <Link href="/b2b/apply" className="dv-link">
-            درخواست همکاری بدهید
-          </Link>{" "}
-          یا{" "}
-          <Link href="/b2b/rfq" className="dv-link">
-            درخواست قیمت عمومی
-          </Link>{" "}
-          ثبت کنید.
-        </p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="container dv-page dv-b2b-apply">
-      <h1>پورتال سازمانی</h1>
+  // Calculate quick metrics
+  const totalRfqs = rfqs?.length ?? 0;
+  const activeQuotesCount = rfqs?.filter((r) => r.quote !== null && r.quote.status === "SENT").length ?? 0;
+  const acceptedQuotesCount = rfqs?.filter((r) => r.status === "ACCEPTED").length ?? 0;
 
-      <div className="dv-order-banner" role="status">
-        <strong>{me.organizationName}</strong> {me.isSample ? "(نمونه — در انتظار تأیید کسب‌وکار)" : ""} —
-        عضو: {me.memberName} | نقش: {ROLE_LABELS[me.role] ?? me.role}{" "}
-        <button type="button" className="dv-admin-tab" onClick={handleLogout}>
-          خروج
-        </button>
+  return (
+    <div className="dv-b2b-container">
+      {/* Enterprise Organization Header */}
+      <div className="dv-b2b-hero">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <h1 className="dv-b2b-header-title">
+              {me.organizationName}
+              {me.isSample ? <span className="dv-badge" style={{ fontSize: "0.75rem", background: "#fef3c7", color: "#92400e" }}>حساب نمونه</span> : null}
+            </h1>
+            <p className="dv-b2b-header-desc">
+              نماینده: <strong>{me.memberName}</strong> | سمت و دسترسی:{" "}
+              <span className="dv-badge" style={{ background: "#ecfdf5", color: "#065f46", fontWeight: 700 }}>
+                {ROLE_LABELS[me.role] ?? me.role}
+              </span>
+            </p>
+          </div>
+          <button type="button" className="dv-btn" onClick={handleLogout} style={{ background: "#fff", border: "1px solid var(--dv-line)" }}>
+            خروج از حساب
+          </button>
+        </div>
+      </div>
+
+      {/* Organization KPIs */}
+      <div className="dv-b2b-stats">
+        <div className="dv-b2b-stat-card">
+          <div className="dv-b2b-stat-num">{totalRfqs}</div>
+          <div className="dv-b2b-stat-label">کل درخواست‌های استعلام (RFQ)</div>
+        </div>
+        <div className="dv-b2b-stat-card">
+          <div className="dv-b2b-stat-num" style={{ color: "#047857" }}>{activeQuotesCount}</div>
+          <div className="dv-b2b-stat-label">پیش‌فاکتورهای آماده پذیرش</div>
+        </div>
+        <div className="dv-b2b-stat-card">
+          <div className="dv-b2b-stat-num" style={{ color: "var(--dv-gold)" }}>{acceptedQuotesCount}</div>
+          <div className="dv-b2b-stat-label">سفارش‌های نهایی شده</div>
+        </div>
+        <div className="dv-b2b-stat-card">
+          <div className="dv-b2b-stat-num" style={{ fontSize: "1.2rem", color: "var(--dv-navy)" }}>سطح طلایی B2B</div>
+          <div className="dv-b2b-stat-label">تخفیف حجمی سازمانی فعال</div>
+        </div>
       </div>
 
       {acceptedOrder !== null ? (
-        <div className="dv-empty dv-cart-empty" role="status">
-          <p>
-            پیش‌فاکتور پذیرفته شد و سفارش ساخته شد ✓ — کد سفارش:{" "}
-            <span dir="ltr">{acceptedOrder}</span>
+        <div className="dv-b2b-card" style={{ background: "#ecfdf5", borderColor: "#a7f3d0" }} role="status">
+          <h3 style={{ color: "#065f46", margin: 0 }}>✓ پیش‌فاکتور با موفقیت پذیرفته شد و سفارش ثبت گردید</h3>
+          <p style={{ margin: "8px 0 16px", color: "#047857" }}>
+            کد رهگیری سفارش: <strong dir="ltr">{acceptedOrder}</strong>
           </p>
-          <Link href="/orders" className="dv-btn dv-btn-gold">
-            مشاهده سفارش
+          <Link href={`/orders/${acceptedOrder}`} className="dv-btn dv-btn-gold">
+            مشاهده جزئیات سفارش و پرداخت
           </Link>
         </div>
       ) : null}
 
+      {/* RFQ Creation Wizard */}
       {isBuyer ? (
-        <section aria-label="ثبت درخواست قیمت سازمانی">
-          <h2>درخواست قیمت سازمانی</h2>
-          <form className="dv-checkout-form" onSubmit={handleRfqSubmit}>
-            <label htmlFor="portal-contact">نام و نام خانوادگی</label>
-            <input
-              id="portal-contact"
-              value={form.contactName}
-              onChange={(event) => setForm({ ...form, contactName: event.target.value })}
-              required
-              minLength={2}
-            />
-            <label htmlFor="portal-phone">شماره موبایل</label>
-            <input
-              id="portal-phone"
-              dir="ltr"
-              inputMode="numeric"
-              placeholder="09123456789"
-              value={form.contactPhone}
-              onChange={(event) => setForm({ ...form, contactPhone: event.target.value })}
-              required
-            />
-            <label htmlFor="portal-product">نام محصول / شرح کالا</label>
-            <input
-              id="portal-product"
-              value={form.productName}
-              onChange={(event) => setForm({ ...form, productName: event.target.value })}
-              required
-              minLength={2}
-            />
-            <fieldset className="dv-choice-row">
-              <legend>نوع خط:</legend>
-              <label className="dv-choice-option">
+        <section className="dv-b2b-card" aria-label="ثبت درخواست قیمت سازمانی">
+          <h2>ثبت استعلام قیمت جدید (RFQ)</h2>
+          <form onSubmit={handleRfqSubmit}>
+            <div className="dv-b2b-field-grid">
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="portal-contact">نام و نام خانوادگی رابط</label>
                 <input
-                  type="radio"
-                  name="portal-item-kind"
-                  checked={form.itemKind === "CATALOG"}
-                  onChange={() => setForm({ ...form, itemKind: "CATALOG" })}
+                  id="portal-contact"
+                  className="dv-checkout-input"
+                  value={form.contactName}
+                  onChange={(event) => setForm({ ...form, contactName: event.target.value })}
+                  required
+                  minLength={2}
                 />
-                کاتالوگ موجود
-              </label>
-              <label className="dv-choice-option">
+              </div>
+
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="portal-phone">شماره همراه</label>
                 <input
-                  type="radio"
-                  name="portal-item-kind"
-                  checked={form.itemKind === "OEM"}
-                  onChange={() => setForm({ ...form, itemKind: "OEM" })}
+                  id="portal-phone"
+                  dir="ltr"
+                  inputMode="numeric"
+                  className="dv-checkout-input"
+                  placeholder="09123456789"
+                  value={form.contactPhone}
+                  onChange={(event) => setForm({ ...form, contactPhone: event.target.value })}
+                  required
                 />
-                سفارشی / OEM
-              </label>
-            </fieldset>
+              </div>
+            </div>
+
+            <div className="dv-checkout-field">
+              <label className="dv-checkout-label">دسته‌بندی تأمین کالا</label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+                <div
+                  className={`dv-b2b-choice-card ${form.itemKind === "CATALOG" ? "is-active" : ""}`}
+                  onClick={() => setForm({ ...form, itemKind: "CATALOG" })}
+                >
+                  <input
+                    type="radio"
+                    name="portal-item-kind"
+                    checked={form.itemKind === "CATALOG"}
+                    onChange={() => setForm({ ...form, itemKind: "CATALOG" })}
+                  />
+                  <div>
+                    <strong style={{ display: "block", fontSize: "0.95rem" }}>محصولات کاتالوگ جاری</strong>
+                    <span className="dv-muted" style={{ fontSize: "0.8rem" }}>سفارش عمده سرم‌ها و کرم‌های استاندارد Dermavia</span>
+                  </div>
+                </div>
+
+                <div
+                  className={`dv-b2b-choice-card ${form.itemKind === "OEM" ? "is-active" : ""}`}
+                  onClick={() => setForm({ ...form, itemKind: "OEM" })}
+                >
+                  <input
+                    type="radio"
+                    name="portal-item-kind"
+                    checked={form.itemKind === "OEM"}
+                    onChange={() => setForm({ ...form, itemKind: "OEM" })}
+                  />
+                  <div>
+                    <strong style={{ display: "block", fontSize: "0.95rem" }}>تولید اختصاصی و سفارشی (OEM)</strong>
+                    <span className="dv-muted" style={{ fontSize: "0.8rem" }}>فرمولاسیون اختصاصی، حجم ویژه یا برچسب اختصاصی کلینیک</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="dv-b2b-field-grid">
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="portal-product">شرح کالا یا فرمول مدنظر</label>
+                <input
+                  id="portal-product"
+                  className="dv-checkout-input"
+                  value={form.productName}
+                  onChange={(event) => setForm({ ...form, productName: event.target.value })}
+                  required
+                  minLength={2}
+                />
+              </div>
+
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="portal-qty">تیراژ درخواستی (عدد)</label>
+                <input
+                  id="portal-qty"
+                  dir="ltr"
+                  inputMode="numeric"
+                  className="dv-checkout-input"
+                  placeholder="حداقل ۱۰۰ عدد"
+                  value={form.quantity}
+                  onChange={(event) => setForm({ ...form, quantity: event.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
             {form.itemKind === "OEM" ? (
-              <>
-                <label htmlFor="portal-spec">شرح فنی سفارش (حداقل ۱۰ نویسه)</label>
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="portal-spec">
+                  مشخصات فنی و مواد مؤثره درخواستی (حداقل ۱۰ نویسه)
+                </label>
                 <textarea
                   id="portal-spec"
-                  className="dv-checkout-textarea"
+                  className="dv-checkout-input dv-checkout-textarea"
                   value={form.specNote}
                   onChange={(event) => setForm({ ...form, specNote: event.target.value })}
                   rows={3}
+                  placeholder="مثال: سرم هیالورونیک اسید ۲٪ با عصاره سنتلا آسیاتیکا، فاقد عطر، در ویال‌های شیشه‌ای ۳۰ میل..."
                   minLength={10}
                   required
                 />
-              </>
+              </div>
             ) : null}
-            <label htmlFor="portal-qty">تعداد</label>
-            <input
-              id="portal-qty"
-              dir="ltr"
-              inputMode="numeric"
-              value={form.quantity}
-              onChange={(event) => setForm({ ...form, quantity: event.target.value })}
-              required
-            />
-            <label htmlFor="portal-note">توضیحات (اختیاری)</label>
-            <input
-              id="portal-note"
-              value={form.note}
-              onChange={(event) => setForm({ ...form, note: event.target.value })}
-            />
-            <fieldset className="dv-brief-grid">
-              <legend className="dv-muted">بریف سفارشی (N10 — اختیاری)</legend>
-              <label htmlFor="portal-market">بازار هدف</label>
-              <input
-                id="portal-market"
-                value={form.targetMarket}
-                onChange={(event) => setForm({ ...form, targetMarket: event.target.value })}
-              />
-              <label htmlFor="portal-packaging">بسته‌بندی</label>
-              <input
-                id="portal-packaging"
-                value={form.packaging}
-                onChange={(event) => setForm({ ...form, packaging: event.target.value })}
-              />
-              <label htmlFor="portal-delivery">تحویل درخواستی (YYYY-MM-DD)</label>
-              <input
-                id="portal-delivery"
-                dir="ltr"
-                placeholder="2026-03-15"
-                value={form.requestedDeliveryDate}
-                onChange={(event) => setForm({ ...form, requestedDeliveryDate: event.target.value })}
-              />
-              <label className="dv-choice-option" htmlFor="portal-conf">
+
+            <div className="dv-b2b-field-grid">
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="portal-market">بازار هدف و کانال توزیع (اختیاری)</label>
+                <input
+                  id="portal-market"
+                  className="dv-checkout-input"
+                  placeholder="مثال: کلینیک‌های پوست، داروخانه‌های تهران"
+                  value={form.targetMarket}
+                  onChange={(event) => setForm({ ...form, targetMarket: event.target.value })}
+                />
+              </div>
+
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="portal-packaging">نوع بسته‌بندی درخواستی (اختیاری)</label>
+                <input
+                  id="portal-packaging"
+                  className="dv-checkout-input"
+                  placeholder="مثال: پمپ ایرلس، قطره‌چکان طلایی"
+                  value={form.packaging}
+                  onChange={(event) => setForm({ ...form, packaging: event.target.value })}
+                />
+              </div>
+
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="portal-delivery">موعد تحویل مورد نیاز</label>
+                <input
+                  id="portal-delivery"
+                  dir="ltr"
+                  className="dv-checkout-input"
+                  placeholder="1405-06-01 یا 2026-08-20"
+                  value={form.requestedDeliveryDate}
+                  onChange={(event) => setForm({ ...form, requestedDeliveryDate: event.target.value })}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBlock: 12 }}>
+              <label className="dv-choice-option" htmlFor="portal-conf" style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
                 <input
                   id="portal-conf"
                   type="checkbox"
                   checked={form.confidentiality}
                   onChange={(event) => setForm({ ...form, confidentiality: event.target.checked })}
                 />
-                این درخواست محرمانه است
+                <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>این درخواست تحت توافق‌نامه محرمانگی (NDA) بررسی شود</span>
               </label>
-            </fieldset>
-            <button type="submit" className="dv-btn dv-btn-block" disabled={busy} aria-busy={busy}>
-              {busy ? "در حال ارسال…" : "ثبت درخواست سازمانی"}
+            </div>
+
+            <button type="submit" className="dv-btn dv-btn-gold" disabled={busy} aria-busy={busy} style={{ minWidth: 220 }}>
+              {busy ? "در حال ثبت…" : "ارسال استعلام قیمت برای کارشناس"}
             </button>
           </form>
         </section>
       ) : (
-        <div className="dv-order-banner" role="note">
-          نقش شما (حساب‌دار) اجازه ثبت درخواست قیمت یا پذیرش پیش‌فاکتور ندارد —
-          فقط مشاهده داده‌های سازمان ممکن است.
+        <div className="dv-b2b-card" style={{ background: "#fef3c7", borderColor: "#fde68a" }}>
+          <p style={{ margin: 0, color: "#92400e", fontSize: "0.9rem" }}>
+            دسترسی شما در وضعیت «حساب‌دار» قرار دارد. شما می‌توانید پیش‌فاکتورها، گزارش‌های مالی و فاکتورها را مشاهده کنید، اما ثبت سفارش توسط خریدار سازمان انجام می‌شود.
+          </p>
         </div>
       )}
 
-      <section className="dv-b2b-track" aria-label="درخواست‌های سازمان">
-        <h2>درخواست‌های سازمان</h2>
+      {/* RFQ and Quote History */}
+      <section aria-label="درخواست‌های سازمان">
+        <h2 style={{ fontSize: "1.4rem", color: "var(--dv-navy)", marginBottom: 16 }}>
+          فهرست استعلام‌ها و پیش‌فاکتورهای صادر شده
+        </h2>
+
         {rfqs !== null && rfqs.length === 0 ? (
-          <div className="dv-empty">هنوز درخواستی برای این سازمان ثبت نشده است.</div>
+          <div className="dv-b2b-card" style={{ textAlign: "center", padding: 48 }}>
+            <p className="dv-muted">تاکنون درخواستی برای این مجموعه ثبت نشده است.</p>
+          </div>
         ) : null}
+
         {rfqs !== null
           ? rfqs.map((rfq) => {
               const quote = rfq.quote;
               const latest = quote?.revisions[quote.revisions.length - 1] ?? null;
               const canAccept = isBuyer && quote !== null && quote.status === "SENT" && latest !== null;
+
               return (
-                <article key={rfq.id} className="dv-card dv-b2b-app">
-                  <h3>
-                    <span dir="ltr">{rfq.id.slice(-8)}</span> — {STATUS_LABELS[rfq.status] ?? rfq.status}
-                  </h3>
-                  <p className="dv-muted">
-                    اقلام:{" "}
-                    {rfq.items
-                      .map((item) =>
-                        item.itemKind === "OEM"
-                          ? `${item.productName}×${item.quantity} (سفارشی/OEM)`
-                          : `${item.productName}×${item.quantity}`,
-                      )
-                      .join("، ")}
-                  </p>
-                  <div className="dv-sandbox-panel">
-                    <h4 className="dv-sandbox-title">پیوست‌ها ({rfq.attachments.length}/3)</h4>
+                <article key={rfq.id} className="dv-b2b-card">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span className={`dv-status-pill dv-status-${rfq.status}`}>
+                        {STATUS_LABELS[rfq.status] ?? rfq.status}
+                      </span>
+                      <strong style={{ fontSize: "1.05rem" }} dir="ltr">
+                        RFQ-{rfq.id.slice(-8).toUpperCase()}
+                      </strong>
+                    </div>
+                    <span className="dv-muted" style={{ fontSize: "0.85rem" }}>
+                      ثبت: {new Date(rfq.createdAt).toLocaleDateString("fa-IR")}
+                    </span>
+                  </div>
+
+                  <div style={{ background: "#fdfbf7", padding: "14px 18px", borderRadius: 10, border: "1px solid var(--dv-line)", marginBottom: 16 }}>
+                    <p style={{ margin: "0 0 6px", fontWeight: 600 }}>اقلام مورد استعلام:</p>
+                    <ul style={{ margin: 0, paddingRight: 20 }}>
+                      {rfq.items.map((item, idx) => (
+                        <li key={idx} style={{ fontSize: "0.9rem", color: "var(--dv-ink-soft)", marginBlock: 4 }}>
+                          <strong>{item.productName}</strong> — تیراژ: {item.quantity} عدد
+                          {item.itemKind === "OEM" ? (
+                            <span className="dv-badge" style={{ marginRight: 8, background: "#ede9fe", color: "#6d28d9" }}>
+                              فرمولاسیون اختصاصی (OEM)
+                            </span>
+                          ) : (
+                            <span className="dv-badge" style={{ marginRight: 8, background: "#e0f2fe", color: "#0369a1" }}>
+                              کاتالوگ رسمی
+                            </span>
+                          )}
+                          {item.specNote ? <p style={{ fontSize: "0.82rem", margin: "4px 0 0", color: "var(--dv-muted)" }}>مشخصات: {item.specNote}</p> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Attachments Panel */}
+                  <div style={{ marginBottom: 16 }}>
+                    <h4 style={{ fontSize: "0.92rem", margin: "0 0 8px", color: "var(--dv-navy)" }}>
+                      مستندات و ضمیمه‌ها ({rfq.attachments.length}/3)
+                    </h4>
                     {rfq.attachments.length === 0 ? (
-                      <p className="dv-muted">پیوستی ثبت نشده است.</p>
+                      <p className="dv-muted" style={{ fontSize: "0.85rem" }}>ضمیمه‌ای بارگذاری نشده است.</p>
                     ) : (
-                      <ul className="dv-attach-list">
+                      <ul className="dv-attach-list" style={{ marginBottom: 10 }}>
                         {rfq.attachments.map((att) => (
                           <li key={att.id} className="dv-attach-item">
                             <button
                               type="button"
                               className="dv-link"
-                              style={{ background: "none", border: "none", padding: 0 }}
+                              style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontWeight: 600 }}
                               onClick={() => void handleOrgDownload(rfq.id, att.id, att.filename)}
                             >
-                              {att.filename}
+                              📄 {att.filename}
                             </button>
-                            <span className="dv-attach-size">
+                            <span className="dv-attach-size" style={{ fontSize: "0.8rem", color: "var(--dv-muted)" }}>
                               {Math.max(1, Math.round(att.sizeBytes / 1024))} کیلوبایت
                             </span>
                           </li>
                         ))}
                       </ul>
                     )}
+
                     {isBuyer && rfq.attachments.length < 3 ? (
-                      <input
-                        type="file"
-                        className="dv-file-input"
-                        accept="application/pdf,image/png,image/jpeg"
-                        aria-label={`بارگذاری پیوست برای ${rfq.id}`}
-                        disabled={attaching}
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          if (file) {
-                            attachTarget.current = rfq.id;
-                            void handleOrgAttach(file, rfq.id);
-                          }
-                        }}
-                      />
+                      <div style={{ marginTop: 8 }}>
+                        <label style={{ fontSize: "0.82rem", color: "var(--dv-ink-soft)", display: "block", marginBottom: 4 }}>
+                          افزودن مدرک جدید (PDF, PNG, JPG - حداکثر ۵۱۲ کیلوبایت):
+                        </label>
+                        <input
+                          type="file"
+                          className="dv-file-input"
+                          accept="application/pdf,image/png,image/jpeg"
+                          aria-label={`بارگذاری پیوست برای ${rfq.id}`}
+                          disabled={attaching}
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (file) {
+                              attachTarget.current = rfq.id;
+                              void handleOrgAttach(file, rfq.id);
+                            }
+                          }}
+                        />
+                      </div>
                     ) : null}
                   </div>
+
+                  {/* Quote Details & Revision Timeline */}
                   {quote !== null ? (
-                    <>
-                      <p className="dv-muted">
-                        پیش‌فاکتور: {QUOTE_STATUS_LABELS[quote.status] ?? quote.status} — اعتبار تا{" "}
-                        <span dir="ltr">{new Date(quote.validUntil).toISOString().slice(0, 10)}</span>
-                      </p>
+                    <div style={{ background: "#fcf9f2", border: "1px solid rgba(212, 175, 55, 0.35)", borderRadius: 12, padding: 20 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span className="dv-badge" style={{ background: "var(--dv-gold)", color: "#1c1913", fontWeight: 800 }}>
+                            پیش‌فاکتور رسمی {QUOTE_STATUS_LABELS[quote.status] ?? quote.status}
+                          </span>
+                          <span style={{ fontSize: "0.85rem", color: "var(--dv-muted)" }}>
+                            مهلت اعتبار: <strong dir="ltr">{new Date(quote.validUntil).toLocaleDateString("fa-IR")}</strong>
+                          </span>
+                        </div>
+                      </div>
+
                       {latest !== null ? (
-                        <div className="dv-sandbox-panel">
-                          <h4 className="dv-sandbox-title">
-                            Revision {latest.revisionNo}
-                            <span className="dv-sandbox-chip">SAMPLE</span>
-                          </h4>
-                          {latest.lines.map((line, index) => (
-                            <p key={index}>
-                              {line.productName} × {line.quantity} ={" "}
-                              {formatPrice(line.lineTotalMinor, quote.currency)}
-                            </p>
-                          ))}
-                          <p className="dv-cart-grand">جمع: {formatPrice(latest.subtotalMinor, latest.currency)}</p>
-                          {latest.leadTimeDays !== null ? (
-                            <p className="dv-muted">زمان تحویل: {latest.leadTimeDays} روز</p>
-                          ) : null}
-                          {latest.paymentTerms !== null ? (
-                            <p className="dv-muted">شرایط پرداخت: {latest.paymentTerms}</p>
-                          ) : null}
+                        <div className="dv-quote-revision-item">
+                          <div className="dv-quote-revision-header">
+                            <span style={{ fontWeight: 700, color: "var(--dv-navy)" }}>
+                              نسخه شماره {latest.revisionNo}
+                            </span>
+                            <span className="dv-badge" style={{ background: "#e0f2fe", color: "#0369a1" }}>قیمت‌گذاری شرکتی</span>
+                          </div>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+                            {latest.lines.map((line, index) => (
+                              <div key={index} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem" }}>
+                                <span>{line.productName} × {line.quantity}</span>
+                                <strong>{formatPrice(line.lineTotalMinor, quote.currency)}</strong>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div style={{ borderTop: "1px solid rgba(212, 175, 55, 0.2)", paddingTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span style={{ fontWeight: 800 }}>مبلغ کل پیش‌فاکتور:</span>
+                            <span style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--dv-navy)" }}>
+                              {formatPrice(latest.subtotalMinor, latest.currency)}
+                            </span>
+                          </div>
+
+                          <div style={{ display: "flex", gap: 20, marginTop: 10, fontSize: "0.85rem", color: "var(--dv-muted)" }}>
+                            {latest.leadTimeDays ? <span>⏱ زمان تحویل: {latest.leadTimeDays} روز کاری</span> : null}
+                            {latest.paymentTerms ? <span>💳 نحوه تسویه: {latest.paymentTerms}</span> : null}
+                          </div>
                         </div>
                       ) : null}
+
+                      {/* Quote Acceptance Form */}
                       {canAccept ? (
-                        <div className="dv-pay-actions dv-admin-adjust">
-                          <input
-                            type="text"
-                            aria-label="نام گیرنده"
-                            placeholder="نام گیرنده"
-                            value={address.fullName}
-                            onChange={(event) => setAddress({ ...address, fullName: event.target.value })}
-                          />
-                          <input
-                            type="text"
-                            dir="ltr"
-                            aria-label="موبایل"
-                            placeholder="0912…"
-                            value={address.phone}
-                            onChange={(event) => setAddress({ ...address, phone: event.target.value })}
-                          />
-                          <input
-                            type="text"
-                            aria-label="استان"
-                            placeholder="استان"
-                            value={address.province}
-                            onChange={(event) => setAddress({ ...address, province: event.target.value })}
-                          />
-                          <input
-                            type="text"
-                            aria-label="شهر"
-                            placeholder="شهر"
-                            value={address.city}
-                            onChange={(event) => setAddress({ ...address, city: event.target.value })}
-                          />
-                          <input
-                            type="text"
-                            dir="ltr"
-                            aria-label="کد پستی"
-                            placeholder="کد پستی ۱۰ رقمی"
-                            value={address.postalCode}
-                            onChange={(event) => setAddress({ ...address, postalCode: event.target.value })}
-                          />
-                          <input
-                            type="text"
-                            aria-label="نشانی"
-                            placeholder="نشانی کامل"
-                            value={address.addressLine}
-                            onChange={(event) => setAddress({ ...address, addressLine: event.target.value })}
-                          />
+                        <div style={{ marginTop: 20, background: "#ffffff", padding: 18, borderRadius: 10, border: "1px solid var(--dv-line)" }}>
+                          <h4 style={{ margin: "0 0 12px", color: "var(--dv-navy)" }}>
+                            تأیید پیش‌فاکتور و ثبت آدرس تحویل محموله
+                          </h4>
+                          <div className="dv-b2b-field-grid">
+                            <input
+                              type="text"
+                              className="dv-checkout-input"
+                              placeholder="نام گیرنده و تحویل‌گیرنده"
+                              value={address.fullName}
+                              onChange={(event) => setAddress({ ...address, fullName: event.target.value })}
+                            />
+                            <input
+                              type="text"
+                              dir="ltr"
+                              className="dv-checkout-input"
+                              placeholder="موبایل تحویل‌گیرنده (0912...)"
+                              value={address.phone}
+                              onChange={(event) => setAddress({ ...address, phone: event.target.value })}
+                            />
+                            <input
+                              type="text"
+                              className="dv-checkout-input"
+                              placeholder="استان"
+                              value={address.province}
+                              onChange={(event) => setAddress({ ...address, province: event.target.value })}
+                            />
+                            <input
+                              type="text"
+                              className="dv-checkout-input"
+                              placeholder="شهر"
+                              value={address.city}
+                              onChange={(event) => setAddress({ ...address, city: event.target.value })}
+                            />
+                            <input
+                              type="text"
+                              dir="ltr"
+                              className="dv-checkout-input"
+                              placeholder="کد پستی ۱۰ رقمی"
+                              value={address.postalCode}
+                              onChange={(event) => setAddress({ ...address, postalCode: event.target.value })}
+                            />
+                          </div>
+                          <div style={{ marginTop: 10 }}>
+                            <input
+                              type="text"
+                              className="dv-checkout-input"
+                              placeholder="نشانی دقیق پستی انبار / دفتر سازمان"
+                              value={address.addressLine}
+                              onChange={(event) => setAddress({ ...address, addressLine: event.target.value })}
+                            />
+                          </div>
                           <button
                             type="button"
-                            className="dv-btn dv-btn-block"
+                            className="dv-btn dv-btn-gold dv-btn-block"
+                            style={{ marginTop: 14 }}
                             disabled={busy}
                             onClick={() => void handleAccept(quote.id)}
                             aria-busy={busy}
                           >
-                            {busy ? "در حال تبدیل…" : "پذیرش پیش‌فاکتور و ساخت سفارش"}
+                            {busy ? "در حال ایجاد سفارش…" : "✓ پذیرش پیش‌فاکتور و تبدیل به سفارش قطعی"}
                           </button>
                         </div>
                       ) : null}
-                    </>
+                    </div>
                   ) : (
-                    <p className="dv-muted">در انتظار قیمت‌گذاری توسط فروش.</p>
+                    <div style={{ background: "#f8fafc", padding: 12, borderRadius: 8, color: "var(--dv-muted)", fontSize: "0.88rem" }}>
+                      ⏳ استعلام در حال بررسی واحد فنی و بازرگانی است — پیش‌فاکتور قیمت پس از تعیین تخفیف سازمانی صادر خواهد شد.
+                    </div>
                   )}
                 </article>
               );
@@ -598,7 +765,7 @@ export default function OrgPortalPage() {
       </section>
 
       {error !== null ? (
-        <p className="dv-cart-feedback-error" role="alert">
+        <p className="dv-cart-feedback dv-cart-feedback-error" role="alert" style={{ marginTop: 20 }}>
           {error}
         </p>
       ) : null}

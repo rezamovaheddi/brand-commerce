@@ -19,8 +19,7 @@ import { formatPrice } from "../../../lib/format";
  * Public RFQ page: submit a quote request (CATALOG or OEM line) → track
  * status → attach files (PDF/PNG/JPEG ≤512KB, ≤3) → view quote revisions
  * (SAMPLE-marked prices) → accept with a shipping address, which converts
- * the quote into a real order (honest: payment still follows the normal
- * locked path).
+ * the quote into a real order.
  */
 
 const EMPTY_FORM = {
@@ -47,19 +46,19 @@ const EMPTY_ADDRESS = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  SUBMITTED: "ثبت‌شده",
-  PRICED: "در حال قیمت‌گذاری",
-  QUOTED: "پیش‌فاکتور صادر شد",
-  ACCEPTED: "پذیرفته‌شده",
-  REJECTED: "رد شده",
-  CLOSED: "بسته",
+  SUBMITTED: "ثبت‌شده و در انتظار بررسی",
+  PRICED: "در حال بررسی و قیمت‌گذاری",
+  QUOTED: "پیش‌فاکتور صادر شد ✓",
+  ACCEPTED: "پذیرفته‌شده و سفارش ساخته شد",
+  REJECTED: "عدم امکان تأمین",
+  CLOSED: "بسته شده",
 };
 
 const QUOTE_STATUS_LABELS: Record<string, string> = {
-  SENT: "ارسال‌شده",
+  SENT: "ارسال‌شده و آماده پذیرش",
   ACCEPTED: "پذیرفته‌شده",
   REJECTED: "رد‌شده",
-  EXPIRED: "منقضی",
+  EXPIRED: "منقضی شده",
 };
 
 export default function RfqPage() {
@@ -176,158 +175,215 @@ export default function RfqPage() {
   const canAccept = quote !== null && quote.status === "SENT";
 
   return (
-    <div className="container dv-page dv-b2b-apply">
-      <h1>درخواست قیمت (RFQ)</h1>
-      <p className="dv-about-lede">
-        محصول و تعداد موردنیاز خود را ثبت کنید. کارشناس فروش پس از بررسی،
-        پیش‌فاکتور رسمی با اعتبار زمانی صادر می‌کند و می‌توانید از همین صفحه
-        پذیرش دهید.
-      </p>
-
-      <div className="dv-order-banner" role="note">
-        قیمت‌های پیش‌فاکتور در این فاز <strong>نمونه (SAMPLE)</strong> هستند —
-        قیمت‌گذاری قراردادی نهایی پس از تصمیم کسب‌وکار فعال می‌شود.
+    <div className="dv-b2b-container">
+      {/* Hero */}
+      <div className="dv-b2b-hero">
+        <h1 className="dv-b2b-header-title">استعلام قیمت سازمانی و سفارشی (RFQ)</h1>
+        <p className="dv-b2b-header-desc">
+          برای استعلام سفارش‌های تیراژ بالا از محصولات استاندارد کاتالوگ یا ثبت سفارش تولید اختصاصی (OEM / Private Label)،
+          فرم زیر را ارسال فرمایید تا کارشناسان بازرگانی پیش‌فاکتور رسمی را در کوتاه‌ترین زمان ممکن صادر کنند.
+        </p>
       </div>
 
       {acceptedOrder !== null ? (
-        <div className="dv-empty dv-cart-empty" role="status">
-          <p>
-            پیش‌فاکتور پذیرفته شد و سفارش ساخته شد ✓ — کد سفارش:{" "}
-            <span dir="ltr">{acceptedOrder}</span>
+        <div className="dv-b2b-card" style={{ background: "#ecfdf5", borderColor: "#a7f3d0", textAlign: "center", padding: 32 }} role="status">
+          <h2 style={{ color: "#065f46", margin: "0 0 10px" }}>✓ پیش‌فاکتور با موفقیت تأیید شد و سفارش ثبت گردید</h2>
+          <p style={{ fontSize: "1.05rem", margin: "0 0 16px" }}>
+            کد رهگیری سفارش: <strong dir="ltr">{acceptedOrder}</strong>
           </p>
-          <Link href="/cart" className="dv-btn dv-btn-gold">
-            ادامه
+          <Link href={`/orders/${acceptedOrder}`} className="dv-btn dv-btn-gold">
+            مشاهده سفارش و تسویه سندباکس
           </Link>
         </div>
       ) : (
-        <form className="dv-checkout-form" onSubmit={handleSubmit}>
-          <label htmlFor="rfq-contact">نام و نام خانوادگی</label>
-          <input
-            id="rfq-contact"
-            value={form.contactName}
-            onChange={(event) => setForm({ ...form, contactName: event.target.value })}
-            required
-            minLength={2}
-          />
-          <label htmlFor="rfq-phone">شماره موبایل</label>
-          <input
-            id="rfq-phone"
-            dir="ltr"
-            inputMode="numeric"
-            placeholder="09123456789"
-            value={form.contactPhone}
-            onChange={(event) => setForm({ ...form, contactPhone: event.target.value })}
-            required
-          />
-          <label htmlFor="rfq-product">نام محصول / شرح کالا</label>
-          <input
-            id="rfq-product"
-            value={form.productName}
-            onChange={(event) => setForm({ ...form, productName: event.target.value })}
-            required
-            minLength={2}
-          />
-          <fieldset className="dv-choice-row">
-            <legend>نوع خط:</legend>
-            <label className="dv-choice-option">
-              <input
-                type="radio"
-                name="rfq-item-kind"
-                checked={form.itemKind === "CATALOG"}
-                onChange={() => setForm({ ...form, itemKind: "CATALOG" })}
-              />
-              کاتالوگ موجود
-            </label>
-            <label className="dv-choice-option">
-              <input
-                type="radio"
-                name="rfq-item-kind"
-                checked={form.itemKind === "OEM"}
-                onChange={() => setForm({ ...form, itemKind: "OEM" })}
-              />
-              سفارشی / OEM
-            </label>
-          </fieldset>
-          {form.itemKind === "OEM" ? (
-            <>
-              <label htmlFor="rfq-spec">شرح فنی سفارش (حداقل ۱۰ نویسه)</label>
-              <textarea
-                id="rfq-spec"
-                className="dv-checkout-textarea"
-                value={form.specNote}
-                onChange={(event) => setForm({ ...form, specNote: event.target.value })}
-                rows={3}
-                minLength={10}
-                required
-              />
-            </>
-          ) : null}
-          <label htmlFor="rfq-qty">تعداد</label>
-          <input
-            id="rfq-qty"
-            dir="ltr"
-            inputMode="numeric"
-            value={form.quantity}
-            onChange={(event) => setForm({ ...form, quantity: event.target.value })}
-            required
-          />
-          <label htmlFor="rfq-note">توضیحات (اختیاری)</label>
-          <input
-            id="rfq-note"
-            value={form.note}
-            onChange={(event) => setForm({ ...form, note: event.target.value })}
-          />
-          <fieldset className="dv-brief-grid">
-            <legend className="dv-muted">بریف سفارشی (N10 — اختیاری)</legend>
-            <label htmlFor="rfq-market">بازار هدف</label>
-            <input
-              id="rfq-market"
-              value={form.targetMarket}
-              onChange={(event) => setForm({ ...form, targetMarket: event.target.value })}
-            />
-            <label htmlFor="rfq-packaging">بسته‌بندی</label>
-            <input
-              id="rfq-packaging"
-              value={form.packaging}
-              onChange={(event) => setForm({ ...form, packaging: event.target.value })}
-            />
-            <label htmlFor="rfq-delivery">تحویل درخواستی (YYYY-MM-DD)</label>
-            <input
-              id="rfq-delivery"
-              dir="ltr"
-              placeholder="2026-03-15"
-              value={form.requestedDeliveryDate}
-              onChange={(event) => setForm({ ...form, requestedDeliveryDate: event.target.value })}
-            />
-            <label className="dv-choice-option" htmlFor="rfq-conf">
-              <input
-                id="rfq-conf"
-                type="checkbox"
-                checked={form.confidentiality}
-                onChange={(event) => setForm({ ...form, confidentiality: event.target.checked })}
-              />
-              این درخواست محرمانه است
-            </label>
-          </fieldset>
-          <button type="submit" className="dv-btn dv-btn-block" disabled={busy} aria-busy={busy}>
-            {busy ? "در حال ارسال…" : "ثبت درخواست قیمت"}
-          </button>
-          {error !== null ? (
-            <p className="dv-cart-feedback-error" role="alert">
-              {error}
-            </p>
-          ) : null}
-        </form>
+        <div className="dv-b2b-card">
+          <h2>ثبت مشخصات استعلام جدید</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="dv-b2b-field-grid">
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="rfq-contact">نام و نام خانوادگی نماینده</label>
+                <input
+                  id="rfq-contact"
+                  className="dv-checkout-input"
+                  placeholder="مثال: مهندس رادمهر"
+                  value={form.contactName}
+                  onChange={(event) => setForm({ ...form, contactName: event.target.value })}
+                  required
+                  minLength={2}
+                />
+              </div>
+
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="rfq-phone">شماره تماس همراه</label>
+                <input
+                  id="rfq-phone"
+                  dir="ltr"
+                  inputMode="numeric"
+                  className="dv-checkout-input"
+                  placeholder="09123456789"
+                  value={form.contactPhone}
+                  onChange={(event) => setForm({ ...form, contactPhone: event.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="dv-checkout-field">
+              <label className="dv-checkout-label">نوع خط محصول مورد درخواست</label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+                <div
+                  className={`dv-b2b-choice-card ${form.itemKind === "CATALOG" ? "is-active" : ""}`}
+                  onClick={() => setForm({ ...form, itemKind: "CATALOG" })}
+                >
+                  <input
+                    type="radio"
+                    name="rfq-item-kind"
+                    checked={form.itemKind === "CATALOG"}
+                    onChange={() => setForm({ ...form, itemKind: "CATALOG" })}
+                  />
+                  <div>
+                    <strong style={{ display: "block" }}>محصول کاتالوگ موجود</strong>
+                    <span className="dv-muted" style={{ fontSize: "0.8rem" }}>سفارش عمده محصولات دارای پروانه ساخت</span>
+                  </div>
+                </div>
+
+                <div
+                  className={`dv-b2b-choice-card ${form.itemKind === "OEM" ? "is-active" : ""}`}
+                  onClick={() => setForm({ ...form, itemKind: "OEM" })}
+                >
+                  <input
+                    type="radio"
+                    name="rfq-item-kind"
+                    checked={form.itemKind === "OEM"}
+                    onChange={() => setForm({ ...form, itemKind: "OEM" })}
+                  />
+                  <div>
+                    <strong style={{ display: "block" }}>سفارشی / Private Label (OEM)</strong>
+                    <span className="dv-muted" style={{ fontSize: "0.8rem" }}>تولید با بسته و فرمول اختصاصی برند شما</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="dv-b2b-field-grid">
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="rfq-product">نام یا فرمولاسیون مدنظر</label>
+                <input
+                  id="rfq-product"
+                  className="dv-checkout-input"
+                  placeholder="مثال: لوسیون سد دفاعی پوست یا سرم نیاسینامید ۱۰٪"
+                  value={form.productName}
+                  onChange={(event) => setForm({ ...form, productName: event.target.value })}
+                  required
+                  minLength={2}
+                />
+              </div>
+
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="rfq-qty">تیراژ درخواستی (عدد)</label>
+                <input
+                  id="rfq-qty"
+                  dir="ltr"
+                  inputMode="numeric"
+                  className="dv-checkout-input"
+                  placeholder="حداقل ۱۰۰ عدد"
+                  value={form.quantity}
+                  onChange={(event) => setForm({ ...form, quantity: event.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            {form.itemKind === "OEM" ? (
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="rfq-spec">
+                  مشخصات فنی، درصد ماده اکتیو و استانداردهای موردنیاز (حداقل ۱۰ نویسه)
+                </label>
+                <textarea
+                  id="rfq-spec"
+                  className="dv-checkout-input dv-checkout-textarea"
+                  value={form.specNote}
+                  onChange={(event) => setForm({ ...form, specNote: event.target.value })}
+                  rows={3}
+                  minLength={10}
+                  required
+                />
+              </div>
+            ) : null}
+
+            <div className="dv-b2b-field-grid">
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="rfq-market">کانال توزیع / بازار هدف (اختیاری)</label>
+                <input
+                  id="rfq-market"
+                  className="dv-checkout-input"
+                  value={form.targetMarket}
+                  onChange={(event) => setForm({ ...form, targetMarket: event.target.value })}
+                />
+              </div>
+
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="rfq-packaging">الزامات بسته‌بندی (اختیاری)</label>
+                <input
+                  id="rfq-packaging"
+                  className="dv-checkout-input"
+                  value={form.packaging}
+                  onChange={(event) => setForm({ ...form, packaging: event.target.value })}
+                />
+              </div>
+
+              <div className="dv-checkout-field">
+                <label className="dv-checkout-label" htmlFor="rfq-delivery">مهلت تحویل مورد انتظار</label>
+                <input
+                  id="rfq-delivery"
+                  dir="ltr"
+                  className="dv-checkout-input"
+                  placeholder="2026-06-01"
+                  value={form.requestedDeliveryDate}
+                  onChange={(event) => setForm({ ...form, requestedDeliveryDate: event.target.value })}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBlock: 12 }}>
+              <label className="dv-choice-option" htmlFor="rfq-conf" style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <input
+                  id="rfq-conf"
+                  type="checkbox"
+                  checked={form.confidentiality}
+                  onChange={(event) => setForm({ ...form, confidentiality: event.target.checked })}
+                />
+                <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>اطلاعات فنی این درخواست کاملاً محرمانه تلقی گردد</span>
+              </label>
+            </div>
+
+            <button type="submit" className="dv-btn dv-btn-gold" disabled={busy} aria-busy={busy} style={{ minWidth: 220 }}>
+              {busy ? "در حال ثبت استعلام…" : "ارسال درخواست استعلام قیمت"}
+            </button>
+
+            {error !== null ? (
+              <p className="dv-cart-feedback dv-cart-feedback-error" role="alert" style={{ marginTop: 12 }}>
+                {error}
+              </p>
+            ) : null}
+          </form>
+        </div>
       )}
 
-      <section className="dv-b2b-track" aria-label="پیگیری و پیش‌فاکتور">
-        <h2>پیگیری و پذیرش</h2>
-        <div className="dv-admin-filter">
+      {/* Tracking Section */}
+      <div className="dv-b2b-card">
+        <h3>پیگیری و بررسی پیش‌فاکتور صادر شده</h3>
+        <p className="dv-muted" style={{ fontSize: "0.85rem", marginBottom: 14 }}>
+          کد استعلام خود (مثال: rfq-...) را وارد کنید تا وضعیت بررسی فنی یا پیش‌فاکتور رسمی را ملاحظه نمایید.
+        </p>
+
+        <div style={{ display: "flex", gap: 10, maxWidth: 500, marginBottom: 20 }}>
           <input
             type="text"
             dir="ltr"
+            className="dv-checkout-input"
             aria-label="شناسه درخواست قیمت"
-            placeholder="rfq-…"
+            placeholder="rfq-..."
             value={trackId}
             onChange={(event) => setTrackId(event.target.value)}
           />
@@ -337,157 +393,200 @@ export default function RfqPage() {
         </div>
 
         {rfq !== null ? (
-          <div className="dv-card dv-b2b-app">
-            <p>
-              وضعیت: <strong>{STATUS_LABELS[rfq.status] ?? rfq.status}</strong>
-            </p>
-            {rfq.items.length > 0 ? (
-              <p className="dv-muted">
-                اقلام:{" "}
-                {rfq.items
-                  .map((item) =>
-                    item.itemKind === "OEM"
-                      ? `${item.productName}×${item.quantity} (سفارشی/OEM)`
-                      : `${item.productName}×${item.quantity}`,
-                  )
-                  .join("، ")}
-              </p>
-            ) : null}
-            <div className="dv-sandbox-panel">
-              <h4 className="dv-sandbox-title">
-                پیوست‌ها ({rfq.attachments.length}/3)
+          <div style={{ background: "#fcf9f2", border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: 14, padding: 22 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className={`dv-status-pill dv-status-${rfq.status}`}>
+                  {STATUS_LABELS[rfq.status] ?? rfq.status}
+                </span>
+                <strong dir="ltr">{rfq.id}</strong>
+              </div>
+              <span className="dv-muted" style={{ fontSize: "0.85rem" }}>
+                متقاضی: {rfq.contactName} ({rfq.contactPhone})
+              </span>
+            </div>
+
+            <div style={{ background: "#fff", padding: 14, borderRadius: 10, border: "1px solid var(--dv-line)", marginBottom: 16 }}>
+              <p style={{ margin: "0 0 6px", fontWeight: 700 }}>شرح اقلام استعلام:</p>
+              <ul style={{ margin: 0, paddingRight: 20 }}>
+                {rfq.items.map((item, idx) => (
+                  <li key={idx} style={{ fontSize: "0.9rem", color: "var(--dv-ink-soft)", marginBlock: 4 }}>
+                    <strong>{item.productName}</strong> — تیراژ: {item.quantity} عدد
+                    <span className="dv-badge" style={{ marginRight: 8, background: item.itemKind === "OEM" ? "#ede9fe" : "#e0f2fe", color: item.itemKind === "OEM" ? "#6d28d9" : "#0369a1" }}>
+                      {item.itemKind === "OEM" ? "سفارشی / OEM" : "کاتالوگ جاری"}
+                    </span>
+                    {item.specNote ? <p style={{ fontSize: "0.82rem", margin: "4px 0 0", color: "var(--dv-muted)" }}>مشخصات: {item.specNote}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Attachments */}
+            <div style={{ marginBottom: 18 }}>
+              <h4 style={{ fontSize: "0.92rem", margin: "0 0 8px", color: "var(--dv-navy)" }}>
+                فایل‌ها و ضمائم ({rfq.attachments.length}/3)
               </h4>
               {rfq.attachments.length === 0 ? (
-                <p className="dv-muted">پیوستی بارگذاری نشده است — برای مشخصات فنی می‌توانید فایل بچسبانید.</p>
+                <p className="dv-muted" style={{ fontSize: "0.85rem" }}>فایلی پیوست نشده است.</p>
               ) : (
-                <ul className="dv-attach-list">
+                <ul className="dv-attach-list" style={{ marginBottom: 10 }}>
                   {rfq.attachments.map((att) => (
                     <li key={att.id} className="dv-attach-item">
                       <a
                         href={rfqAttachmentDownloadUrl(rfq.id, att.id)}
                         className="dv-link"
                         download={att.filename}
+                        style={{ fontWeight: 600 }}
                       >
-                        {att.filename}
+                        📄 {att.filename}
                       </a>
-                      <span className="dv-attach-size">
+                      <span className="dv-attach-size" style={{ fontSize: "0.8rem", color: "var(--dv-muted)" }}>
                         {Math.max(1, Math.round(att.sizeBytes / 1024))} کیلوبایت
                       </span>
                     </li>
                   ))}
                 </ul>
               )}
+
               {rfq.attachments.length < 3 ? (
-                <input
-                  ref={fileInput}
-                  type="file"
-                  className="dv-file-input"
-                  accept="application/pdf,image/png,image/jpeg"
-                  aria-label="بارگذاری پیوست"
-                  disabled={attaching}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) {
-                      void handleAttach(file);
-                    }
-                  }}
-                />
-              ) : (
-                <p className="dv-muted">سقف ۳ پیوست پر شده است.</p>
-              )}
+                <div>
+                  <label style={{ fontSize: "0.82rem", color: "var(--dv-ink-soft)", display: "block", marginBottom: 4 }}>
+                    افزودن فرمولاسیون یا مستندات برچسب (حداکثر ۵۱۲ کیلوبایت):
+                  </label>
+                  <input
+                    ref={fileInput}
+                    type="file"
+                    className="dv-file-input"
+                    accept="application/pdf,image/png,image/jpeg"
+                    disabled={attaching}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        void handleAttach(file);
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
             </div>
+
+            {/* Official Quote */}
             {quote !== null ? (
-              <>
-                <p>
-                  پیش‌فاکتور: <span dir="ltr">{quote.id}</span> —{" "}
-                  {QUOTE_STATUS_LABELS[quote.status] ?? quote.status} — اعتبار تا{" "}
-                  <span dir="ltr">{new Date(quote.validUntil).toISOString().slice(0, 10)}</span>
-                </p>
-                {quote.revisions.map((revision) => (
-                  <div key={revision.id} className="dv-sandbox-panel">
-                    <h4 className="dv-sandbox-title">
-                      Revision {revision.revisionNo}
-                      <span className="dv-sandbox-chip">SAMPLE</span>
-                    </h4>
-                    {revision.lines.map((line, index) => (
-                      <p key={index}>
-                        {line.productName} × {line.quantity} ={" "}
-                        {formatPrice(line.lineTotalMinor, quote.currency)}
-                      </p>
-                    ))}
-                    <p className="dv-cart-grand">جمع: {formatPrice(revision.subtotalMinor, revision.currency)}</p>
-                    {revision.leadTimeDays !== null ? (
-                      <p className="dv-muted">زمان تحویل: {revision.leadTimeDays} روز</p>
-                    ) : null}
-                    {revision.paymentTerms !== null ? (
-                      <p className="dv-muted">شرایط پرداخت: {revision.paymentTerms}</p>
-                    ) : null}
+              <div style={{ background: "#ffffff", border: "1px solid rgba(212, 175, 55, 0.4)", borderRadius: 12, padding: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span className="dv-badge" style={{ background: "var(--dv-gold)", color: "#1c1913", fontWeight: 800 }}>
+                      {QUOTE_STATUS_LABELS[quote.status] ?? quote.status}
+                    </span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--dv-muted)" }}>
+                      اعتبار قیمت تا: <strong dir="ltr">{new Date(quote.validUntil).toLocaleDateString("fa-IR")}</strong>
+                    </span>
                   </div>
-                ))}
-                {canAccept && latestRevision !== null ? (
-                  <div className="dv-pay-actions dv-admin-adjust">
-                    <input
-                      type="text"
-                      aria-label="نام گیرنده"
-                      placeholder="نام گیرنده"
-                      value={address.fullName}
-                      onChange={(event) => setAddress({ ...address, fullName: event.target.value })}
-                    />
-                    <input
-                      type="text"
-                      dir="ltr"
-                      aria-label="موبایل"
-                      placeholder="0912…"
-                      value={address.phone}
-                      onChange={(event) => setAddress({ ...address, phone: event.target.value })}
-                    />
-                    <input
-                      type="text"
-                      aria-label="استان"
-                      placeholder="استان"
-                      value={address.province}
-                      onChange={(event) => setAddress({ ...address, province: event.target.value })}
-                    />
-                    <input
-                      type="text"
-                      aria-label="شهر"
-                      placeholder="شهر"
-                      value={address.city}
-                      onChange={(event) => setAddress({ ...address, city: event.target.value })}
-                    />
-                    <input
-                      type="text"
-                      dir="ltr"
-                      aria-label="کد پستی"
-                      placeholder="کد پستی ۱۰ رقمی"
-                      value={address.postalCode}
-                      onChange={(event) => setAddress({ ...address, postalCode: event.target.value })}
-                    />
-                    <input
-                      type="text"
-                      aria-label="نشانی"
-                      placeholder="نشانی کامل"
-                      value={address.addressLine}
-                      onChange={(event) => setAddress({ ...address, addressLine: event.target.value })}
-                    />
+                </div>
+
+                {latestRevision !== null ? (
+                  <div className="dv-quote-revision-item" style={{ background: "#fdfbf7" }}>
+                    <div className="dv-quote-revision-header">
+                      <span style={{ fontWeight: 700 }}>نسخه شماره {latestRevision.revisionNo}</span>
+                      <span className="dv-badge" style={{ background: "#ecfdf5", color: "#065f46" }}>تأییدیه واحد مالی</span>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBlock: 10 }}>
+                      {latestRevision.lines.map((line, index) => (
+                        <div key={index} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem" }}>
+                          <span>{line.productName} × {line.quantity}</span>
+                          <strong>{formatPrice(line.lineTotalMinor, quote.currency)}</strong>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ borderTop: "1px solid rgba(212, 175, 55, 0.2)", paddingTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontWeight: 800 }}>مبلغ کل سفارش:</span>
+                      <span style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--dv-navy)" }}>
+                        {formatPrice(latestRevision.subtotalMinor, latestRevision.currency)}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 20, marginTop: 10, fontSize: "0.85rem", color: "var(--dv-muted)" }}>
+                      {latestRevision.leadTimeDays ? <span>⏱ زمان تحویل: {latestRevision.leadTimeDays} روز کاری</span> : null}
+                      {latestRevision.paymentTerms ? <span>💳 نحوه پرداخت: {latestRevision.paymentTerms}</span> : null}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Accept Quote Form */}
+                {canAccept ? (
+                  <div style={{ marginTop: 20, background: "#fcf9f2", padding: 18, borderRadius: 10, border: "1px solid var(--dv-line)" }}>
+                    <h4 style={{ margin: "0 0 12px", color: "var(--dv-navy)" }}>تکمیل آدرس تحویل و پذیرش قطعی</h4>
+                    <div className="dv-b2b-field-grid">
+                      <input
+                        type="text"
+                        className="dv-checkout-input"
+                        placeholder="نام تحویل‌گیرنده"
+                        value={address.fullName}
+                        onChange={(event) => setAddress({ ...address, fullName: event.target.value })}
+                      />
+                      <input
+                        type="text"
+                        dir="ltr"
+                        className="dv-checkout-input"
+                        placeholder="موبایل (0912...)"
+                        value={address.phone}
+                        onChange={(event) => setAddress({ ...address, phone: event.target.value })}
+                      />
+                      <input
+                        type="text"
+                        className="dv-checkout-input"
+                        placeholder="استان"
+                        value={address.province}
+                        onChange={(event) => setAddress({ ...address, province: event.target.value })}
+                      />
+                      <input
+                        type="text"
+                        className="dv-checkout-input"
+                        placeholder="شهر"
+                        value={address.city}
+                        onChange={(event) => setAddress({ ...address, city: event.target.value })}
+                      />
+                      <input
+                        type="text"
+                        dir="ltr"
+                        className="dv-checkout-input"
+                        placeholder="کد پستی ۱۰ رقمی"
+                        value={address.postalCode}
+                        onChange={(event) => setAddress({ ...address, postalCode: event.target.value })}
+                      />
+                    </div>
+                    <div style={{ marginTop: 10 }}>
+                      <input
+                        type="text"
+                        className="dv-checkout-input"
+                        placeholder="نشانی دقیق تحویل سفارش"
+                        value={address.addressLine}
+                        onChange={(event) => setAddress({ ...address, addressLine: event.target.value })}
+                      />
+                    </div>
                     <button
                       type="button"
-                      className="dv-btn dv-btn-block"
+                      className="dv-btn dv-btn-gold dv-btn-block"
+                      style={{ marginTop: 14 }}
                       disabled={accepting}
                       onClick={() => void handleAccept()}
                       aria-busy={accepting}
                     >
-                      {accepting ? "در حال تبدیل…" : "پذیرش پیش‌فاکتور و ساخت سفارش"}
+                      {accepting ? "در حال صدور سفارش…" : "✓ پذیرش پیش‌فاکتور و ثبت سفارش نهایی"}
                     </button>
                   </div>
                 ) : null}
-              </>
+              </div>
             ) : (
-              <p className="dv-muted">هنوز پیش‌فاکتوری برای این درخواست صادر نشده است.</p>
+              <div style={{ background: "#fff", padding: 12, borderRadius: 8, color: "var(--dv-muted)", fontSize: "0.88rem" }}>
+                ⏳ استعلام در حال بررسی واحد فنی و فروش است — پیش‌فاکتور رسمی به زودی صادر خواهد شد.
+              </div>
             )}
           </div>
         ) : null}
-      </section>
+      </div>
     </div>
   );
 }

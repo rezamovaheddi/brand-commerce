@@ -464,75 +464,117 @@ export default function AdminPage() {
   // ---- console --------------------------------------------------------------
   return (
     <div className="container dv-page dv-admin">
-      <div className="dv-order-head">
-        <h1>کنسول اپراتور</h1>
-        <span className="dv-sandbox-chip">BOOTSTRAP — RBAC در P4</span>
-      </div>
-
-      <div className="dv-admin-tabs" role="tablist" aria-label="بخش‌های کنسول">
+      <div className="dv-order-head" style={{ marginBottom: 20 }}>
+        <div>
+          <h1 style={{ margin: "0 0 6px", color: "var(--dv-navy)", fontSize: "1.75rem" }}>پیشخوان مدیریت پلتفرم (Backoffice)</h1>
+          <p className="dv-muted" style={{ margin: 0, fontSize: "0.9rem" }}>
+            مدیریت یکپارچه سفارش‌ها، لجر انبارداری، استعلام‌های B2B/OEM و ارتباط با مشتریان (CRM)
+          </p>
+        </div>
         <button
           type="button"
-          role="tab"
-          aria-selected={section === "orders"}
-          className={section === "orders" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
-          onClick={() => setSection("orders")}
-        >
-          سفارش‌ها
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={section === "inventory"}
-          className={section === "inventory" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
-          onClick={() => setSection("inventory")}
-        >
-          موجودی و دفتر
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={section === "b2b"}
-          className={section === "b2b" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
-          onClick={() => setSection("b2b")}
-        >
-          درخواست‌های B2B
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={section === "rfq"}
-          className={section === "rfq" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
-          onClick={() => setSection("rfq")}
-        >
-          درخواست‌های قیمت
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={section === "org"}
-          className={section === "org" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
-          onClick={() => setSection("org")}
-        >
-          سازمان‌ها و اعضا
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={section === "crm"}
-          className={section === "crm" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
-          onClick={() => setSection("crm")}
-        >
-          CRM و پشتیبانی
-        </button>
-        <button
-          type="button"
-          className="dv-admin-tab dv-admin-exit"
+          className="dv-btn"
+          style={{ background: "#fff", border: "1px solid var(--dv-line)", color: "var(--dv-danger)" }}
           onClick={() => {
             clearAdminKey();
             setAuthed(false);
           }}
         >
-          خروج
+          خروج از پنل
+        </button>
+      </div>
+
+      {/* KPI Overview */}
+      <div className="dv-admin-kpis">
+        <div className="dv-admin-kpi accent-navy">
+          <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--dv-navy)" }}>
+            {orders?.total ?? 0}
+          </div>
+          <div style={{ fontSize: "0.82rem", color: "var(--dv-muted)", marginTop: 4 }}>کل سفارش‌های ثبت‌شده</div>
+        </div>
+
+        <div className="dv-admin-kpi accent-gold">
+          <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--dv-gold)" }}>
+            {b2bApps?.filter(a => a.status === "SUBMITTED" || a.status === "UNDER_REVIEW").length ?? 0}
+          </div>
+          <div style={{ fontSize: "0.82rem", color: "var(--dv-muted)", marginTop: 4 }}>درخواست‌های B2B منتظر بررسی</div>
+        </div>
+
+        <div className="dv-admin-kpi accent-green">
+          <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#047857" }}>
+            {rfqRows?.filter(r => r.status === "SUBMITTED" || r.status === "PRICED").length ?? 0}
+          </div>
+          <div style={{ fontSize: "0.82rem", color: "var(--dv-muted)", marginTop: 4 }}>استعلام‌های RFQ آماده صدور قیمت</div>
+        </div>
+
+        <div className="dv-admin-kpi accent-purple">
+          <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#7c3aed" }}>
+            {crmTicketRows?.filter(t => t.status === "OPEN" || t.status === "IN_PROGRESS").length ?? 0}
+          </div>
+          <div style={{ fontSize: "0.82rem", color: "var(--dv-muted)", marginTop: 4 }}>تیکت‌های باز CRM و پشتیبانی</div>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="dv-admin-tabs-nav" role="tablist" aria-label="بخش‌های کنسول">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "orders"}
+          className={`dv-admin-tab-btn ${section === "orders" ? "is-active" : ""}`}
+          onClick={() => setSection("orders")}
+        >
+          سفارش‌ها
+          <span className="dv-admin-tab-count">{orders?.total ?? 0}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "inventory"}
+          className={`dv-admin-tab-btn ${section === "inventory" ? "is-active" : ""}`}
+          onClick={() => setSection("inventory")}
+        >
+          موجودی و لجر انبار
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "b2b"}
+          className={`dv-admin-tab-btn ${section === "b2b" ? "is-active" : ""}`}
+          onClick={() => setSection("b2b")}
+        >
+          درخواست‌های نمایندگی
+          <span className="dv-admin-tab-count">{b2bApps?.length ?? 0}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "rfq"}
+          className={`dv-admin-tab-btn ${section === "rfq" ? "is-active" : ""}`}
+          onClick={() => setSection("rfq")}
+        >
+          استعلام قیمت (RFQ)
+          <span className="dv-admin-tab-count">{rfqRows?.length ?? 0}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "org"}
+          className={`dv-admin-tab-btn ${section === "org" ? "is-active" : ""}`}
+          onClick={() => setSection("org")}
+        >
+          سازمان‌ها و اعضا
+          <span className="dv-admin-tab-count">{orgRows?.length ?? 0}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "crm"}
+          className={`dv-admin-tab-btn ${section === "crm" ? "is-active" : ""}`}
+          onClick={() => setSection("crm")}
+        >
+          CRM و پشتیبانی
+          <span className="dv-admin-tab-count">{crmTicketRows?.length ?? 0}</span>
         </button>
       </div>
 
