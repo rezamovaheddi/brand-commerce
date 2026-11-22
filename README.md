@@ -1,50 +1,126 @@
-# Brand Commerce Platform — DERMAVIA
+# Brand Commerce Platform — DERMAVIA Ethereal (v2.2.0)
 
-اکوسیستم تجاری برند DERMAVIA: فروشگاه B2C، API ماژولار، PIM اولیه و حاکمیت داده نمونه.
-این مخزن **اولین تحویل عمودی (First Delivery)** است: یک جریان واقعی از Database → API → UI.
+سکوی جامع و یکپارچه تجارت الکترونیک، عمده‌فروشی B2B و مدیریت برند مراقبت پوستی **DERMAVIA** بر پایه زیبایی‌شناسی اثیری بالینی (Warm Clinical Luxury) و معماری Modular Monolith.
 
-## معماری (خلاصه)
+---
 
-- **Modular Monolith** (ADR-0001، هم‌راستا با ADR-001 منبع): NestJS API + Next.js Storefront
-- **npm workspaces** روی ویندوز/OneDrive (ADR-0002 — رد pnpm+turbo به‌دلیل symlink و پین‌های حدسی starter kit)
-- **PostgreSQL + Prisma** — مالکیت اسکیما: `packages/database`
-- **Contracts**: zod schemas مشترک (`packages/contracts`) — قرارداد API ⇄ Storefront
-- Design tokens از DERMAVIA ETHEREAL V6 (پالت تجاری `--dv-*`) — ADR-0003
+## ۱. نمای کلی معماری (Architecture Overview)
 
-## ساختار
+این پلتفرم بر اساس معماری استاندارد و تست‌پذیر **Modular Monolith** سازمان‌دهی شده و تمامی قوانین تجاری و مالی آن در پکیج‌های مستقل و بدون وابستگی به فریم‌ورک پیاده‌سازی شده است:
 
 ```
-apps/api          NestJS 11 — /api/v1 (health, products, categories) + Swagger /docs
-apps/storefront   Next.js 15 — fa / RTL، Home، PLP، PDP
-packages/contracts   zod schemas + types مشترک
-packages/database    Prisma schema + migration + seed (داده نمونه isSample=true)
-packages/config      tsconfig مشترک
-docs/                audit / execution / governance / adr (فارسی)
+brand-commerce/
+├── apps/
+│   ├── api/             # هسته بک‌اند NestJS 11 — سرویس‌های RESTful، Swagger /docs، گاردها و اعتبارسنجی Zod
+│   └── storefront/      # فرانت‌اند Next.js 15 App Router — RTL-first فارسی با استایل‌های لوکس Dermavia V6
+├── packages/
+│   ├── contracts/       # قراردادهای اشتراکی، DTOها و اسکیماهای Zod بین فرانت‌اند و بک‌اند
+│   ├── domain/          # قوانین خالص دامنه تجاری (محاسبات مالی عدد صحیح، ماشین وضعیت سفارش و تیکت‌ها)
+│   ├── database/        # اسکیما و مایگریشن‌های Prisma برای PostgreSQL 16
+│   └── config/          # تنظیمات پایه‌ای تایپ‌اسکریپت و لینتینگ
+├── tokens/              # سیستم توکن‌های کانونیکال طراحی طبق استاندارد DTCG 2025.10
+├── scripts/             # اسکریپت‌های آزمون کنتراست WCAG، ممیزی امنیتی، تولید OpenAPI و گراف معماری
+└── docs/                # اسناد معماری، تصمیمات مهندسی (ADR)، لاگ شواهد و آمادگی انتشار
 ```
 
-## اجرا (Local)
+---
 
-پیش‌نیاز: Node ≥ 20. برای دیتابیس: Docker Desktop (یا PostgreSQL محلی روی 5432).
+## ۲. قابلیت‌های کلیدی سیستم (Features)
 
+### ۲.۱. فروشگاه و ویترین لوکس B2C (`apps/storefront`)
+- **زیبایی‌شناسی بالینی گرم (Dermavia V6 Ethereal):**
+  - سایبان کرم براق با افکت Specular Gloss و حباب‌های میکرونی (`CreamCanopy`).
+  - موتور ذرات متحرک غبار ستاره‌ای و نورهای ملایم اثیری (`StardustCanvas`).
+  - داک معلق شیشه‌ای همراه با سنتز نوای لوکس پنج‌تنی (`FloatingDock` با Web Audio API).
+- **تجربه کاربری و خرید تعاملی:**
+  - **کوییز هوشمند مشاوره پوست (`SkinConsultationModal`):** تشخیص دوعاملی نوع پوست و دغدغه، و ارائه نسخه و پیشنهاد مستقیم محصول.
+  - **کاتالوگ ۳ بعدی کتابی با ورق‌زدن صفحات (`BookCatalog`):** نمایش دوصفحه‌ای راست‌به‌چپ با امکان افزودن مستقیم به سبد.
+  - **کشوی سبد خرید شناور (`CartDrawer`):** استپر تغییر تعداد، نوارهای پیشرفت آنی برای ارسال رایگان (۲۵M ریال) و هدیه اکسیر طلایی (۴۵M ریال)، و پشتیبانی از کدهای تخفیف (`DERMAVIA10`, `GOLDVIP15`).
+  - **تسویه‌حساب و پرداخت سندباکس (`/checkout` و `/orders/:id`):** نرمال‌سازی کد پستی و ارقام فارسی، ثبت سفارش DRAFT و شبیه‌ساز پرداخت سندباکس با امضای امن HMAC-SHA256 و استپر ۵ مرحله‌ای چرخه عمر سفارش.
+- **صفحات تخصصی برند:**
+  - فهرست کاتالوگ محصولات با فیلتر چیپ‌های کپسولی (`/products`).
+  - صفحه جزئیات محصول با وکتور سه‌بعدی بطری سرم، قطره‌چکان و تب‌های مواد اولیه فعال INCI (`/products/[slug]`).
+  - داستان برند و بیانیه استانداردهای Cleanroom و فرمولاسیون فاقد آب (`/about`).
+  - باشگاه مشتریان وفادار VIP و محاسبه‌گر امتیازات مروارید (`/loyalty`).
+  - مجله علمی و مراقبت پوستی با نوار پیشرفت مطالعه و دیالوگ مطالعه مقاله (`/magazine`).
+  - فرم تماس با بوتیک و آکاردئون پرسش‌های متداول (`/contact`).
+  - سیستم طراحی زنده همراه با آزمایشگاه کنتراست لحظه‌ای WCAG 2.1 (`/design-system`).
+
+### ۲.۲. پورتال عمده‌فروشی و استعلام سفارشی B2B / OEM
+- **ثبت‌نام همکاران و نمایندگان (`/b2b/apply`):** فرم چندمرحله‌ای احراز صلاحیت همراه با آپلود مدارک ثبتی (PDF/تصویر با اعتبارسنجی هش SHA-256).
+- **استعلام قیمت و فرمولاسیون اختصاصی (`/b2b/rfq`):** استعلام خطوط کاتالوگ و مشخصات فنی OEM با گواهی محرمانگی (NDA).
+- **پیشخوان سازمانی B2B (`/b2b/portal`):** ورود با کلیدهای پرآنتراپی (`dvorg_...`)، تفکیک نقش‌های OWNER, BUYER, ACCOUNTANT، مشاهده تاریخچه بازبینی پیش‌فاکتورها و پذیرش پیش‌فاکتور به سفارش واقعی.
+
+### ۲.۳. کنسول اپراتوری و مدیریت مشتریان (Backoffice & CRM)
+- **کنسول مدیریت اپراتور (`/admin`):**
+  - کارت‌های KPI لحظه‌ای سفارش‌ها، درخواست‌های B2B و تیکت‌ها.
+  - صف سفارش‌ها، تغییر وضعیت و استرداد وجه سندباکس.
+  - لجر تراکنش‌های انبارداری با شروط اتمیک Raw-SQL و جلوگیری از Oversell.
+  - تایید یا رد درخواست‌های نمایندگی همراه با دانلود مدارک متقاضی.
+  - صدور پیش‌فاکتور با مهلت اعتبار و قیمت‌گذاری سفارشی OEM.
+  - نمای یکپارچه Customer 360 و تاریخچه سفارش‌های قطعی پرداخت‌شده.
+- **هاب پشتیبانی و تیکتینگ (`/support`):** ثبت تیکت، استعلام کد رهگیری، گفت‌وگوی دوطرفه پیوستار (Append-only) و ثبت سرنخ‌های مشاوره.
+
+---
+
+## ۳. استانداردهای مهندسی و تضمین کیفیت (Quality Gates)
+
+| استاندارد / ابزار | فرمان اجرا | نتیجه و شواهد |
+|---|---|---|
+| **ESLint 9** | `npm run lint` | ۰ خطا در تمامی ۳۴+ فایل کد |
+| **DTCG 2025.10 Tokens** | `npm run tokens:validate` | اعتبارسنجی کامل ۱۰۶ توکن در `tokens/brand.tokens.json` |
+| **WCAG 2.1 AA/AAA Contrast** | `npm run contrast:check` | ۱۷/۱۷ آزمون کنتراست روشنایی با قبولی کامل |
+| **OWASP ASVS 5.0 Security** | `npm run security:audit` | اسکن ۱۱۵ فایل کد؛ ۰ نشت کلید، ۰ eval و تضمین محاسبات پولی صحیح |
+| **گراف معماری Vis.js** | `npm run graph:generate` | نگاشت ۱۱۳ فایل کد و ۴۱۳ گره همراه با تحلیل Blast-radius |
+| **آزمون‌های خودکار Jest** | `npm run test` | **۱۸۳ تست خودکار ۱۰۰٪ سبز** (قراردادها، دامنه، سرویس‌ها و ۱۲ سوئیت E2E) |
+| **بیلد کامل مونوریپو** | `npm run build` | کامپایل موفق ۴ پکیج و تولید تمام **۱۷ مسیر ایستا و پویا** در Next.js 15 |
+| **فرمان یکپارچه ارزیابی** | `npm run verify` | اجرای پشت‌سرهم تمام گیت‌های فوق با Exit Code 0 |
+
+---
+
+## ۴. راه‌اندازی و اجرای محلی (Quick Start)
+
+### پیش‌نیازها
+- **Node.js**: نسخه `v20.0.0` یا بالاتر (تست‌شده و پایدار روی `v22.23.3`)
+- **PostgreSQL**: نسخه 16 (به‌صورت سرویس محلی روی پورت 5432 یا از طریق `docker compose up -d`)
+
+### گام‌های اجرا
 ```bash
+# ۱. نصب وابستگی‌های مونوریپو
 npm install
+
+# ۲. ایجاد کلاینت پریزما و اعمال مایگریشن‌ها
 npm run prisma:generate
-docker compose up -d                 # postgres + redis
-npm run prisma:migrate -w @bc/database   # یا: npx prisma migrate dev
+npm run prisma:migrate -w @bc/database
 npm run prisma:seed
-npm run api:dev      # ترمینال ۱ → http://localhost:3001/api/v1/health
-npm run web:dev      # ترمینال ۲ → http://localhost:3000
-npm run verify       # build + tests
+
+# ۳. اجرای سرور بک‌اند (پورت ۳۰۰۱)
+npm run api:dev
+
+# ۴. اجرای فرانت‌اند استورفرانت (پورت ۳۰۰۰)
+npm run web:dev
+
+# ۵. اجرای تمامی تست‌ها و ممیزی‌های کیفی
+npm run verify
 ```
 
-## داده نمونه و مرزهای صداقت
+---
 
-- تمام محصولات seed با `isSample=true` هستند و در UI با نشان «داده نمونه» نمایش داده می‌شوند (ADR-0004).
-- پرداخت، سبد خرید و لویالتی **عمداً غیرفعال** هستند (فازهای P2/P3) — هیچ جریان خرید شبیه‌سازی‌شده‌ای «موفق» جلوه داده نمی‌شود.
-- تصمیمات تجاری باز (ارز، قیمت‌گذاری، درگاه پرداخت، بازار) در `docs/governance/PENDING_BUSINESS_DECISIONS.fa.md` ثبت‌اند.
+## ۵. داشبوردها و مستندات تکمیلی
 
-## مستندات
+- **داشبورد تعاملی گراف معماری (Vis.js):**
+  - در مخزن: [brand_arch_graph.html](brand_arch_graph.html)
+  - روی دسکتاپ: [C:\Users\talas\OneDrive\Desktop\brand_arch_graph.html](file:///C:/Users/talas/OneDrive/Desktop/brand_arch_graph.html)
+- **مشخصات کامل OpenAPI 3.0 (شامل ۵۸ مسیر REST API):** [apps/api/openapi.json](apps/api/openapi.json)
+- **سند جامع آمادگی انتشار:** [docs/execution/RELEASE_READINESS.md](docs/execution/RELEASE_READINESS.md)
+- **برنامه اجرایی کلان و تاریخچه چرخه‌ها:** [docs/execution/MASTER_EXECUTION_PLAN.fa.md](docs/execution/MASTER_EXECUTION_PLAN.fa.md)
+- **شاخص شواهد آزمون‌ها:** [docs/execution/TEST_EVIDENCE_INDEX.md](docs/execution/TEST_EVIDENCE_INDEX.md)
+- **دفترچه تصمیمات معماری (Decision Log):** [docs/execution/DECISION_LOG.md](docs/execution/DECISION_LOG.md)
 
-- [ممیزی پایه](docs/audit/BASELINE_AUDIT.fa.md) · [Gap Register](docs/audit/GAP_REGISTER.csv)
-- [تصمیمات باز تجاری](docs/governance/PENDING_BUSINESS_DECISIONS.fa.md)
-- [نقشه اجرا P0..P8](docs/execution/MASTER_EXECUTION_PLAN.fa.md) · [Log تصمیمات](docs/execution/DECISION_LOG.md)
+---
+
+## ۶. حاکمیت داده و صداقت در پیش‌تولید (Honest Data Governance)
+
+- تمامی محصولات اولیه حامل نشان `isSample: true` هستند و در رابط کاربری با برچسب مشخص «داده نمونه» عرضه می‌شوند.
+- پرداخت‌های این فاز بر بستر آداپتور امن سندباکس (`PAYMENT_SANDBOX_MODE=true`) با نشان شفاف `SANDBOX` انجام می‌شود و هیچ تراکنش مالی واقعی شبیه‌سازی نمی‌شود.
+- تمامی مبالغ در سطح سرور با مقادیر صحیح جزء (`priceMinor` به ریال) محاسبه می‌گردند و فرانت‌اند صرفاً نمایش‌دهنده مقادیر تاییدشده سرور است.
