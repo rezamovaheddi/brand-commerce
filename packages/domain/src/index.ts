@@ -106,3 +106,41 @@ export function canActAsOrgBuyer(role: OrgMemberRole): boolean {
 export function canReadOrgData(role: OrgMemberRole): boolean {
   return role === "OWNER" || role === "BUYER" || role === "ACCOUNTANT";
 }
+
+// ---- RFQ attachments (B3) ---------------------------------------------------
+// Policy lives here so the API layer and tests share one source of truth.
+// MVP-lite storage: bytes in the database, hard-capped — object storage
+// (S3/COS) replaces this when the deployment slice lands.
+
+export const RFQ_ATTACHMENT_MAX_BYTES = 512 * 1024;
+export const RFQ_ATTACHMENT_MAX_COUNT = 3;
+export const RFQ_ATTACHMENT_ALLOWED_MIMES = ["application/pdf", "image/png", "image/jpeg"] as const;
+export const RFQ_ATTACHMENT_MAX_FILENAME = 120;
+
+export type RfqAttachmentCheck = "ok" | "too_large" | "bad_mime" | "bad_filename";
+
+/** Byte budget + MIME whitelist for one attachment upload. */
+export function checkRfqAttachment(mime: string, sizeBytes: number): RfqAttachmentCheck {
+  if (!RFQ_ATTACHMENT_ALLOWED_MIMES.includes(mime as (typeof RFQ_ATTACHMENT_ALLOWED_MIMES)[number])) {
+    return "bad_mime";
+  }
+  if (!Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > RFQ_ATTACHMENT_MAX_BYTES) {
+    return "too_large";
+  }
+  return "ok";
+}
+
+/**
+ * Filenames are display labels only (stored as-is, never used as paths):
+ * reject path separators and control characters to keep them inert.
+ */
+export function checkRfqAttachmentFilename(filename: string): RfqAttachmentCheck {
+  if (filename.length < 1 || filename.length > RFQ_ATTACHMENT_MAX_FILENAME) {
+    return "bad_filename";
+  }
+  // eslint-disable-next-line no-control-regex
+  if (/[/\\:\0]/.test(filename) || /[\x00-\x1f]/.test(filename)) {
+    return "bad_filename";
+  }
+  return "ok";
+}

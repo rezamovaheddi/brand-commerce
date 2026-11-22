@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -7,16 +7,20 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { Response } from 'express';
 import {
   AcceptQuoteSchema,
   B2BApplication,
   CreateB2BApplicationSchema,
   CreateRfqSchema,
+  RfqAttachmentInputSchema,
   type AcceptQuote,
+  type ApplicationAttachmentMeta,
   type CreateB2BApplication,
   type CreateRfq,
   type QuoteAcceptResponse,
   type Rfq,
+  type RfqAttachmentMeta,
 } from '@bc/contracts';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { B2bService } from './b2b.service';
@@ -47,6 +51,42 @@ export class B2bController {
     return this.b2bService.get(id);
   }
 
+  // ---- B3 application attachments (license/permit documents) ------------------
+
+  @Post('applications/:id/attachments')
+  @ApiOperation({ summary: 'بارگذاری مدرک (جواز/مجوز) — PDF/PNG/JPEG، حداکثر ۵۱۲KB، تا ۳ فایل' })
+  @ApiCreatedResponse({ description: 'متادیتای مدرک', type: Object })
+  @ApiBadRequestResponse({ description: 'نوع/حجم/نام نامعتبر یا سقف ۳ فایل' })
+  @ApiNotFoundResponse({ description: 'درخواست همکاری یافت نشد' })
+  async addApplicationAttachment(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(RfqAttachmentInputSchema)) input: {
+      filename: string;
+      mime: string;
+      contentBase64: string;
+    },
+  ): Promise<ApplicationAttachmentMeta> {
+    return this.b2bService.addApplicationAttachment(id, input);
+  }
+
+  @Get('applications/:id/attachments/:attachmentId')
+  @ApiOperation({ summary: 'دانلود مدرک پیوست‌شده به درخواست همکاری' })
+  @ApiNotFoundResponse({ description: 'مدرک یافت نشد' })
+  async downloadApplicationAttachment(
+    @Param('id') id: string,
+    @Param('attachmentId') attachmentId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { meta, data } = await this.b2bService.getApplicationAttachment(id, attachmentId);
+    res.setHeader('Content-Type', meta.mime);
+    res.setHeader('Content-Length', String(data.length));
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="document-${meta.id}"; filename*=UTF-8''${encodeURIComponent(meta.filename)}`,
+    );
+    res.end(data);
+  }
+
   @Post('rfqs')
   @ApiOperation({ summary: 'ثبت درخواست قیمت (RFQ)' })
   @ApiCreatedResponse({ description: 'RFQ ثبت شد (SUBMITTED)', type: Object })
@@ -63,6 +103,42 @@ export class B2bController {
   @ApiNotFoundResponse({ description: 'درخواست قیمت یافت نشد' })
   async getRfq(@Param('id') id: string): Promise<Rfq> {
     return this.b2bService.getRfq(id);
+  }
+
+  // ---- attachments (B3-lite; access by RFQ id, same trust level as tracking) --
+
+  @Post('rfqs/:id/attachments')
+  @ApiOperation({ summary: 'بارگذاری پیوست (PDF/PNG/JPEG، حداکثر ۵۱۲KB، تا ۳ فایل)' })
+  @ApiCreatedResponse({ description: 'متادیتای پیوست', type: Object })
+  @ApiBadRequestResponse({ description: 'نوع/حجم/نام نامعتبر یا سقف ۳ فایل' })
+  @ApiNotFoundResponse({ description: 'درخواست قیمت یافت نشد' })
+  async addAttachment(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(RfqAttachmentInputSchema)) input: {
+      filename: string;
+      mime: string;
+      contentBase64: string;
+    },
+  ): Promise<RfqAttachmentMeta> {
+    return this.b2bService.addRfqAttachment(id, input);
+  }
+
+  @Get('rfqs/:id/attachments/:attachmentId')
+  @ApiOperation({ summary: 'دانلود پیوست' })
+  @ApiNotFoundResponse({ description: 'پیوست یافت نشد' })
+  async downloadAttachment(
+    @Param('id') id: string,
+    @Param('attachmentId') attachmentId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { meta, data } = await this.b2bService.getRfqAttachment(id, attachmentId);
+    res.setHeader('Content-Type', meta.mime);
+    res.setHeader('Content-Length', String(data.length));
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="attachment-${meta.id}"; filename*=UTF-8''${encodeURIComponent(meta.filename)}`,
+    );
+    res.end(data);
   }
 
   @Post('quotes/:id/accept')

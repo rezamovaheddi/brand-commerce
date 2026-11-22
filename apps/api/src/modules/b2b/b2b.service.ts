@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
@@ -11,8 +12,11 @@ import {
   Quote,
   QuoteRevision,
   Rfq,
+  RfqAttachmentInput,
+  RfqAttachmentMeta,
 } from '@bc/contracts';
-import { canActAsOrgBuyer } from '@bc/domain';
+import type { ApplicationAttachmentMeta } from '@bc/contracts';
+import { canActAsOrgBuyer, checkRfqAttachment, checkRfqAttachmentFilename, RFQ_ATTACHMENT_MAX_COUNT } from '@bc/domain';
 import { PrismaService } from '../../prisma/prisma.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { toOrderContract } from '../orders/order.mapper';
@@ -20,6 +24,10 @@ import type { OrgMemberContext } from './org-member.guard';
 
 const RFQ_INCLUDE = {
   items: true,
+  attachments: {
+    select: { id: true, rfqId: true, filename: true, mime: true, sizeBytes: true, sha256: true, createdAt: true },
+    orderBy: { createdAt: 'asc' as const },
+  },
   quote: { include: { revisions: { orderBy: { revisionNo: 'asc' as const } } } },
 } as const;
 
@@ -29,6 +37,8 @@ interface QuoteLine {
   quantity: number;
   unitPriceMinor: number;
   lineTotalMinor: number;
+  itemKind?: 'CATALOG' | 'OEM';
+  specNote?: string;
 }
 
 interface RfqItemRow {
@@ -37,6 +47,30 @@ interface RfqItemRow {
   productName: string;
   quantity: number;
   note: string | null;
+  itemKind: 'CATALOG' | 'OEM';
+  specNote: string | null;
+}
+
+interface RfqAttachmentMetaRow {
+  id: string;
+  rfqId: string;
+  filename: string;
+  mime: string;
+  sizeBytes: number;
+  sha256: string;
+  createdAt: Date;
+}
+
+function toAttachmentMeta(row: RfqAttachmentMetaRow): RfqAttachmentMeta {
+  return {
+    id: row.id,
+    rfqId: row.rfqId,
+    filename: row.filename,
+    mime: row.mime,
+    sizeBytes: row.sizeBytes,
+    sha256: row.sha256,
+    createdAt: row.createdAt.toISOString(),
+  };
 }
 
 interface RfqRowWithRelations {
@@ -46,8 +80,13 @@ interface RfqRowWithRelations {
   contactName: string;
   contactPhone: string;
   note: string | null;
+  targetMarket: string | null;
+  packaging: string | null;
+  requestedDeliveryDate: Date | null;
+  confidentiality: boolean;
   createdAt: Date;
   items: RfqItemRow[];
+  attachments: RfqAttachmentMetaRow[];
   quote: (QuoteRowWithRevisions & { rfqId: string; status: QuoteRowStatus }) | null;
 }
 
@@ -85,8 +124,30 @@ const APP_SELECT = {
   licenseRef: true,
   status: true,
   reviewNote: true,
+  attachments: {
+    select: {
+      id: true,
+      applicationId: true,
+      filename: true,
+      mime: true,
+      sizeBytes: true,
+      sha256: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: 'asc' as const },
+  },
   createdAt: true,
 } as const;
+
+type ApplicationAttachmentMetaRow = {
+  id: string;
+  applicationId: string;
+  filename: string;
+  mime: string;
+  sizeBytes: number;
+  sha256: string;
+  createdAt: Date;
+};
 
 type B2BApplicationRow = {
   id: string;
@@ -97,8 +158,21 @@ type B2BApplicationRow = {
   licenseRef: string | null;
   status: 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_INFO';
   reviewNote: string | null;
+  attachments: ApplicationAttachmentMetaRow[];
   createdAt: Date;
 };
+
+function toApplicationAttachmentMeta(row: ApplicationAttachmentMetaRow): ApplicationAttachmentMeta {
+  return {
+    id: row.id,
+    applicationId: row.applicationId,
+    filename: row.filename,
+    mime: row.mime,
+    sizeBytes: row.sizeBytes,
+    sha256: row.sha256,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
 
 function toApplicationContract(row: B2BApplicationRow): B2BApplication {
   return {
@@ -110,6 +184,7 @@ function toApplicationContract(row: B2BApplicationRow): B2BApplication {
     licenseRef: row.licenseRef,
     status: row.status,
     reviewNote: row.reviewNote,
+    attachments: (row.attachments ?? []).map((row) => toApplicationAttachmentMeta(row)),
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -246,6 +321,11 @@ export class B2bService {
         contactPhone: input.contactPhone,
         orgId,
         note: input.note ?? null,
+        targetMarket: input.targetMarket ?? null,
+        packaging: input.packaging ?? null,
+        requestedDeliveryDate:
+          input.requestedDeliveryDate !== undefined ? new Date(input.requestedDeliveryDate) : null,
+        confidentiality: input.confidentiality,
         status: 'SUBMITTED',
         items: {
           create: input.items.map((item) => ({
@@ -253,6 +333,8 @@ export class B2bService {
             productName: item.productName,
             quantity: item.quantity,
             note: item.note ?? null,
+            itemKind: item.itemKind,
+            specNote: item.specNote ?? null,
           })),
         },
       },
@@ -317,9 +399,11 @@ export class B2bService {
   }
 
   /**
-   * Admin issues Quote + Revision 1 (APPEND-ONLY). Every RFQ line must carry a
-   * variantId — unit prices are resolved SERVER-SIDE from the catalog and
-   * marked isSample=true (real contract pricing awaits D-11).
+   * Admin issues Quote + Revision 1 (APPEND-ONLY). CATALOG lines are priced
+   * SERVER-SIDE from the catalog; OEM lines (N10/N12) are priced by the
+   * operator via oemUnitPrices (rfqItemId → unitPriceMinor) — every OEM line
+   * must carry one, extra keys are rejected. Everything stays SAMPLE-marked
+   * (real contract pricing awaits D-11).
    */
   async issueQuote(rfqId: string, input: IssueQuote): Promise<Quote> {
     const rfq = await this.prisma.rfq.findUnique({ where: { id: rfqId }, include: RFQ_INCLUDE });
@@ -329,12 +413,7 @@ export class B2bService {
     if (rfq.status === 'ACCEPTED' || rfq.status === 'CLOSED' || rfq.status === 'REJECTED') {
       throw new BadRequestException('این درخواست قیمت قابل قیمت‌گذاری نیست');
     }
-    if (rfq.items.some((item) => item.variantId === null)) {
-      throw new BadRequestException(
-        'برای صدور پیش‌فاکتور همه اقلام باید محصول مشخص داشته باشند (خط سفارشی در فاز OEM)',
-      );
-    }
-    const lines = await this.resolveLines(rfq.items);
+    const lines = await this.resolveLines(rfq.items as unknown as RfqItemRow[], input.oemUnitPrices ?? {});
     const subtotalMinor = lines.reduce((sum, line) => sum + line.lineTotalMinor, 0);
     const validUntil = new Date(Date.now() + input.validityDays * 24 * 60 * 60 * 1000);
     const quote = await this.prisma.$transaction(async (tx) => {
@@ -384,7 +463,7 @@ export class B2bService {
     if (!rfq) {
       throw new NotFoundException('درخواست قیمت یافت نشد');
     }
-    const lines = await this.resolveLines(rfq.items);
+    const lines = await this.resolveLines(rfq.items as unknown as RfqItemRow[], input.oemUnitPrices ?? {});
     const subtotalMinor = lines.reduce((sum, line) => sum + line.lineTotalMinor, 0);
     const validUntil = new Date(Date.now() + input.validityDays * 24 * 60 * 60 * 1000);
     const nextRevisionNo = (quote.revisions[0]?.revisionNo ?? 0) + 1;
@@ -504,7 +583,7 @@ export class B2bService {
           data: lines.map((line) => ({
             orderId: order.id,
             variantId: line.variantId ?? '',
-            sku: 'RFQ',
+            sku: line.itemKind === 'OEM' ? 'OEM' : 'RFQ',
             productNameFa: line.productName,
             productNameEn: line.productName,
             titleFa: line.productName,
@@ -554,14 +633,196 @@ export class B2bService {
     return this.toQuoteContract(quote as unknown as QuoteRowWithRevisions);
   }
 
-  /** Resolves RFQ lines to server-priced catalog lines (all must have variantId). */
+  // ---- RFQ attachments (B3) ---------------------------------------------------
+  // MVP-lite: bytes in the DB with domain-policy caps (≤512KB, ≤3 files, MIME
+  // whitelist); sha256 recorded for integrity. Public access is by RFQ id —
+  // same trust level as the existing public RFQ tracking endpoint.
+
+  /** Uploads one attachment. Policy checks run BEFORE any write. */
+  async addRfqAttachment(rfqId: string, input: RfqAttachmentInput): Promise<RfqAttachmentMeta> {
+    const rfq = await this.prisma.rfq.findUnique({ where: { id: rfqId }, select: { id: true } });
+    if (!rfq) {
+      throw new NotFoundException('درخواست قیمت یافت نشد');
+    }
+    const filenameCheck = checkRfqAttachmentFilename(input.filename);
+    if (filenameCheck !== 'ok') {
+      throw new BadRequestException('نام فایل نامعتبر است (بدون مسیر و نویسه‌های کنترلی)');
+    }
+    const data = Buffer.from(input.contentBase64, 'base64');
+    if (data.length === 0) {
+      throw new BadRequestException('محتوای فایل خالی یا base64 نامعتبر است');
+    }
+    const policy = checkRfqAttachment(input.mime, data.length);
+    if (policy === 'bad_mime') {
+      throw new BadRequestException('فقط PDF، PNG یا JPEG پذیرفته می‌شود');
+    }
+    if (policy === 'too_large') {
+      throw new BadRequestException('حجم فایل بیش از حد مجاز (۵۱۲ کیلوبایت) است');
+    }
+    const count = await this.prisma.rfqAttachment.count({ where: { rfqId } });
+    if (count >= RFQ_ATTACHMENT_MAX_COUNT) {
+      throw new BadRequestException('حداکثر ۳ پیوست برای هر درخواست قیمت مجاز است');
+    }
+    const row = await this.prisma.rfqAttachment.create({
+      data: {
+        rfqId,
+        filename: input.filename,
+        mime: input.mime,
+        sizeBytes: data.length,
+        sha256: createHash('sha256').update(data).digest('hex'),
+        dataBytes: data,
+      },
+      select: { id: true, rfqId: true, filename: true, mime: true, sizeBytes: true, sha256: true, createdAt: true },
+    });
+    return toAttachmentMeta(row as unknown as RfqAttachmentMetaRow);
+  }
+
+  async listRfqAttachments(rfqId: string): Promise<RfqAttachmentMeta[]> {
+    const rows = await this.prisma.rfqAttachment.findMany({
+      where: { rfqId },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, rfqId: true, filename: true, mime: true, sizeBytes: true, sha256: true, createdAt: true },
+    });
+    return rows.map((row) => toAttachmentMeta(row as unknown as RfqAttachmentMetaRow));
+  }
+
+  /** Full attachment (meta + bytes) for download; rfqId must match. */
+  async getRfqAttachment(
+    rfqId: string,
+    attachmentId: string,
+  ): Promise<{ meta: RfqAttachmentMeta; data: Buffer }> {
+    const row = await this.prisma.rfqAttachment.findUnique({ where: { id: attachmentId } });
+    if (!row || row.rfqId !== rfqId) {
+      throw new NotFoundException('پیوست یافت نشد');
+    }
+    return {
+      meta: toAttachmentMeta(row as unknown as RfqAttachmentMetaRow),
+      data: Buffer.from(row.dataBytes),
+    };
+  }
+
+  /** Org-scoped attachment fetch: the RFQ must belong to the member's org. */
+  async getOrgRfqAttachment(
+    member: OrgMemberContext,
+    rfqId: string,
+    attachmentId: string,
+  ): Promise<{ meta: RfqAttachmentMeta; data: Buffer }> {
+    const rfq = await this.prisma.rfq.findUnique({ where: { id: rfqId }, select: { orgId: true } });
+    if (!rfq || rfq.orgId !== member.organizationId) {
+      throw new NotFoundException('درخواست قیمت یافت نشد');
+    }
+    return this.getRfqAttachment(rfqId, attachmentId);
+  }
+
+  // ---- B3 application attachments (license/permit documents) ------------------
+
+  /** Uploads one license/permit document to a distributor application. */
+  async addApplicationAttachment(
+    applicationId: string,
+    input: RfqAttachmentInput,
+  ): Promise<ApplicationAttachmentMeta> {
+    const app = await this.prisma.b2BApplication.findUnique({
+      where: { id: applicationId },
+      select: { id: true },
+    });
+    if (!app) {
+      throw new NotFoundException('درخواست همکاری یافت نشد');
+    }
+    const filenameCheck = checkRfqAttachmentFilename(input.filename);
+    if (filenameCheck !== 'ok') {
+      throw new BadRequestException('نام فایل نامعتبر است (بدون مسیر و نویسه‌های کنترلی)');
+    }
+    const data = Buffer.from(input.contentBase64, 'base64');
+    if (data.length === 0) {
+      throw new BadRequestException('محتوای فایل خالی یا base64 نامعتبر است');
+    }
+    const policy = checkRfqAttachment(input.mime, data.length);
+    if (policy === 'bad_mime') {
+      throw new BadRequestException('فقط PDF، PNG یا JPEG پذیرفته می‌شود');
+    }
+    if (policy === 'too_large') {
+      throw new BadRequestException('حجم فایل بیش از حد مجاز (۵۱۲ کیلوبایت) است');
+    }
+    const count = await this.prisma.applicationAttachment.count({ where: { applicationId } });
+    if (count >= RFQ_ATTACHMENT_MAX_COUNT) {
+      throw new BadRequestException('حداکثر ۳ مدرک برای هر درخواست همکاری مجاز است');
+    }
+    const row = await this.prisma.applicationAttachment.create({
+      data: {
+        applicationId,
+        filename: input.filename,
+        mime: input.mime,
+        sizeBytes: data.length,
+        sha256: createHash('sha256').update(data).digest('hex'),
+        dataBytes: data,
+      },
+      select: {
+        id: true,
+        applicationId: true,
+        filename: true,
+        mime: true,
+        sizeBytes: true,
+        sha256: true,
+        createdAt: true,
+      },
+    });
+    return toApplicationAttachmentMeta(row as unknown as ApplicationAttachmentMetaRow);
+  }
+
+  /** Full application attachment (meta + bytes); applicationId must match. */
+  async getApplicationAttachment(
+    applicationId: string,
+    attachmentId: string,
+  ): Promise<{ meta: ApplicationAttachmentMeta; data: Buffer }> {
+    const row = await this.prisma.applicationAttachment.findUnique({ where: { id: attachmentId } });
+    if (!row || row.applicationId !== applicationId) {
+      throw new NotFoundException('مدرک یافت نشد');
+    }
+    return {
+      meta: toApplicationAttachmentMeta(row as unknown as ApplicationAttachmentMetaRow),
+      data: Buffer.from(row.dataBytes),
+    };
+  }
+
+  /**
+   * Resolves RFQ lines to priced snapshot lines. CATALOG lines take the
+   * server-resolved catalog price (variantId mandatory); OEM lines take the
+   * operator-supplied price from oemUnitPrices keyed by RFQ item id.
+   */
   private async resolveLines(
-    items: Array<{ variantId: string | null; productName: string; quantity: number }>,
+    items: RfqItemRow[],
+    oemUnitPrices: Record<string, number>,
   ): Promise<QuoteLine[]> {
     const lines: QuoteLine[] = [];
     for (const item of items) {
+      if (item.itemKind === 'OEM') {
+        const unitPriceMinor = oemUnitPrices[item.id];
+        if (unitPriceMinor === undefined) {
+          throw new BadRequestException(
+            `قیمت واحد برای خط OEM «${item.productName}» الزامی است`,
+          );
+        }
+        lines.push({
+          variantId: null,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPriceMinor,
+          lineTotalMinor: unitPriceMinor * item.quantity,
+          itemKind: 'OEM',
+          specNote: item.specNote ?? undefined,
+        });
+        continue;
+      }
+      if (oemUnitPrices[item.id] !== undefined) {
+        throw new BadRequestException('قیمت دستی فقط برای خطوط OEM مجاز است');
+      }
+      if (item.variantId === null) {
+        throw new BadRequestException(
+          'برای صدور پیش‌فاکتور همه اقلام باید محصول مشخص داشته باشند یا نوع OEM باشند',
+        );
+      }
       const variant = await this.prisma.productVariant.findUnique({
-        where: { id: item.variantId as string },
+        where: { id: item.variantId },
         include: { product: true },
       });
       if (!variant || variant.status !== 'ACTIVE' || variant.product.status !== 'ACTIVE') {
@@ -573,6 +834,7 @@ export class B2bService {
         quantity: item.quantity,
         unitPriceMinor: variant.priceMinor,
         lineTotalMinor: variant.priceMinor * item.quantity,
+        itemKind: 'CATALOG',
       });
     }
     return lines;
@@ -613,8 +875,18 @@ export class B2bService {
         productName: item.productName,
         quantity: item.quantity,
         note: item.note,
+        itemKind: item.itemKind ?? 'CATALOG',
+        specNote: item.specNote ?? null,
       })),
+      attachments: (row.attachments ?? []).map((row) => toAttachmentMeta(row)),
       note: row.note,
+      targetMarket: row.targetMarket ?? null,
+      packaging: row.packaging ?? null,
+      requestedDeliveryDate:
+        row.requestedDeliveryDate !== null && row.requestedDeliveryDate !== undefined
+          ? row.requestedDeliveryDate.toISOString().slice(0, 10)
+          : null,
+      confidentiality: row.confidentiality ?? false,
       quote: row.quote ? this.toQuoteContract(row.quote as unknown as QuoteRowWithRevisions) : null,
       createdAt: row.createdAt.toISOString(),
     };

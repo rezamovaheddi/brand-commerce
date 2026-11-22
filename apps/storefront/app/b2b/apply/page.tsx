@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { B2BApplication } from "@bc/contracts";
-import { CartApiError, getB2BApplication, submitB2BApplication } from "../../../lib/b2b-client";
+import {
+  applicationAttachmentDownloadUrl,
+  CartApiError,
+  fileToAttachmentPayload,
+  getB2BApplication,
+  submitB2BApplication,
+  uploadApplicationAttachment,
+  validateAttachmentFile,
+} from "../../../lib/b2b-client";
 
 /**
- * Public B2B application page (B3-lite): distributor/agency submit → track.
+ * Public B2B application page (B3): distributor/agency submit → attach
+ * license/permit documents (PDF/PNG/JPEG ≤512KB, ≤3 files) → track.
  * Honest state: approval creates the organization scaffold only; contract
  * pricing (D-11) and credit (D-12) are pending business decisions and the
  * B2B portal stays locked until then. (Metadata lives in the root layout —
@@ -28,6 +37,41 @@ export default function B2BApplyPage() {
   const [tracked, setTracked] = useState<B2BApplication | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const docInput = useRef<HTMLInputElement>(null);
+
+  // B3: attach a license/permit document to a submitted application (public
+  // upload by application id — same trust level as the tracking endpoint).
+  const handleDocUpload = async (file: File, applicationId: string): Promise<void> => {
+    if (uploading) {
+      return;
+    }
+    const invalid = validateAttachmentFile(file);
+    if (invalid !== null) {
+      setError(invalid);
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    try {
+      const payload = await fileToAttachmentPayload(file);
+      await uploadApplicationAttachment(applicationId, payload);
+      const fresh = await getB2BApplication(applicationId);
+      if (created !== null && created.id === applicationId) {
+        setCreated(fresh);
+      }
+      if (tracked !== null && tracked.id === applicationId) {
+        setTracked(fresh);
+      }
+      if (docInput.current !== null) {
+        docInput.current.value = "";
+      }
+    } catch (cause) {
+      setError(cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در بارگذاری مدرک.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -77,6 +121,55 @@ export default function B2BApplyPage() {
     NEEDS_INFO: "نیازمند اطلاعات تکمیلی",
   };
 
+  // Shared documents panel (B3): list + upload slot for a known application.
+  const renderDocPanel = (application: B2BApplication): React.ReactNode => (
+    <div className="dv-sandbox-panel">
+      <h4 className="dv-sandbox-title">
+        مدارک بارگذاری‌شده ({application.attachments.length}/3)
+      </h4>
+      {application.attachments.length === 0 ? (
+        <p className="dv-muted">
+          جواز کسب / مجوز را پیوست کنید (PDF، PNG یا JPEG — حداکثر ۵۱۲ کیلوبایت).
+        </p>
+      ) : (
+        <ul className="dv-attach-list">
+          {application.attachments.map((doc) => (
+            <li key={doc.id} className="dv-attach-item">
+              <a
+                href={applicationAttachmentDownloadUrl(application.id, doc.id)}
+                className="dv-link"
+                download={doc.filename}
+              >
+                {doc.filename}
+              </a>
+              <span className="dv-attach-size">
+                {Math.max(1, Math.round(doc.sizeBytes / 1024))} کیلوبایت
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {application.attachments.length < 3 ? (
+        <input
+          ref={docInput}
+          type="file"
+          className="dv-file-input"
+          accept="application/pdf,image/png,image/jpeg"
+          aria-label="بارگذاری مدرک"
+          disabled={uploading}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) {
+              void handleDocUpload(file, application.id);
+            }
+          }}
+        />
+      ) : (
+        <p className="dv-muted">سقف ۳ مدرک پر شده است.</p>
+      )}
+    </div>
+  );
+
   return (
     <div className="container dv-page dv-b2b-apply">
       <h1>درخواست همکاری توزیع</h1>
@@ -97,6 +190,7 @@ export default function B2BApplyPage() {
             <span dir="ltr">{created.id}</span>
           </p>
           <p className="dv-muted">{TRACK_HINT}</p>
+          {renderDocPanel(created)}
           <Link href="/" className="dv-btn dv-btn-gold">
             بازگشت به فروشگاه
           </Link>
@@ -170,11 +264,14 @@ export default function B2BApplyPage() {
           </button>
         </div>
         {tracked !== null ? (
-          <p role="status">
-            وضعیت درخواست <span dir="ltr">{tracked.id}</span>:{" "}
-            <strong>{STATUS_LABELS[tracked.status] ?? tracked.status}</strong>
-            {tracked.reviewNote ? ` — ${tracked.reviewNote}` : ""}
-          </p>
+          <div role="status">
+            <p>
+              وضعیت درخواست <span dir="ltr">{tracked.id}</span>:{" "}
+              <strong>{STATUS_LABELS[tracked.status] ?? tracked.status}</strong>
+              {tracked.reviewNote ? ` — ${tracked.reviewNote}` : ""}
+            </p>
+            {renderDocPanel(tracked)}
+          </div>
         ) : null}
       </section>
     </div>

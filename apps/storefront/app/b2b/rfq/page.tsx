@@ -1,21 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Rfq } from "@bc/contracts";
 import {
   CartApiError,
   acceptQuote,
+  fileToAttachmentPayload,
   getRfq,
+  rfqAttachmentDownloadUrl,
   submitRfq,
+  uploadRfqAttachment,
+  validateAttachmentFile,
 } from "../../../lib/b2b-client";
 import { formatPrice } from "../../../lib/format";
 
 /**
- * Public RFQ page: submit a quote request → track status → view quote
- * revisions (SAMPLE-marked prices) → accept with a shipping address, which
- * converts the quote into a real order (honest: payment still follows the
- * normal locked path).
+ * Public RFQ page: submit a quote request (CATALOG or OEM line) → track
+ * status → attach files (PDF/PNG/JPEG ≤512KB, ≤3) → view quote revisions
+ * (SAMPLE-marked prices) → accept with a shipping address, which converts
+ * the quote into a real order (honest: payment still follows the normal
+ * locked path).
  */
 
 const EMPTY_FORM = {
@@ -24,6 +29,12 @@ const EMPTY_FORM = {
   productName: "",
   quantity: "",
   note: "",
+  itemKind: "CATALOG" as "CATALOG" | "OEM",
+  specNote: "",
+  targetMarket: "",
+  packaging: "",
+  requestedDeliveryDate: "",
+  confidentiality: false,
 };
 
 const EMPTY_ADDRESS = {
@@ -60,6 +71,8 @@ export default function RfqPage() {
   const [acceptedOrder, setAcceptedOrder] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [attaching, setAttaching] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -69,6 +82,7 @@ export default function RfqPage() {
     setBusy(true);
     setError(null);
     try {
+      const isOem = form.itemKind === "OEM";
       const created = await submitRfq({
         contactName: form.contactName,
         contactPhone: form.contactPhone,
@@ -76,9 +90,16 @@ export default function RfqPage() {
           {
             productName: form.productName,
             quantity: Number(form.quantity),
+            itemKind: form.itemKind,
+            ...(isOem && form.specNote.trim() !== "" ? { specNote: form.specNote } : {}),
           },
         ],
         note: form.note.trim() === "" ? undefined : form.note,
+        targetMarket: form.targetMarket.trim() === "" ? undefined : form.targetMarket,
+        packaging: form.packaging.trim() === "" ? undefined : form.packaging,
+        requestedDeliveryDate:
+          form.requestedDeliveryDate.trim() === "" ? undefined : form.requestedDeliveryDate,
+        confidentiality: form.confidentiality,
       });
       setRfq(created);
       setTrackId(created.id);
@@ -87,6 +108,31 @@ export default function RfqPage() {
       setError(cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در ثبت RFQ.");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleAttach = async (file: File): Promise<void> => {
+    if (rfq === null || attaching) {
+      return;
+    }
+    const invalid = validateAttachmentFile(file);
+    if (invalid !== null) {
+      setError(invalid);
+      return;
+    }
+    setAttaching(true);
+    setError(null);
+    try {
+      const payload = await fileToAttachmentPayload(file);
+      await uploadRfqAttachment(rfq.id, payload);
+      setRfq(await getRfq(rfq.id));
+      if (fileInput.current !== null) {
+        fileInput.current.value = "";
+      }
+    } catch (cause) {
+      setError(cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در بارگذاری پیوست.");
+    } finally {
+      setAttaching(false);
     }
   };
 
@@ -181,6 +227,41 @@ export default function RfqPage() {
             required
             minLength={2}
           />
+          <fieldset className="dv-choice-row">
+            <legend>نوع خط:</legend>
+            <label className="dv-choice-option">
+              <input
+                type="radio"
+                name="rfq-item-kind"
+                checked={form.itemKind === "CATALOG"}
+                onChange={() => setForm({ ...form, itemKind: "CATALOG" })}
+              />
+              کاتالوگ موجود
+            </label>
+            <label className="dv-choice-option">
+              <input
+                type="radio"
+                name="rfq-item-kind"
+                checked={form.itemKind === "OEM"}
+                onChange={() => setForm({ ...form, itemKind: "OEM" })}
+              />
+              سفارشی / OEM
+            </label>
+          </fieldset>
+          {form.itemKind === "OEM" ? (
+            <>
+              <label htmlFor="rfq-spec">شرح فنی سفارش (حداقل ۱۰ نویسه)</label>
+              <textarea
+                id="rfq-spec"
+                className="dv-checkout-textarea"
+                value={form.specNote}
+                onChange={(event) => setForm({ ...form, specNote: event.target.value })}
+                rows={3}
+                minLength={10}
+                required
+              />
+            </>
+          ) : null}
           <label htmlFor="rfq-qty">تعداد</label>
           <input
             id="rfq-qty"
@@ -196,6 +277,38 @@ export default function RfqPage() {
             value={form.note}
             onChange={(event) => setForm({ ...form, note: event.target.value })}
           />
+          <fieldset className="dv-brief-grid">
+            <legend className="dv-muted">بریف سفارشی (N10 — اختیاری)</legend>
+            <label htmlFor="rfq-market">بازار هدف</label>
+            <input
+              id="rfq-market"
+              value={form.targetMarket}
+              onChange={(event) => setForm({ ...form, targetMarket: event.target.value })}
+            />
+            <label htmlFor="rfq-packaging">بسته‌بندی</label>
+            <input
+              id="rfq-packaging"
+              value={form.packaging}
+              onChange={(event) => setForm({ ...form, packaging: event.target.value })}
+            />
+            <label htmlFor="rfq-delivery">تحویل درخواستی (YYYY-MM-DD)</label>
+            <input
+              id="rfq-delivery"
+              dir="ltr"
+              placeholder="2026-03-15"
+              value={form.requestedDeliveryDate}
+              onChange={(event) => setForm({ ...form, requestedDeliveryDate: event.target.value })}
+            />
+            <label className="dv-choice-option" htmlFor="rfq-conf">
+              <input
+                id="rfq-conf"
+                type="checkbox"
+                checked={form.confidentiality}
+                onChange={(event) => setForm({ ...form, confidentiality: event.target.checked })}
+              />
+              این درخواست محرمانه است
+            </label>
+          </fieldset>
           <button type="submit" className="dv-btn dv-btn-block" disabled={busy} aria-busy={busy}>
             {busy ? "در حال ارسال…" : "ثبت درخواست قیمت"}
           </button>
@@ -228,6 +341,61 @@ export default function RfqPage() {
             <p>
               وضعیت: <strong>{STATUS_LABELS[rfq.status] ?? rfq.status}</strong>
             </p>
+            {rfq.items.length > 0 ? (
+              <p className="dv-muted">
+                اقلام:{" "}
+                {rfq.items
+                  .map((item) =>
+                    item.itemKind === "OEM"
+                      ? `${item.productName}×${item.quantity} (سفارشی/OEM)`
+                      : `${item.productName}×${item.quantity}`,
+                  )
+                  .join("، ")}
+              </p>
+            ) : null}
+            <div className="dv-sandbox-panel">
+              <h4 className="dv-sandbox-title">
+                پیوست‌ها ({rfq.attachments.length}/3)
+              </h4>
+              {rfq.attachments.length === 0 ? (
+                <p className="dv-muted">پیوستی بارگذاری نشده است — برای مشخصات فنی می‌توانید فایل بچسبانید.</p>
+              ) : (
+                <ul className="dv-attach-list">
+                  {rfq.attachments.map((att) => (
+                    <li key={att.id} className="dv-attach-item">
+                      <a
+                        href={rfqAttachmentDownloadUrl(rfq.id, att.id)}
+                        className="dv-link"
+                        download={att.filename}
+                      >
+                        {att.filename}
+                      </a>
+                      <span className="dv-attach-size">
+                        {Math.max(1, Math.round(att.sizeBytes / 1024))} کیلوبایت
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {rfq.attachments.length < 3 ? (
+                <input
+                  ref={fileInput}
+                  type="file"
+                  className="dv-file-input"
+                  accept="application/pdf,image/png,image/jpeg"
+                  aria-label="بارگذاری پیوست"
+                  disabled={attaching}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      void handleAttach(file);
+                    }
+                  }}
+                />
+              ) : (
+                <p className="dv-muted">سقف ۳ پیوست پر شده است.</p>
+              )}
+            </div>
             {quote !== null ? (
               <>
                 <p>

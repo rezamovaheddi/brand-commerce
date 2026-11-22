@@ -1,17 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Rfq } from "@bc/contracts";
 import {
   CartApiError,
   clearOrgKey,
+  fileToAttachmentPayload,
   getOrgKey,
   orgAcceptQuote,
+  orgDownloadAttachment,
   orgListRfqs,
   orgMe,
   orgSubmitRfq,
+  orgUploadAttachment,
   setOrgKey,
+  validateAttachmentFile,
   type OrgMe,
 } from "../../../lib/b2b-client";
 import { formatPrice } from "../../../lib/format";
@@ -19,8 +23,9 @@ import { formatPrice } from "../../../lib/format";
 /**
  * Organization portal (N16): the member enters the operator-issued access key
  * (kept in sessionStorage only), sees their organization identity, raises
- * org-bound RFQs and accepts org quotes. Honest gates: ACCOUNTANT role cannot
- * purchase; SAMPLE pricing banners stay until D-11 lands.
+ * org-bound RFQs (CATALOG or OEM), attaches files and accepts org quotes.
+ * Honest gates: ACCOUNTANT role cannot purchase; SAMPLE pricing banners stay
+ * until D-11 lands.
  */
 
 const EMPTY_FORM = {
@@ -29,6 +34,12 @@ const EMPTY_FORM = {
   productName: "",
   quantity: "",
   note: "",
+  itemKind: "CATALOG" as "CATALOG" | "OEM",
+  specNote: "",
+  targetMarket: "",
+  packaging: "",
+  requestedDeliveryDate: "",
+  confidentiality: false,
 };
 
 const EMPTY_ADDRESS = {
@@ -73,6 +84,8 @@ export default function OrgPortalPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [booting, setBooting] = useState(true);
+  const [attaching, setAttaching] = useState(false);
+  const attachTarget = useRef<string | null>(null);
 
   const loadPortal = useCallback(async (activeKey: string): Promise<void> => {
     setBusy(true);
@@ -144,11 +157,24 @@ export default function OrgPortalPage() {
     setBusy(true);
     setError(null);
     try {
+      const isOem = form.itemKind === "OEM";
       await orgSubmitRfq(key, {
         contactName: form.contactName,
         contactPhone: form.contactPhone,
-        items: [{ productName: form.productName, quantity: Number(form.quantity) }],
+        items: [
+          {
+            productName: form.productName,
+            quantity: Number(form.quantity),
+            itemKind: form.itemKind,
+            ...(isOem && form.specNote.trim() !== "" ? { specNote: form.specNote } : {}),
+          },
+        ],
         note: form.note.trim() === "" ? undefined : form.note,
+        targetMarket: form.targetMarket.trim() === "" ? undefined : form.targetMarket,
+        packaging: form.packaging.trim() === "" ? undefined : form.packaging,
+        requestedDeliveryDate:
+          form.requestedDeliveryDate.trim() === "" ? undefined : form.requestedDeliveryDate,
+        confidentiality: form.confidentiality,
       });
       setForm(EMPTY_FORM);
       setRfqs(await orgListRfqs(key));
@@ -156,6 +182,40 @@ export default function OrgPortalPage() {
       setError(cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در ثبت درخواست.");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleOrgAttach = async (file: File, rfqId: string): Promise<void> => {
+    if (key === null || attaching) {
+      return;
+    }
+    const invalid = validateAttachmentFile(file);
+    if (invalid !== null) {
+      setError(invalid);
+      return;
+    }
+    setAttaching(true);
+    setError(null);
+    try {
+      const payload = await fileToAttachmentPayload(file);
+      await orgUploadAttachment(key, rfqId, payload);
+      setRfqs(await orgListRfqs(key));
+    } catch (cause) {
+      setError(cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در بارگذاری پیوست.");
+    } finally {
+      setAttaching(false);
+      attachTarget.current = null;
+    }
+  };
+
+  const handleOrgDownload = async (rfqId: string, attachmentId: string, filename: string): Promise<void> => {
+    if (key === null) {
+      return;
+    }
+    try {
+      await orgDownloadAttachment(key, rfqId, attachmentId, filename);
+    } catch (cause) {
+      setError(cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در دانلود پیوست.");
     }
   };
 
@@ -284,6 +344,41 @@ export default function OrgPortalPage() {
               required
               minLength={2}
             />
+            <fieldset className="dv-choice-row">
+              <legend>نوع خط:</legend>
+              <label className="dv-choice-option">
+                <input
+                  type="radio"
+                  name="portal-item-kind"
+                  checked={form.itemKind === "CATALOG"}
+                  onChange={() => setForm({ ...form, itemKind: "CATALOG" })}
+                />
+                کاتالوگ موجود
+              </label>
+              <label className="dv-choice-option">
+                <input
+                  type="radio"
+                  name="portal-item-kind"
+                  checked={form.itemKind === "OEM"}
+                  onChange={() => setForm({ ...form, itemKind: "OEM" })}
+                />
+                سفارشی / OEM
+              </label>
+            </fieldset>
+            {form.itemKind === "OEM" ? (
+              <>
+                <label htmlFor="portal-spec">شرح فنی سفارش (حداقل ۱۰ نویسه)</label>
+                <textarea
+                  id="portal-spec"
+                  className="dv-checkout-textarea"
+                  value={form.specNote}
+                  onChange={(event) => setForm({ ...form, specNote: event.target.value })}
+                  rows={3}
+                  minLength={10}
+                  required
+                />
+              </>
+            ) : null}
             <label htmlFor="portal-qty">تعداد</label>
             <input
               id="portal-qty"
@@ -299,6 +394,38 @@ export default function OrgPortalPage() {
               value={form.note}
               onChange={(event) => setForm({ ...form, note: event.target.value })}
             />
+            <fieldset className="dv-brief-grid">
+              <legend className="dv-muted">بریف سفارشی (N10 — اختیاری)</legend>
+              <label htmlFor="portal-market">بازار هدف</label>
+              <input
+                id="portal-market"
+                value={form.targetMarket}
+                onChange={(event) => setForm({ ...form, targetMarket: event.target.value })}
+              />
+              <label htmlFor="portal-packaging">بسته‌بندی</label>
+              <input
+                id="portal-packaging"
+                value={form.packaging}
+                onChange={(event) => setForm({ ...form, packaging: event.target.value })}
+              />
+              <label htmlFor="portal-delivery">تحویل درخواستی (YYYY-MM-DD)</label>
+              <input
+                id="portal-delivery"
+                dir="ltr"
+                placeholder="2026-03-15"
+                value={form.requestedDeliveryDate}
+                onChange={(event) => setForm({ ...form, requestedDeliveryDate: event.target.value })}
+              />
+              <label className="dv-choice-option" htmlFor="portal-conf">
+                <input
+                  id="portal-conf"
+                  type="checkbox"
+                  checked={form.confidentiality}
+                  onChange={(event) => setForm({ ...form, confidentiality: event.target.checked })}
+                />
+                این درخواست محرمانه است
+              </label>
+            </fieldset>
             <button type="submit" className="dv-btn dv-btn-block" disabled={busy} aria-busy={busy}>
               {busy ? "در حال ارسال…" : "ثبت درخواست سازمانی"}
             </button>
@@ -327,8 +454,55 @@ export default function OrgPortalPage() {
                     <span dir="ltr">{rfq.id.slice(-8)}</span> — {STATUS_LABELS[rfq.status] ?? rfq.status}
                   </h3>
                   <p className="dv-muted">
-                    اقلام: {rfq.items.map((item) => `${item.productName}×${item.quantity}`).join("، ")}
+                    اقلام:{" "}
+                    {rfq.items
+                      .map((item) =>
+                        item.itemKind === "OEM"
+                          ? `${item.productName}×${item.quantity} (سفارشی/OEM)`
+                          : `${item.productName}×${item.quantity}`,
+                      )
+                      .join("، ")}
                   </p>
+                  <div className="dv-sandbox-panel">
+                    <h4 className="dv-sandbox-title">پیوست‌ها ({rfq.attachments.length}/3)</h4>
+                    {rfq.attachments.length === 0 ? (
+                      <p className="dv-muted">پیوستی ثبت نشده است.</p>
+                    ) : (
+                      <ul className="dv-attach-list">
+                        {rfq.attachments.map((att) => (
+                          <li key={att.id} className="dv-attach-item">
+                            <button
+                              type="button"
+                              className="dv-link"
+                              style={{ background: "none", border: "none", padding: 0 }}
+                              onClick={() => void handleOrgDownload(rfq.id, att.id, att.filename)}
+                            >
+                              {att.filename}
+                            </button>
+                            <span className="dv-attach-size">
+                              {Math.max(1, Math.round(att.sizeBytes / 1024))} کیلوبایت
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {isBuyer && rfq.attachments.length < 3 ? (
+                      <input
+                        type="file"
+                        className="dv-file-input"
+                        accept="application/pdf,image/png,image/jpeg"
+                        aria-label={`بارگذاری پیوست برای ${rfq.id}`}
+                        disabled={attaching}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            attachTarget.current = rfq.id;
+                            void handleOrgAttach(file, rfq.id);
+                          }
+                        }}
+                      />
+                    ) : null}
+                  </div>
                   {quote !== null ? (
                     <>
                       <p className="dv-muted">

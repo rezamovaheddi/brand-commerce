@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
@@ -9,6 +9,7 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
+import { Response } from 'express';
 import {
   AdminB2BDecisionSchema,
   AdminInventoryItem,
@@ -147,6 +148,42 @@ export class AdminController {
     @Body(new ZodValidationPipe(IssueQuoteSchema)) input: IssueQuote,
   ) {
     return this.adminService.addRevision(id, input);
+  }
+
+  @Get('b2b/rfqs/:id/attachments/:attachmentId')
+  @ApiOperation({ summary: 'دانلود پیوست RFQ (بررسی قیمت‌گذاری)' })
+  @ApiNotFoundResponse({ description: 'پیوست یافت نشد' })
+  async downloadRfqAttachment(
+    @Param('id') id: string,
+    @Param('attachmentId') attachmentId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { meta, data } = await this.adminService.downloadRfqAttachment(id, attachmentId);
+    res.setHeader('Content-Type', meta.mime);
+    res.setHeader('Content-Length', String(data.length));
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="attachment-${attachmentId}"; filename*=UTF-8''${encodeURIComponent(meta.filename)}`,
+    );
+    res.end(data);
+  }
+
+  @Get('b2b/applications/:id/attachments/:attachmentId')
+  @ApiOperation({ summary: 'دانلود مدرک درخواست همکاری (بررسی B3/B4)' })
+  @ApiNotFoundResponse({ description: 'مدرک یافت نشد' })
+  async downloadApplicationAttachment(
+    @Param('id') id: string,
+    @Param('attachmentId') attachmentId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { meta, data } = await this.adminService.downloadApplicationAttachment(id, attachmentId);
+    res.setHeader('Content-Type', meta.mime);
+    res.setHeader('Content-Length', String(data.length));
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="document-${attachmentId}"; filename*=UTF-8''${encodeURIComponent(meta.filename)}`,
+    );
+    res.end(data);
   }
 
   // ---- Organization members + access keys (N16) -------------------------------

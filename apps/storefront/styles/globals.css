@@ -1537,6 +1537,151 @@ button[aria-disabled="true"],
   margin: 0 0 10px;
 }
 
+/* ---- B2B brief + attachments (cycle 10) ------------------------------------ */
+
+/* Inline text link (referenced by RFQ/portal/admin pages). */
+.dv-link {
+  color: var(--dv-gold);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  border-radius: 4px;
+}
+
+.dv-link:hover {
+  color: var(--dv-navy);
+}
+
+.dv-link:focus-visible {
+  outline: none;
+  box-shadow: var(--dv-focus);
+}
+
+/* CATALOG / OEM choice row: logical properties only, 44px touch per option. */
+.dv-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dv-choice-row legend {
+  font-size: 0.9rem;
+  color: var(--dv-muted);
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.dv-choice-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--dv-touch);
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: var(--dv-ink);
+  cursor: pointer;
+}
+
+.dv-choice-option:hover {
+  background: rgba(233, 203, 138, 0.35);
+}
+
+.dv-choice-option input[type="radio"] {
+  inline-size: 20px;
+  block-size: 20px;
+  accent-color: var(--dv-gold);
+}
+
+/* Native file picker aligned with the sandbox panel aesthetic. */
+.dv-file-input {
+  display: block;
+  inline-size: 100%;
+  min-height: var(--dv-touch);
+  padding: 10px 12px;
+  border: 1px dashed rgba(111, 74, 20, 0.4);
+  border-radius: 10px;
+  background: var(--dv-paper);
+  color: var(--dv-ink-soft);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.dv-file-input:focus-visible {
+  outline: none;
+  box-shadow: var(--dv-focus);
+}
+
+/* Attachment list inside RFQ/application cards. */
+.dv-attach-list {
+  margin: 0;
+  padding-inline-start: 18px;
+  line-height: 2;
+}
+
+.dv-attach-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.dv-attach-size {
+  color: var(--dv-muted);
+  font-size: 0.82rem;
+}
+
+/* Operator OEM unit-price row in the quote form. */
+.dv-oem-price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  inline-size: 100%;
+  font-size: 0.85rem;
+  color: var(--dv-ink-soft);
+}
+
+.dv-oem-price-row input {
+  min-height: 40px;
+  inline-size: 130px;
+  padding: 6px 10px;
+  border: 1px solid var(--dv-line);
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+/* Optional brief fields (target market / packaging / delivery). */
+.dv-brief-grid {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+
+.dv-brief-grid label {
+  font-size: 0.85rem;
+  color: var(--dv-muted);
+}
+
+.dv-brief-grid input {
+  min-height: var(--dv-touch);
+  padding: 8px 12px;
+  border: 1px solid var(--dv-line);
+  border-radius: 10px;
+  font-family: inherit;
+  background: var(--dv-paper);
+}
+
+.dv-brief-grid input:focus-visible {
+  outline: none;
+  box-shadow: var(--dv-focus);
+}
+
 /* ---- About page ---------------------------------------------------------- */
 .dv-about-lede {
   max-width: 60ch;

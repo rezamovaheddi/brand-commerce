@@ -326,6 +326,22 @@ export const B2BApplicationStatusSchema = z.enum([
 ]);
 export type B2BApplicationStatus = z.infer<typeof B2BApplicationStatusSchema>;
 
+/**
+ * B3 application attachments: license/permit files attached to a distributor
+ * application (public upload by application id — same trust level as the
+ * tracking endpoint; admin reviews and downloads from the console).
+ */
+export const ApplicationAttachmentMetaSchema = z.object({
+  id: z.string(),
+  applicationId: z.string(),
+  filename: z.string(),
+  mime: z.string(),
+  sizeBytes: z.number().int().positive(),
+  sha256: z.string().length(64),
+  createdAt: z.string(),
+});
+export type ApplicationAttachmentMeta = z.infer<typeof ApplicationAttachmentMetaSchema>;
+
 export const B2BApplicationSchema = z.object({
   id: z.string(),
   contactName: z.string(),
@@ -335,6 +351,7 @@ export const B2BApplicationSchema = z.object({
   licenseRef: z.string().nullable(),
   status: B2BApplicationStatusSchema,
   reviewNote: z.string().nullable(),
+  attachments: z.array(ApplicationAttachmentMetaSchema),
   createdAt: z.string(),
 });
 export type B2BApplication = z.infer<typeof B2BApplicationSchema>;
@@ -395,12 +412,42 @@ export type OrgMe = z.infer<typeof OrgMeSchema>;
  * Revision prices are SAMPLE-marked (isSandbox-style honesty): real contract
  * pricing awaits D-11. Accept converts to a real Order with inventory reserve.
  */
-export const RfqItemInputSchema = z.object({
-  variantId: z.string().max(64).optional(),
-  productName: z.string().min(2).max(120),
-  quantity: z.coerce.number().int().min(1).max(999),
-  note: z.string().max(200).optional(),
-});
+/**
+ * RFQ item kinds (N10/N12): CATALOG lines reference (optionally) a catalog
+ * variant; OEM lines are custom-manufacturing requests — variantId forbidden,
+ * a technical specNote is mandatory. Pricing for OEM lines is operator-supplied
+ * at quote time (still SAMPLE-marked until D-11).
+ */
+export const RfqItemKindSchema = z.enum(["CATALOG", "OEM"]);
+export type RfqItemKind = z.infer<typeof RfqItemKindSchema>;
+
+export const RfqItemInputSchema = z
+  .object({
+    variantId: z.string().max(64).optional(),
+    productName: z.string().min(2).max(120),
+    quantity: z.coerce.number().int().min(1).max(999),
+    note: z.string().max(200).optional(),
+    itemKind: RfqItemKindSchema.default("CATALOG"),
+    specNote: z.string().max(500).optional(),
+  })
+  .superRefine((item, ctx) => {
+    if (item.itemKind === "OEM") {
+      if (item.variantId !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "خط OEM نباید محصول کاتالوگ داشته باشد",
+          path: ["variantId"],
+        });
+      }
+      if (item.specNote === undefined || item.specNote.trim().length < 10) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "خط OEM به شرح فنی (حداقل ۱۰ نویسه) نیاز دارد",
+          path: ["specNote"],
+        });
+      }
+    }
+  });
 export type RfqItemInput = z.infer<typeof RfqItemInputSchema>;
 
 export const CreateRfqSchema = z.object({
@@ -408,6 +455,15 @@ export const CreateRfqSchema = z.object({
   contactPhone: IranianPhoneSchema,
   items: z.array(RfqItemInputSchema).min(1).max(20),
   note: z.string().max(500).optional(),
+  // N10 custom-order brief: target market, packaging, requested delivery and
+  // confidentiality are optional at intake (sales may ask later).
+  targetMarket: z.string().max(120).optional(),
+  packaging: z.string().max(200).optional(),
+  requestedDeliveryDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "تاریخ تحویل باید به شکل YYYY-MM-DD باشد")
+    .optional(),
+  confidentiality: z.boolean().default(false),
 });
 export type CreateRfq = z.infer<typeof CreateRfqSchema>;
 
@@ -427,6 +483,8 @@ export const RfqItemSchema = z.object({
   productName: z.string(),
   quantity: z.number().int().min(1),
   note: z.string().nullable(),
+  itemKind: RfqItemKindSchema,
+  specNote: z.string().nullable(),
 });
 export type RfqItem = z.infer<typeof RfqItemSchema>;
 
@@ -440,6 +498,9 @@ export const QuoteRevisionSchema = z.object({
       quantity: z.number().int().min(1),
       unitPriceMinor: z.number().int().nonnegative(),
       lineTotalMinor: z.number().int().nonnegative(),
+      // Older revisions (pre-N10/N12) lack these — optional for compatibility.
+      itemKind: RfqItemKindSchema.optional(),
+      specNote: z.string().optional(),
     }),
   ),
   subtotalMinor: z.number().int().nonnegative(),
@@ -465,6 +526,29 @@ export const QuoteSchema = z.object({
 });
 export type Quote = z.infer<typeof QuoteSchema>;
 
+/**
+ * RFQ attachments (B3-lite): small files stored as bytes in the database —
+ * policy (MIME whitelist, byte budget) lives in @bc/domain. Object storage
+ * replaces this when the deployment slice lands.
+ */
+export const RfqAttachmentInputSchema = z.object({
+  filename: z.string().min(1).max(120),
+  mime: z.string().min(3).max(60),
+  contentBase64: z.string().min(4).max(750_000),
+});
+export type RfqAttachmentInput = z.infer<typeof RfqAttachmentInputSchema>;
+
+export const RfqAttachmentMetaSchema = z.object({
+  id: z.string(),
+  rfqId: z.string(),
+  filename: z.string(),
+  mime: z.string(),
+  sizeBytes: z.number().int().positive(),
+  sha256: z.string().length(64),
+  createdAt: z.string(),
+});
+export type RfqAttachmentMeta = z.infer<typeof RfqAttachmentMetaSchema>;
+
 export const RfqSchema = z.object({
   id: z.string(),
   status: RfqStatusSchema,
@@ -472,7 +556,13 @@ export const RfqSchema = z.object({
   contactName: z.string(),
   contactPhone: z.string(),
   items: z.array(RfqItemSchema),
+  attachments: z.array(RfqAttachmentMetaSchema),
   note: z.string().nullable(),
+  // N10 brief fields (nullable until provided).
+  targetMarket: z.string().nullable(),
+  packaging: z.string().nullable(),
+  requestedDeliveryDate: z.string().nullable(),
+  confidentiality: z.boolean(),
   quote: QuoteSchema.nullable(),
   createdAt: z.string(),
 });
@@ -483,6 +573,10 @@ export const IssueQuoteSchema = z.object({
   leadTimeDays: z.coerce.number().int().min(1).max(180).optional(),
   paymentTerms: z.string().max(200).optional(),
   note: z.string().max(300).optional(),
+  /** rfqItemId → operator-supplied unit price for OEM lines (required per OEM line). */
+  oemUnitPrices: z
+    .record(z.string(), z.coerce.number().int().min(0).max(9_999_999_999))
+    .optional(),
 });
 export type IssueQuote = z.infer<typeof IssueQuoteSchema>;
 

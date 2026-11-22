@@ -952,6 +952,80 @@
         ]
       }
     },
+    "/api/v1/admin/b2b/rfqs/{id}/attachments/{attachmentId}": {
+      "get": {
+        "operationId": "AdminController_downloadRfqAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "پیوست یافت نشد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "دانلود پیوست RFQ (بررسی قیمت‌گذاری)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/b2b/applications/{id}/attachments/{attachmentId}": {
+      "get": {
+        "operationId": "AdminController_downloadApplicationAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "مدرک یافت نشد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "دانلود مدرک درخواست همکاری (بررسی B3/B4)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/admin/b2b/orgs": {
       "get": {
         "operationId": "AdminController_listOrganizations",
@@ -1198,6 +1272,75 @@
         ]
       }
     },
+    "/api/v1/b2b/applications/{id}/attachments": {
+      "post": {
+        "operationId": "B2bController_addApplicationAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "متادیتای مدرک",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "نوع/حجم/نام نامعتبر یا سقف ۳ فایل"
+          },
+          "404": {
+            "description": "درخواست همکاری یافت نشد"
+          }
+        },
+        "summary": "بارگذاری مدرک (جواز/مجوز) — PDF/PNG/JPEG، حداکثر ۵۱۲KB، تا ۳ فایل",
+        "tags": [
+          "b2b"
+        ]
+      }
+    },
+    "/api/v1/b2b/applications/{id}/attachments/{attachmentId}": {
+      "get": {
+        "operationId": "B2bController_downloadApplicationAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "مدرک یافت نشد"
+          }
+        },
+        "summary": "دانلود مدرک پیوست‌شده به درخواست همکاری",
+        "tags": [
+          "b2b"
+        ]
+      }
+    },
     "/api/v1/b2b/rfqs": {
       "post": {
         "operationId": "B2bController_submitRfq",
@@ -1252,6 +1395,75 @@
           }
         },
         "summary": "مشاهده RFQ و پیش‌فاکتورهای آن",
+        "tags": [
+          "b2b"
+        ]
+      }
+    },
+    "/api/v1/b2b/rfqs/{id}/attachments": {
+      "post": {
+        "operationId": "B2bController_addAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "متادیتای پیوست",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "نوع/حجم/نام نامعتبر یا سقف ۳ فایل"
+          },
+          "404": {
+            "description": "درخواست قیمت یافت نشد"
+          }
+        },
+        "summary": "بارگذاری پیوست (PDF/PNG/JPEG، حداکثر ۵۱۲KB، تا ۳ فایل)",
+        "tags": [
+          "b2b"
+        ]
+      }
+    },
+    "/api/v1/b2b/rfqs/{id}/attachments/{attachmentId}": {
+      "get": {
+        "operationId": "B2bController_downloadAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "پیوست یافت نشد"
+          }
+        },
+        "summary": "دانلود پیوست",
         "tags": [
           "b2b"
         ]
@@ -1422,6 +1634,85 @@
           }
         ],
         "summary": "مشاهده RFQ سازمانی (سایر سازمان‌ها: 404)",
+        "tags": [
+          "b2b-org"
+        ]
+      }
+    },
+    "/api/v1/b2b/org/rfqs/{id}/attachments": {
+      "post": {
+        "operationId": "OrgPortalController_addAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "متادیتای پیوست",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "نقش ACCOUNTANT اجازه بارگذاری ندارد"
+          },
+          "404": {
+            "description": "RFQ متعلق به سازمان دیگر است"
+          }
+        },
+        "security": [
+          {
+            "x-org-key": []
+          }
+        ],
+        "summary": "بارگذاری پیوست روی RFQ سازمانی (نقش OWNER/BUYER)",
+        "tags": [
+          "b2b-org"
+        ]
+      }
+    },
+    "/api/v1/b2b/org/rfqs/{id}/attachments/{attachmentId}": {
+      "get": {
+        "operationId": "OrgPortalController_downloadAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "یافت نشد یا متعلق به سازمان دیگری است"
+          }
+        },
+        "security": [
+          {
+            "x-org-key": []
+          }
+        ],
+        "summary": "دانلود پیوست سازمانی (سایر سازمان‌ها: 404)",
         "tags": [
           "b2b-org"
         ]

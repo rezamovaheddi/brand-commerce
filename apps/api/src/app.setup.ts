@@ -10,7 +10,9 @@ export const API_PREFIX = 'api/v1';
  * against the exact same middleware/pipeline as production.
  */
 export function applyAppConfig(app: INestApplication): void {
-  app.use(json({ limit: '100kb' }));
+  // 2mb: RFQ attachments arrive as base64 in JSON (B3-lite; domain caps a
+  // single file at 512KB binary ⇒ ≤ ~700KB base64). Other bodies stay small.
+  app.use(json({ limit: '2mb' }));
   app.use(helmet());
   // Dev-friendly CORS: any origin, no credentials.
   app.enableCors({ origin: true, credentials: false });

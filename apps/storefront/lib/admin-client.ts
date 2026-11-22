@@ -169,6 +169,7 @@ export type B2BApplicationRow = {
   licenseRef: string | null;
   status: string;
   reviewNote: string | null;
+  attachments: Array<{ id: string; filename: string; sizeBytes: number }>;
   createdAt: string;
 };
 
@@ -181,6 +182,15 @@ const B2BApplicationRowSchema = z.object({
   licenseRef: z.string().nullable(),
   status: z.string(),
   reviewNote: z.string().nullable(),
+  attachments: z
+    .array(
+      z.object({
+        id: z.string(),
+        filename: z.string(),
+        sizeBytes: z.number(),
+      }),
+    )
+    .default([]),
   createdAt: z.string(),
 });
 

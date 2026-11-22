@@ -56,6 +56,7 @@ interface FakeRfqRow {
   createdAt: Date;
   updatedAt: Date;
   items: FakeRfqItemRow[];
+  attachments: Array<Record<string, unknown>>;
   quote: FakeQuoteRow | null;
 }
 
@@ -108,6 +109,16 @@ const state = {
   revisions: [] as FakeRevisionRow[],
   orders: [] as Array<Record<string, unknown>>,
   orderLines: [] as Array<Record<string, unknown>>,
+  attachments: [] as Array<{
+    id: string;
+    rfqId: string;
+    filename: string;
+    mime: string;
+    sizeBytes: number;
+    sha256: string;
+    dataBytes: Buffer;
+    createdAt: Date;
+  }>,
   inventory: new Map<string, { onHand: number; reserved: number }>(),
   ledger: [] as Array<Record<string, unknown>>,
   rfqSeq: 0,
@@ -116,6 +127,7 @@ const state = {
   revisionSeq: 0,
   orderSeq: 0,
   memberSeq: 0,
+  attachmentSeq: 0,
 };
 
 function seedBase(): void {
@@ -186,6 +198,7 @@ function resetState(): void {
   state.revisions = [];
   state.orders = [];
   state.orderLines = [];
+  state.attachments = [];
   state.inventory = new Map([['var-1', { onHand: 10, reserved: 0 }]]);
   state.ledger = [];
   state.rfqSeq = 0;
@@ -193,12 +206,25 @@ function resetState(): void {
   state.quoteSeq = 0;
   state.revisionSeq = 0;
   state.orderSeq = 0;
+  state.memberSeq = 0;
+  state.attachmentSeq = 0;
   seedBase();
 }
 
 const hydrateRfq = (rfq: FakeRfqRow): FakeRfqRow => ({
   ...rfq,
   items: state.rfqItems.filter((item) => item.rfqId === rfq.id),
+  attachments: state.attachments
+    .filter((att) => att.rfqId === rfq.id)
+    .map((att) => ({
+      id: att.id,
+      rfqId: att.rfqId,
+      filename: att.filename,
+      mime: att.mime,
+      sizeBytes: att.sizeBytes,
+      sha256: att.sha256,
+      createdAt: att.createdAt,
+    })),
   quote: state.quotes.find((quote) => quote.rfqId === rfq.id) ?? null,
 });
 
@@ -324,6 +350,7 @@ const fakePrismaCore = {
         createdAt: new Date('2026-01-06T00:00:00.000Z'),
         updatedAt: new Date('2026-01-06T00:00:00.000Z'),
         items: [],
+        attachments: [],
         quote: null,
       };
       state.rfqs.push(rfq);
@@ -453,6 +480,29 @@ const fakePrismaCore = {
     create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => {
       state.ledger.push({ id: `led-${state.ledger.length + 1}`, createdAt: new Date(), ...data });
       return data;
+    }),
+  },
+  rfqAttachment: {
+    count: jest.fn(async (args?: { where?: { rfqId?: string } }) => {
+      return state.attachments.filter((row) => row.rfqId === args?.where?.rfqId).length;
+    }),
+    create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => {
+      state.attachmentSeq += 1;
+      const row = {
+        id: `att-${state.attachmentSeq}`,
+        rfqId: data.rfqId as string,
+        filename: data.filename as string,
+        mime: data.mime as string,
+        sizeBytes: data.sizeBytes as number,
+        sha256: data.sha256 as string,
+        dataBytes: data.dataBytes as Buffer,
+        createdAt: new Date('2026-01-12T00:00:00.000Z'),
+      };
+      state.attachments.push(row);
+      return row;
+    }),
+    findUnique: jest.fn(async (args?: { where?: { id?: string } }) => {
+      return state.attachments.find((row) => row.id === args?.where?.id) ?? null;
     }),
   },
 };
@@ -752,6 +802,60 @@ describe('N16 org access (e2e, in-memory Prisma)', () => {
     await request(app.getHttpServer())
       .get('/api/v1/b2b/org/me')
       .set('x-org-key', res.body.accessKey)
+      .expect(200);
+  });
+
+  // ---- org attachments (B3 + N16 scoping) -------------------------------------
+
+  const PDF_BODY = {
+    filename: 'spec.pdf',
+    mime: 'application/pdf',
+    contentBase64: Buffer.alloc(256, 0x25).toString('base64'),
+  };
+
+  it('org member uploads an attachment to their own org RFQ; buyer role only', async () => {
+    await orgSubmit(KEY_A1).expect(201); // rfq-1 → org-a
+    await request(app.getHttpServer())
+      .post('/api/v1/b2b/org/rfqs/rfq-1/attachments')
+      .set('x-org-key', KEY_A2)
+      .send(PDF_BODY)
+      .expect(403); // ACCOUNTANT is finance-only
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/b2b/org/rfqs/rfq-1/attachments')
+      .set('x-org-key', KEY_A1)
+      .send(PDF_BODY)
+      .expect(201);
+    expect(res.body.rfqId).toBe('rfq-1');
+    expect(res.body.sizeBytes).toBe(256);
+    // metas appear on the org RFQ view
+    const rfq = await request(app.getHttpServer())
+      .get('/api/v1/b2b/org/rfqs/rfq-1')
+      .set('x-org-key', KEY_A1)
+      .expect(200);
+    expect(rfq.body.attachments).toHaveLength(1);
+    expect(JSON.stringify(rfq.body.attachments[0])).not.toContain('contentBase64');
+  });
+
+  it('cross-org attachment upload/download is 404 — no leak (N16 mandatory)', async () => {
+    await orgSubmit(KEY_A1).expect(201); // rfq-1 → org-a
+    await request(app.getHttpServer())
+      .post('/api/v1/b2b/org/rfqs/rfq-1/attachments')
+      .set('x-org-key', KEY_A1)
+      .send(PDF_BODY)
+      .expect(201);
+    await request(app.getHttpServer())
+      .post('/api/v1/b2b/org/rfqs/rfq-1/attachments')
+      .set('x-org-key', KEY_B1)
+      .send(PDF_BODY)
+      .expect(404);
+    await request(app.getHttpServer())
+      .get('/api/v1/b2b/org/rfqs/rfq-1/attachments/att-1')
+      .set('x-org-key', KEY_B1)
+      .expect(404);
+    // own org downloads the bytes
+    await request(app.getHttpServer())
+      .get('/api/v1/b2b/org/rfqs/rfq-1/attachments/att-1')
+      .set('x-org-key', KEY_A1)
       .expect(200);
   });
 });

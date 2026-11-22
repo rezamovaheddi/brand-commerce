@@ -278,4 +278,30 @@ describe('Payments API (e2e, in-memory Prisma — SANDBOX)', () => {
       .send({ result: 'succeeded' });
     expect(hidden.status).toBe(404);
   });
+
+  it('SALE conversion touches only inventory-backed lines (OEM lines skipped)', async () => {
+    // Mixed order: one catalog line + one OEM/custom line (empty variantId).
+    (fakePrismaCore.orderLine.findMany as jest.Mock).mockResolvedValueOnce([
+      { variantId: 'var-1', quantity: 2 },
+      { variantId: '', quantity: 300 },
+    ]);
+    const rawArgs: unknown[][] = [];
+    (fakePrismaCore.$executeRaw as jest.Mock).mockImplementation(async (...args: unknown[]) => {
+      rawArgs.push(args);
+      return 1;
+    });
+    const created = await pay('ord-1').expect(201);
+    const paymentId = (created.body as { payment: Payment }).payment.id;
+    const res = await request(app.getHttpServer())
+      .post(`/api/v1/payments/${paymentId}/sandbox-confirm`)
+      .send({ result: 'succeeded' })
+      .expect(200);
+    expect((res.body as Payment).status).toBe('SUCCEEDED');
+    const saleCalls = rawArgs.filter((args) =>
+      (args[0] as TemplateStringsArray).join("").includes('"onHand" = "onHand" -'),
+    );
+    expect(saleCalls).toHaveLength(1); // only the catalog line
+    expect(JSON.stringify(saleCalls[0])).toContain('var-1'); // real variant value bound
+    (fakePrismaCore.$executeRaw as jest.Mock).mockImplementation(async (): Promise<number> => 1);
+  });
 });

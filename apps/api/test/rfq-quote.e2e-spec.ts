@@ -24,6 +24,8 @@ interface FakeRfqItemRow {
   productName: string;
   quantity: number;
   note: string | null;
+  itemKind: 'CATALOG' | 'OEM';
+  specNote: string | null;
 }
 
 interface FakeRfqRow {
@@ -32,6 +34,10 @@ interface FakeRfqRow {
   contactName: string;
   contactPhone: string;
   note: string | null;
+  targetMarket: string | null;
+  packaging: string | null;
+  requestedDeliveryDate: Date | null;
+  confidentiality: boolean;
   createdAt: Date;
   updatedAt: Date;
   items: FakeRfqItemRow[];
@@ -170,6 +176,10 @@ const fakePrismaCore = {
         contactName: data.contactName as string,
         contactPhone: data.contactPhone as string,
         note: (data.note as string | null) ?? null,
+        targetMarket: (data.targetMarket as string | null) ?? null,
+        packaging: (data.packaging as string | null) ?? null,
+        requestedDeliveryDate: (data.requestedDeliveryDate as Date | null) ?? null,
+        confidentiality: (data.confidentiality as boolean | undefined) ?? false,
         createdAt: new Date('2026-01-06T00:00:00.000Z'),
         updatedAt: new Date('2026-01-06T00:00:00.000Z'),
         items: [],
@@ -185,6 +195,8 @@ const fakePrismaCore = {
           productName: item.productName as string,
           quantity: item.quantity as number,
           note: (item.note as string | null) ?? null,
+          itemKind: ((item.itemKind as 'CATALOG' | 'OEM') ?? 'CATALOG'),
+          specNote: (item.specNote as string | null) ?? null,
         });
       }
       return hydrateRfq(rfq);
@@ -361,6 +373,26 @@ describe('RFQ → Quote → Accept → Order (e2e, in-memory Prisma)', () => {
         note: 'نیاز فوری',
       });
 
+  it('N10 brief fields are stored and returned (market/packaging/delivery/confidentiality)', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/b2b/rfqs')
+      .send({
+        contactName: 'آرزو کریمی',
+        contactPhone: '09123456789',
+        items: [{ variantId: 'var-1', productName: 'سرم', quantity: 2 }],
+        targetMarket: 'بازار فارسی‌زبان خلیج فارس',
+        packaging: 'جعبه ۲۴تایی با برندینگ مشتری',
+        requestedDeliveryDate: '2026-03-15',
+        confidentiality: true,
+      })
+      .expect(201);
+    const rfq: Rfq = RfqSchema.parse(res.body);
+    expect(rfq.targetMarket).toContain('خلیج فارس');
+    expect(rfq.packaging).toContain('۲۴تایی');
+    expect(rfq.requestedDeliveryDate).toBe('2026-03-15');
+    expect(rfq.confidentiality).toBe(true);
+  });
+
   it('public RFQ submit creates SUBMITTED rfq with items', async () => {
     const res = await submitRfq().expect(201);
     const rfq: Rfq = RfqSchema.parse(res.body);
@@ -500,5 +532,166 @@ describe('RFQ → Quote → Accept → Order (e2e, in-memory Prisma)', () => {
     // The passthrough double cannot roll back state (real DB does); assert the
     // quote stayed SENT — the conversion never completed.
     expect(state.quotes[0]!.status).toBe('SENT');
+  });
+
+  // ---- N10/N12: OEM/custom lines ---------------------------------------------
+
+  it('OEM intake requires specNote and forbids variantId (contract-level)', async () => {
+    const missing = await request(app.getHttpServer())
+      .post('/api/v1/b2b/rfqs')
+      .send({
+        contactName: 'آرزو کریمی',
+        contactPhone: '09123456789',
+        items: [{ productName: 'سفارشی: شامپو OEM', quantity: 500, itemKind: 'OEM' }],
+      });
+    expect(missing.status).toBe(400);
+    expect(JSON.stringify(missing.body.message)).toContain('شرح فنی');
+
+    const withVariant = await request(app.getHttpServer())
+      .post('/api/v1/b2b/rfqs')
+      .send({
+        contactName: 'آرزو کریمی',
+        contactPhone: '09123456789',
+        items: [
+          {
+            productName: 'سفارشی: شامپو OEM',
+            quantity: 500,
+            itemKind: 'OEM',
+            specNote: 'شامپو با فرمول اختصاصی و رایحه مشتری',
+            variantId: 'var-1',
+          },
+        ],
+      });
+    expect(withVariant.status).toBe(400);
+
+    const ok = await request(app.getHttpServer())
+      .post('/api/v1/b2b/rfqs')
+      .send({
+        contactName: 'آرزو کریمی',
+        contactPhone: '09123456789',
+        items: [
+          {
+            productName: 'سفارشی: شامپو OEM',
+            quantity: 500,
+            itemKind: 'OEM',
+            specNote: 'شامپو با فرمول اختصاصی و رایحه مشتری',
+          },
+        ],
+      })
+      .expect(201);
+    const rfq: Rfq = RfqSchema.parse(ok.body);
+    expect(rfq.items[0]?.itemKind).toBe('OEM');
+    expect(rfq.items[0]?.variantId).toBeNull();
+    expect(rfq.items[0]?.specNote).toContain('فرمول');
+  });
+
+  it('quoting an OEM line without oemUnitPrices is rejected', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/b2b/rfqs')
+      .send({
+        contactName: 'آرزو کریمی',
+        contactPhone: '09123456789',
+        items: [
+          { productName: 'سفارشی: شامپو OEM', quantity: 500, itemKind: 'OEM', specNote: 'فرمول اختصاصی مشتری' },
+        ],
+      })
+      .expect(201);
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/admin/b2b/rfqs/rfq-1/quote')
+      .set(auth)
+      .send({ validityDays: 14 });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body.message)).toContain('خط OEM');
+  });
+
+  it('manual price on a CATALOG line is rejected; OEM price keys must be OEM lines', async () => {
+    await submitRfq().expect(201); // ritem-1 CATALOG with var-1
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/admin/b2b/rfqs/rfq-1/quote')
+      .set(auth)
+      .send({ validityDays: 14, oemUnitPrices: { 'ritem-1': 100 } });
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe('قیمت دستی فقط برای خطوط OEM مجاز است');
+  });
+
+  it('OEM quote prices the line from oemUnitPrices (snapshot keeps itemKind)', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/b2b/rfqs')
+      .send({
+        contactName: 'آرزو کریمی',
+        contactPhone: '09123456789',
+        items: [
+          { productName: 'سفارشی: شامپو OEM', quantity: 500, itemKind: 'OEM', specNote: 'فرمول اختصاصی مشتری' },
+        ],
+      })
+      .expect(201);
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/admin/b2b/rfqs/rfq-1/quote')
+      .set(auth)
+      .send({ validityDays: 14, oemUnitPrices: { 'ritem-1': 125_000 } })
+      .expect(201);
+    const quote: Quote = QuoteSchema.parse(res.body);
+    const line = quote.revisions[0]?.lines[0];
+    expect(line?.itemKind).toBe('OEM');
+    expect(line?.variantId).toBeNull();
+    expect(line?.unitPriceMinor).toBe(125_000); // operator price, not catalog
+    expect(line?.lineTotalMinor).toBe(62_500_000);
+    expect(quote.revisions[0]?.subtotalMinor).toBe(62_500_000);
+    expect(quote.revisions[0]?.isSample).toBe(true);
+  });
+
+  it('accept of an OEM-only quote reserves NO inventory and stamps sku=OEM', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/b2b/rfqs')
+      .send({
+        contactName: 'آرزو کریمی',
+        contactPhone: '09123456789',
+        items: [
+          { productName: 'سفارشی: شامپو OEM', quantity: 500, itemKind: 'OEM', specNote: 'فرمول اختصاصی مشتری' },
+        ],
+      })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post('/api/v1/admin/b2b/rfqs/rfq-1/quote')
+      .set(auth)
+      .send({ validityDays: 14, oemUnitPrices: { 'ritem-1': 125_000 } })
+      .expect(201);
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/b2b/quotes/qt-1/accept')
+      .send(ADDRESS)
+      .expect(201);
+    expect(res.body.order.status).toBe('DRAFT');
+    expect(res.body.order.itemCount).toBe(500);
+    expect(state.orderLines[0]?.sku).toBe('OEM');
+    expect(state.inventory.get('var-1')).toMatchObject({ reserved: 0 }); // untouched
+    expect(state.ledger.some((row) => row.reason === 'RESERVE')).toBe(false);
+  });
+
+  it('mixed catalog+OEM quote reserves only the catalog line', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/b2b/rfqs')
+      .send({
+        contactName: 'آرزو کریمی',
+        contactPhone: '09123456789',
+        items: [
+          { variantId: 'var-1', productName: 'سرم ویتامین C اتیریال', quantity: 2 },
+          { productName: 'سفارشی: شامپو OEM', quantity: 100, itemKind: 'OEM', specNote: 'بسته‌بندی اختصاصی فروشگاه' },
+        ],
+      })
+      .expect(201);
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/admin/b2b/rfqs/rfq-1/quote')
+      .set(auth)
+      .send({ validityDays: 14, oemUnitPrices: { 'ritem-2': 90_000 } })
+      .expect(201);
+    const quote: Quote = QuoteSchema.parse(res.body);
+    expect(quote.revisions[0]?.lines).toHaveLength(2);
+    expect(quote.revisions[0]?.subtotalMinor).toBe(3_950_000 * 2 + 9_000_000);
+    await request(app.getHttpServer())
+      .post('/api/v1/b2b/quotes/qt-1/accept')
+      .send(ADDRESS)
+      .expect(201);
+    expect(state.inventory.get('var-1')).toMatchObject({ reserved: 2 }); // catalog only
+    expect(state.orderLines.map((line) => line.sku).sort()).toEqual(['OEM', 'RFQ']);
   });
 });

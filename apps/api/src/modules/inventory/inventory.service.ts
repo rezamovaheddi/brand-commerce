@@ -51,6 +51,10 @@ export class InventoryService {
     const lines = await this.prisma.orderLine.findMany({ where: { orderId } });
     await this.prisma.$transaction(async (tx) => {
       for (const line of lines) {
+        // OEM/custom lines (empty variantId) have nothing reserved — skip.
+        if (line.variantId === '') {
+          continue;
+        }
         const updated = await tx.$executeRaw`
           UPDATE "InventoryItem"
           SET "reserved" = "reserved" - ${line.quantity}
@@ -79,6 +83,10 @@ export class InventoryService {
     const lines = await this.prisma.orderLine.findMany({ where: { orderId } });
     await this.prisma.$transaction(async (tx) => {
       for (const line of lines) {
+        // OEM/custom lines (empty variantId) are not inventory-backed — skip.
+        if (line.variantId === '') {
+          continue;
+        }
         const updated = await tx.$executeRaw`
           UPDATE "InventoryItem"
           SET "onHand" = "onHand" - ${line.quantity}, "reserved" = "reserved" - ${line.quantity}
@@ -106,6 +114,10 @@ export class InventoryService {
     const lines = await this.prisma.orderLine.findMany({ where: { orderId } });
     await this.prisma.$transaction(async (tx) => {
       for (const line of lines) {
+        // OEM/custom lines (empty variantId) were never stocked — skip.
+        if (line.variantId === '') {
+          continue;
+        }
         await tx.$executeRaw`
           UPDATE "InventoryItem"
           SET "onHand" = "onHand" + ${line.quantity}

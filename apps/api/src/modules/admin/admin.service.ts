@@ -196,6 +196,20 @@ export class AdminService {
     return this.b2bService.addRevision(id, input);
   }
 
+  async downloadRfqAttachment(
+    rfqId: string,
+    attachmentId: string,
+  ): Promise<{ meta: { filename: string; mime: string }; data: Buffer }> {
+    return this.b2bService.getRfqAttachment(rfqId, attachmentId);
+  }
+
+  async downloadApplicationAttachment(
+    applicationId: string,
+    attachmentId: string,
+  ): Promise<{ meta: { filename: string; mime: string }; data: Buffer }> {
+    return this.b2bService.getApplicationAttachment(applicationId, attachmentId);
+  }
+
   // ---- Organization members + access keys (N16) ------------------------------
 
   async listOrganizations(): Promise<{

@@ -286,10 +286,27 @@ model B2BApplication {
   status       B2BApplicationStatus @default(SUBMITTED)
   reviewNote   String?
   reviewedAt   DateTime?
+  attachments  ApplicationAttachment[]
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
 
   @@index([status])
+}
+
+// B3: license/permit documents attached to a distributor application
+// (≤512KB each, ≤3 per application, MIME whitelist per @bc/domain).
+model ApplicationAttachment {
+  id            String        @id @default(cuid())
+  application   B2BApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  applicationId String
+  filename      String
+  mime          String
+  sizeBytes     Int
+  sha256        String
+  dataBytes     Bytes
+  createdAt     DateTime      @default(now())
+
+  @@index([applicationId])
 }
 
 // ---- RFQ / Quote (P4 slice, N11: immutable revisions) ----------------------
@@ -314,7 +331,13 @@ model Rfq {
   contactName  String
   contactPhone String
   note         String?
+  // N10 custom-order brief (optional at intake).
+  targetMarket            String?
+  packaging               String?
+  requestedDeliveryDate   DateTime?
+  confidentiality         Boolean   @default(false)
   items        RfqItem[]
+  attachments  RfqAttachment[]
   quote        Quote?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -331,6 +354,27 @@ model RfqItem {
   productName String
   quantity   Int
   note       String?
+  // N10/N12: CATALOG lines may reference a variant; OEM lines are custom
+  // manufacturing requests (variantId null, specNote mandatory).
+  itemKind   String   @default("CATALOG")
+  specNote   String?
+
+  @@index([rfqId])
+}
+
+// B3-lite: small RFQ attachments (≤512KB each, ≤3 per RFQ, MIME whitelist per
+// @bc/domain) stored as bytes; sha256 for integrity. Object storage replaces
+// this in the deployment slice.
+model RfqAttachment {
+  id        String   @id @default(cuid())
+  rfq       Rfq      @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  rfqId     String
+  filename  String
+  mime      String
+  sizeBytes Int
+  sha256    String
+  dataBytes Bytes
+  createdAt DateTime @default(now())
 
   @@index([rfqId])
 }

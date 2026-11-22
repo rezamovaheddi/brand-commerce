@@ -126,6 +126,8 @@ const AdminRfqItem = z.object({
   productName: z.string(),
   quantity: z.number(),
   note: z.string().nullable(),
+  itemKind: z.string().optional(),
+  specNote: z.string().nullable().optional(),
 });
 
 const AdminRfq = z.object({
@@ -134,7 +136,20 @@ const AdminRfq = z.object({
   contactName: z.string(),
   contactPhone: z.string(),
   note: z.string().nullable(),
+  targetMarket: z.string().nullable().optional(),
+  packaging: z.string().nullable().optional(),
+  requestedDeliveryDate: z.string().nullable().optional(),
+  confidentiality: z.boolean().optional(),
   items: z.array(AdminRfqItem),
+  attachments: z
+    .array(
+      z.object({
+        id: z.string(),
+        filename: z.string(),
+        sizeBytes: z.number(),
+      }),
+    )
+    .optional(),
   quote: z
     .object({
       id: z.string(),
@@ -280,6 +295,137 @@ export async function orgAcceptQuote(
       return quote.success ? { order: obj.order, quote: quote.data } : null;
     },
   );
+}
+
+/* ---- RFQ attachments (B3-lite) ---------------------------------------------- */
+
+const RfqAttachmentMeta = z.object({
+  id: z.string(),
+  rfqId: z.string(),
+  filename: z.string(),
+  mime: z.string(),
+  sizeBytes: z.number(),
+  sha256: z.string(),
+  createdAt: z.string(),
+});
+export type RfqAttachmentMeta = z.infer<typeof RfqAttachmentMeta>;
+
+export interface AttachmentFile {
+  filename: string;
+  mime: string;
+  contentBase64: string;
+}
+
+const ALLOWED_MIMES = ["application/pdf", "image/png", "image/jpeg"];
+const MAX_ATTACHMENT_BYTES = 512 * 1024;
+
+/** Client-side pre-check (mirrors the domain policy) before base64 encoding. */
+export function validateAttachmentFile(file: File): string | null {
+  if (!ALLOWED_MIMES.includes(file.type)) {
+    return "فقط PDF، PNG یا JPEG پذیرفته می‌شود.";
+  }
+  if (file.size < 1 || file.size > MAX_ATTACHMENT_BYTES) {
+    return "حجم فایل باید حداکثر ۵۱۲ کیلوبایت باشد.";
+  }
+  return null;
+}
+
+/** Reads a File into an attachment payload (base64 without the data: prefix). */
+export function fileToAttachmentPayload(file: File): Promise<AttachmentFile> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new CartApiError("parse", "خواندن فایل ناموفق بود."));
+    reader.onload = () => {
+      const result = String(reader.result ?? "");
+      const comma = result.indexOf(",");
+      resolve({
+        filename: file.name,
+        mime: file.type,
+        contentBase64: comma >= 0 ? result.slice(comma + 1) : result,
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/** Public upload (access by RFQ id — same trust level as RFQ tracking). */
+export async function uploadRfqAttachment(
+  rfqId: string,
+  attachment: AttachmentFile,
+): Promise<RfqAttachmentMeta> {
+  return requestJson<RfqAttachmentMeta>(
+    `${BASE}/b2b/rfqs/${encodeURIComponent(rfqId)}/attachments`,
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(attachment) },
+    (body) => (RfqAttachmentMeta.safeParse(body).success ? (body as RfqAttachmentMeta) : null),
+  );
+}
+
+/** Public download URL (plain link — works because RFQ tracking is public by id). */
+export function rfqAttachmentDownloadUrl(rfqId: string, attachmentId: string): string {
+  return `${BASE}/b2b/rfqs/${encodeURIComponent(rfqId)}/attachments/${encodeURIComponent(attachmentId)}`;
+}
+
+/** B3: upload a license/permit document to a distributor application. */
+export async function uploadApplicationAttachment(
+  applicationId: string,
+  attachment: AttachmentFile,
+): Promise<RfqAttachmentMeta> {
+  return requestJson<RfqAttachmentMeta>(
+    `${BASE}/b2b/applications/${encodeURIComponent(applicationId)}/attachments`,
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(attachment) },
+    (body) => (RfqAttachmentMeta.safeParse(body).success ? (body as RfqAttachmentMeta) : null),
+  );
+}
+
+export function applicationAttachmentDownloadUrl(
+  applicationId: string,
+  attachmentId: string,
+): string {
+  return `${BASE}/b2b/applications/${encodeURIComponent(applicationId)}/attachments/${encodeURIComponent(attachmentId)}`;
+}
+
+/** Org-scoped upload (x-org-key). */
+export async function orgUploadAttachment(
+  key: string,
+  rfqId: string,
+  attachment: AttachmentFile,
+): Promise<RfqAttachmentMeta> {
+  return requestJson<RfqAttachmentMeta>(
+    `${BASE}/b2b/org/rfqs/${encodeURIComponent(rfqId)}/attachments`,
+    { method: "POST", headers: orgHeaders(key, true), body: JSON.stringify(attachment) },
+    (body) => (RfqAttachmentMeta.safeParse(body).success ? (body as RfqAttachmentMeta) : null),
+  );
+}
+
+/** Org-scoped download — key header required, so fetch→blob→browser download. */
+export async function orgDownloadAttachment(
+  key: string,
+  rfqId: string,
+  attachmentId: string,
+  filename: string,
+): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetch(
+      `${BASE}/b2b/org/rfqs/${encodeURIComponent(rfqId)}/attachments/${encodeURIComponent(attachmentId)}`,
+      { method: "GET", headers: orgHeaders(key) },
+    );
+  } catch {
+    throw new CartApiError("network", "سرویس در دسترس نیست.");
+  }
+  if (!response.ok) {
+    const raw: unknown = await response.json().catch(() => null);
+    throw new CartApiError("http", extractApiMessage(raw), response.status);
+  }
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.URL.revokeObjectURL(url);
 }
 
 /* ---- admin: organization member/key management (N16) ------------------------ */

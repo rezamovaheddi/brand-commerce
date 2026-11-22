@@ -26,6 +26,8 @@ import {
   adminListOrgs,
   adminListRfqs,
   adminRevokeMemberKey,
+  applicationAttachmentDownloadUrl,
+  rfqAttachmentDownloadUrl,
   type AdminMemberRow,
   type AdminOrgRow,
   type AdminRfqRow,
@@ -69,6 +71,7 @@ export default function AdminPage() {
     leadTimeDays: string;
     paymentTerms: string;
     note: string;
+    oemPrices: Record<string, string>;
   } | null>(null);
   const [orgRows, setOrgRows] = useState<AdminOrgRow[] | null>(null);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -193,12 +196,36 @@ export default function AdminPage() {
     setBusy(true);
     setError(null);
     try {
+      const oemUnitPrices: Record<string, number> = {};
+      let missingOemPrice: string | null = null;
+      const oemRows = (rfqRows ?? [])
+        .flatMap((row) => row.items)
+        .filter((item) => item.itemKind === "OEM" && item.id in quoteForm.oemPrices);
+      for (const item of oemRows) {
+        const raw = quoteForm.oemPrices[item.id] ?? "";
+        if (raw.trim() === "") {
+          missingOemPrice = item.productName;
+          break;
+        }
+        const price = Number(raw);
+        if (!Number.isInteger(price) || price < 0) {
+          missingOemPrice = item.productName;
+          break;
+        }
+        oemUnitPrices[item.id] = price;
+      }
+      if (missingOemPrice !== null) {
+        setError(`قیمت واحد برای خط OEM «${missingOemPrice}» الزامی است.`);
+        setBusy(false);
+        return;
+      }
       const input = {
         validityDays: Number(quoteForm.validityDays),
         leadTimeDays:
           quoteForm.leadTimeDays.trim() === "" ? undefined : Number(quoteForm.leadTimeDays),
         paymentTerms: quoteForm.paymentTerms.trim() === "" ? undefined : quoteForm.paymentTerms,
         note: quoteForm.note.trim() === "" ? undefined : quoteForm.note,
+        oemUnitPrices: Object.keys(oemUnitPrices).length > 0 ? oemUnitPrices : undefined,
       };
       const quote =
         quoteForm.quoteId === ""
@@ -484,8 +511,52 @@ export default function AdminPage() {
                   </h3>
                   <p className="dv-muted">
                     وضعیت: {row.status} | اقلام:{" "}
-                    {row.items.map((item) => `${item.productName}×${item.quantity}`).join("، ")}
+                    {row.items
+                      .map((item) =>
+                        item.itemKind === "OEM"
+                          ? `${item.productName}×${item.quantity} (OEM)`
+                          : `${item.productName}×${item.quantity}`,
+                      )
+                      .join("، ")}
                   </p>
+                  {row.items.some((item) => item.itemKind === "OEM" && item.specNote) ? (
+                    <p className="dv-muted" style={{ fontSize: "0.85rem" }}>
+                      شرح فنی OEM:{" "}
+                      {row.items
+                        .filter((item) => item.itemKind === "OEM" && item.specNote)
+                        .map((item) => `${item.productName}: ${item.specNote}`)
+                        .join(" | ")}
+                    </p>
+                  ) : null}
+                  {row.targetMarket || row.packaging || row.requestedDeliveryDate || row.confidentiality ? (
+                    <p className="dv-muted" style={{ fontSize: "0.85rem" }}>
+                      بریف (N10):{" "}
+                      {[
+                        row.targetMarket ? `بازار: ${row.targetMarket}` : "",
+                        row.packaging ? `بسته‌بندی: ${row.packaging}` : "",
+                        row.requestedDeliveryDate ? `تحویل: ${row.requestedDeliveryDate}` : "",
+                        row.confidentiality ? "محرمانه" : "",
+                      ]
+                        .filter((part) => part !== "")
+                        .join(" | ")}
+                    </p>
+                  ) : null}
+                  {row.attachments && row.attachments.length > 0 ? (
+                    <p className="dv-muted" style={{ fontSize: "0.85rem" }}>
+                      پیوست‌ها:{" "}
+                      {row.attachments.map((att) => (
+                        <a
+                          key={att.id}
+                          href={rfqAttachmentDownloadUrl(row.id, att.id)}
+                          className="dv-link"
+                          style={{ marginInlineStart: "8px" }}
+                          download={att.filename}
+                        >
+                          {att.filename} ({Math.max(1, Math.round(att.sizeBytes / 1024))}KB)
+                        </a>
+                      ))}
+                    </p>
+                  ) : null}
                   {row.quote !== null ? (
                     <p className="dv-muted">
                       پیش‌فاکتور: {row.quote.status} | Revisions:{" "}
@@ -526,6 +597,28 @@ export default function AdminPage() {
                         value={quoteForm.note}
                         onChange={(event) => setQuoteForm({ ...quoteForm, note: event.target.value })}
                       />
+                      {row.items
+                        .filter((item) => item.itemKind === "OEM")
+                        .map((item) => (
+                          <label key={item.id} className="dv-oem-price-row">
+                            <span style={{ whiteSpace: "nowrap" }}>
+                              قیمت واحد (ریال) — {item.productName}:
+                            </span>
+                            <input
+                              type="number"
+                              dir="ltr"
+                              aria-label={`قیمت واحد OEM ${item.productName}`}
+                              placeholder="0"
+                              value={quoteForm.oemPrices[item.id] ?? ""}
+                              onChange={(event) =>
+                                setQuoteForm({
+                                  ...quoteForm,
+                                  oemPrices: { ...quoteForm.oemPrices, [item.id]: event.target.value },
+                                })
+                              }
+                            />
+                          </label>
+                        ))}
                       <button
                         type="button"
                         className="dv-btn dv-btn-gold"
@@ -556,6 +649,11 @@ export default function AdminPage() {
                             leadTimeDays: "",
                             paymentTerms: "",
                             note: "",
+                            oemPrices: Object.fromEntries(
+                              row.items
+                                .filter((item) => item.itemKind === "OEM")
+                                .map((item) => [item.id, ""]),
+                            ),
                           })
                         }
                       >
@@ -790,6 +888,26 @@ export default function AdminPage() {
                     وضعیت: <strong>{row.status}</strong>
                     {row.reviewNote ? ` — ${row.reviewNote}` : ""}
                   </p>
+                  {row.attachments.length > 0 ? (
+                    <p className="dv-muted" style={{ fontSize: "0.85rem" }}>
+                      مدارک (B3):{" "}
+                      {row.attachments.map((doc) => (
+                        <a
+                          key={doc.id}
+                          href={applicationAttachmentDownloadUrl(row.id, doc.id)}
+                          className="dv-link"
+                          style={{ marginInlineStart: "8px" }}
+                          download={doc.filename}
+                        >
+                          {doc.filename} ({Math.max(1, Math.round(doc.sizeBytes / 1024))}KB)
+                        </a>
+                      ))}
+                    </p>
+                  ) : (
+                    <p className="dv-muted" style={{ fontSize: "0.85rem" }}>
+                      مدارکی پیوست نشده است (B3).
+                    </p>
+                  )}
                   {b2bNote !== null && b2bNote.id === row.id ? (
                     <div className="dv-admin-adjust">
                       <input

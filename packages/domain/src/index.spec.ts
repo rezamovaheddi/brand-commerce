@@ -1,10 +1,14 @@
 import {
   MAX_QUANTITY,
   MIN_QUANTITY,
+  RFQ_ATTACHMENT_ALLOWED_MIMES,
+  RFQ_ATTACHMENT_MAX_BYTES,
   CartLineInput,
   canActAsOrgBuyer,
   canReadOrgData,
   checkQuantity,
+  checkRfqAttachment,
+  checkRfqAttachmentFilename,
   computeCartTotals,
   displayUnit,
   mergeQuantity,
@@ -152,5 +156,35 @@ describe('organization roles (N16)', () => {
     expect(canReadOrgData('OWNER')).toBe(true);
     expect(canReadOrgData('BUYER')).toBe(true);
     expect(canReadOrgData('ACCOUNTANT')).toBe(true);
+  });
+});
+
+describe('RFQ attachments (B3)', () => {
+  it('accepts the whitelisted MIME types within the byte budget', () => {
+    for (const mime of RFQ_ATTACHMENT_ALLOWED_MIMES) {
+      expect(checkRfqAttachment(mime, 1024)).toBe('ok');
+    }
+    expect(checkRfqAttachment('application/pdf', RFQ_ATTACHMENT_MAX_BYTES)).toBe('ok');
+  });
+
+  it('rejects non-whitelisted MIME types', () => {
+    expect(checkRfqAttachment('application/zip', 100)).toBe('bad_mime');
+    expect(checkRfqAttachment('text/html', 100)).toBe('bad_mime');
+    expect(checkRfqAttachment('image/svg+xml', 100)).toBe('bad_mime');
+  });
+
+  it('rejects sizes outside 1..max bytes (incl. non-integers)', () => {
+    expect(checkRfqAttachment('application/pdf', 0)).toBe('too_large');
+    expect(checkRfqAttachment('application/pdf', RFQ_ATTACHMENT_MAX_BYTES + 1)).toBe('too_large');
+    expect(checkRfqAttachment('application/pdf', 1.5)).toBe('too_large');
+  });
+
+  it('rejects path-like or control-character filenames', () => {
+    expect(checkRfqAttachmentFilename('spec.pdf')).toBe('ok');
+    expect(checkRfqAttachmentFilename('../etc/passwd')).toBe('bad_filename');
+    expect(checkRfqAttachmentFilename('C:\\tmp\\x.pdf')).toBe('bad_filename');
+    expect(checkRfqAttachmentFilename('bad\x01name.pdf')).toBe('bad_filename');
+    expect(checkRfqAttachmentFilename('a'.repeat(121))).toBe('bad_filename');
+    expect(checkRfqAttachmentFilename('')).toBe('bad_filename');
   });
 });
