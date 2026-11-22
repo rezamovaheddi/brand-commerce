@@ -2067,7 +2067,8 @@
       "is_symbol": false,
       "external": false,
       "deps": [
-        "apps/storefront/components/LeafMark.tsx"
+        "apps/storefront/components/LeafMark.tsx",
+        "apps/storefront/lib/support-client.ts"
       ],
       "rdeps": [
         "apps/storefront/app/contact/page.tsx#ContactPage"
@@ -3685,6 +3686,7 @@
       ],
       "rdeps": [
         "apps/storefront/app/admin/page.tsx",
+        "apps/storefront/app/contact/page.tsx",
         "apps/storefront/app/support/page.tsx",
         "apps/storefront/lib/support-client.ts#AdminCustomerProfile",
         "apps/storefront/lib/support-client.ts#AdminLeadRow",
@@ -8691,6 +8693,11 @@
     {
       "from": "apps/storefront/app/contact/page.tsx",
       "to": "apps/storefront/components/LeafMark.tsx",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/app/contact/page.tsx",
+      "to": "apps/storefront/lib/support-client.ts",
       "relation": "imports"
     },
     {
