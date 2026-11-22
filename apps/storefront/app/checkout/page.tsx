@@ -15,9 +15,9 @@ import { formatFaNumber, formatPrice } from "../../lib/format";
  * taken anywhere in this phase (banner copy below states it plainly).
  */
 
-/** Honest copy shown above the form — payment lands in phase P3. */
+/** Honest copy shown above the form — describes the checkout & sandbox payment step. */
 const PAYMENT_NOTE =
-  "هیچ پرداختی در این مرحله انجام نمی‌شود — این سفارش به‌صورت پیش‌نویس ثبت می‌شود و پرداخت در فاز بعدی فعال خواهد شد.";
+  "ثبت سفارش رسمی و امن: پس از ثبت اطلاعات پستی، پیش‌فاکتور شما صادر شده و به صفحه پرداخت امن هدایت خواهید شد.";
 
 /** Field keys of CheckoutAddressSchema we render inputs for. */
 type CheckoutField =

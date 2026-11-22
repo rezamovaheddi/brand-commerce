@@ -240,6 +240,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <li>امکان دریافت مشاوره تلفنی رایگان پیش و پس از خرید</li>
               <li>ثبت امتیاز خرید در باشگاه مشتریان اثیری درماویا</li>
             </ul>
+            <div style={{ marginTop: 14 }}>
+              <Link href="/support" className="dv-link" style={{ fontSize: "0.85rem", color: "var(--dv-gold)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <span>💬</span>
+                <span>نیاز به مشاوره پوستی برای این محصول دارید؟ گفتگو با کارشناس درماویا ←</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
