@@ -18,6 +18,7 @@ export default function Footer() {
         <nav aria-label="ناوبری پابرگ" className="dv-footer-nav">
           <Link href="/">خانه</Link>
           <Link href="/products">محصولات</Link>
+          <Link href="/support">پشتیبانی</Link>
         </nav>
 
         <p className="dv-footer-copy">© ۲۰۲۶ DERMAVIA</p>

@@ -32,6 +32,17 @@ import {
   type AdminOrgRow,
   type AdminRfqRow,
 } from "../../lib/b2b-client";
+import {
+  adminCustomerProfile,
+  adminListLeads,
+  adminListTickets,
+  adminReplyTicket,
+  adminUpdateLead,
+  adminUpdateTicket,
+  type AdminCustomerProfile,
+  type AdminLeadRow,
+  type AdminTicketRow,
+} from "../../lib/support-client";
 import { formatFaNumber, formatPrice } from "../../lib/format";
 
 /**
@@ -50,7 +61,22 @@ const STATUS_LABELS: Record<string, string> = {
   REFUNDED: "بازگشت وجه",
 };
 
-type Section = "orders" | "inventory" | "b2b" | "rfq" | "org";
+type Section = "orders" | "inventory" | "b2b" | "rfq" | "org" | "crm";
+
+const TICKET_STATUS_LABELS: Record<string, string> = {
+  OPEN: "باز",
+  IN_PROGRESS: "در حال بررسی",
+  WAITING_CUSTOMER: "در انتظار مشتری",
+  RESOLVED: "حل‌شده",
+  CLOSED: "بسته",
+};
+
+const LEAD_STATUS_LABELS: Record<string, string> = {
+  NEW: "جدید",
+  CONTACTED: "تماس گرفته‌شده",
+  QUALIFIED: "واجد شرایط",
+  DISCARDED: "منتفی",
+};
 
 export default function AdminPage() {
   const [key, setKey] = useState<string>("");
@@ -83,6 +109,11 @@ export default function AdminPage() {
     role: string;
   } | null>(null);
   const [issuedKey, setIssuedKey] = useState<{ memberName: string; accessKey: string } | null>(null);
+  const [crmTicketRows, setCrmTicketRows] = useState<AdminTicketRow[] | null>(null);
+  const [crmLeadRows, setCrmLeadRows] = useState<AdminLeadRow[] | null>(null);
+  const [crmReply, setCrmReply] = useState<{ id: string; body: string } | null>(null);
+  const [crmPhone, setCrmPhone] = useState("");
+  const [crmCustomer, setCrmCustomer] = useState<AdminCustomerProfile | null>(null);
   const [adjust, setAdjust] = useState<{ variantId: string; delta: string; note: string }>({
     variantId: "",
     delta: "",
@@ -105,6 +136,13 @@ export default function AdminPage() {
           setRfqRows(await adminListRfqs(getAdminKey() ?? ""));
         } else if (which === "org") {
           setOrgRows(await adminListOrgs(getAdminKey() ?? ""));
+        } else if (which === "crm") {
+          const [tickets, leads] = await Promise.all([
+            adminListTickets(getAdminKey() ?? ""),
+            adminListLeads(getAdminKey() ?? ""),
+          ]);
+          setCrmTicketRows(tickets);
+          setCrmLeadRows(leads);
         } else {
           const [inv, led] = await Promise.all([adminListInventory(), adminListLedger()]);
           setInventory(inv);
@@ -318,6 +356,78 @@ export default function AdminPage() {
     }
   };
 
+  // ---- CRM-lite (tickets / leads / customer 360) ------------------------------
+
+  const reloadCrm = async (): Promise<void> => {
+    const [tickets, leads] = await Promise.all([
+      adminListTickets(getAdminKey() ?? ""),
+      adminListLeads(getAdminKey() ?? ""),
+    ]);
+    setCrmTicketRows(tickets);
+    setCrmLeadRows(leads);
+  };
+
+  const handleCrmReply = async (ticketId: string): Promise<void> => {
+    if (crmReply === null || crmReply.id !== ticketId || crmReply.body.trim() === "") {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await adminReplyTicket(getAdminKey() ?? "", ticketId, crmReply.body);
+      setCrmReply(null);
+      await reloadCrm();
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در پاسخ تیکت.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleCrmTicketUpdate = async (
+    ticketId: string,
+    patch: { status?: string; priority?: string },
+  ): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    try {
+      await adminUpdateTicket(getAdminKey() ?? "", ticketId, patch);
+      await reloadCrm();
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در تغییر تیکت.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleCrmLeadUpdate = async (leadId: string, status: string): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    try {
+      await adminUpdateLead(getAdminKey() ?? "", leadId, status);
+      await reloadCrm();
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در تغییر سرنخ.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleCustomerLookup = async (): Promise<void> => {
+    if (crmPhone.trim() === "") {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      setCrmCustomer(await adminCustomerProfile(getAdminKey() ?? "", crmPhone.trim()));
+    } catch (cause) {
+      setError(cause instanceof AdminApiError ? cause.message : "خطای غیرمنتظره در استعلام مشتری.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // ---- key gate -------------------------------------------------------------
   if (!authed) {
     return (
@@ -404,6 +514,15 @@ export default function AdminPage() {
           onClick={() => setSection("org")}
         >
           سازمان‌ها و اعضا
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "crm"}
+          className={section === "crm" ? "dv-admin-tab dv-admin-tab-active" : "dv-admin-tab"}
+          onClick={() => setSection("crm")}
+        >
+          CRM و پشتیبانی
         </button>
         <button
           type="button"
@@ -864,6 +983,174 @@ export default function AdminPage() {
                   </button>
                 </div>
               )}
+            </div>
+          ) : null}
+        </section>
+      ) : section === "crm" ? (
+        <section aria-label="CRM و پشتیبانی">
+          <h2>تیکت‌های پشتیبانی</h2>
+          {crmTicketRows !== null && crmTicketRows.length === 0 ? (
+            <div className="dv-empty">تیکتی ثبت نشده است.</div>
+          ) : null}
+          {crmTicketRows !== null
+            ? crmTicketRows.map((row) => (
+                <article key={row.id} className="dv-card dv-b2b-app">
+                  <h3>
+                    <span dir="ltr">{row.id.slice(-8)}</span> — {row.contactName} |{" "}
+                    {TICKET_STATUS_LABELS[row.status] ?? row.status} | اولویت:{" "}
+                    {row.priority === "HIGH" ? "بالا" : row.priority === "LOW" ? "پایین" : "عادی"}
+                  </h3>
+                  <ul className="dv-attach-list">
+                    {row.messages.map((msg) => (
+                      <li key={msg.id} className="dv-attach-item">
+                        <strong>{msg.author === "AGENT" ? "اپراتور:" : "مشتری:"}</strong>
+                        <span>{msg.body}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {row.status !== "CLOSED" ? (
+                    <div className="dv-pay-actions dv-admin-adjust">
+                      {crmReply !== null && crmReply.id === row.id ? (
+                        <>
+                          <input
+                            type="text"
+                            aria-label={`پاسخ به تیکت ${row.id}`}
+                            placeholder="پاسخ اپراتور…"
+                            value={crmReply.body}
+                            onChange={(event) => setCrmReply({ ...crmReply, body: event.target.value })}
+                          />
+                          <button
+                            type="button"
+                            className="dv-btn dv-btn-gold"
+                            disabled={busy}
+                            onClick={() => void handleCrmReply(row.id)}
+                          >
+                            ارسال پاسخ
+                          </button>
+                          <button type="button" className="dv-admin-tab" onClick={() => setCrmReply(null)}>
+                            انصراف
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="dv-btn dv-btn-gold"
+                          disabled={busy}
+                          onClick={() => setCrmReply({ id: row.id, body: "" })}
+                        >
+                          پاسخ اپراتور
+                        </button>
+                      )}
+                      {row.status !== "RESOLVED" && row.status !== "CLOSED" ? (
+                        <button
+                          type="button"
+                          className="dv-admin-tab"
+                          disabled={busy}
+                          onClick={() => void handleCrmTicketUpdate(row.id, { status: "RESOLVED" })}
+                        >
+                          علامت حل‌شده
+                        </button>
+                      ) : null}
+                      {row.status !== "CLOSED" ? (
+                        <button
+                          type="button"
+                          className="dv-admin-tab"
+                          disabled={busy}
+                          onClick={() => void handleCrmTicketUpdate(row.id, { status: "CLOSED" })}
+                        >
+                          بستن تیکت
+                        </button>
+                      ) : null}
+                      {row.status === "RESOLVED" ? (
+                        <button
+                          type="button"
+                          className="dv-admin-tab"
+                          disabled={busy}
+                          onClick={() => void handleCrmTicketUpdate(row.id, { status: "IN_PROGRESS" })}
+                        >
+                          بازگشایی
+                        </button>
+                      ) : null}
+                      {row.priority !== "HIGH" ? (
+                        <button
+                          type="button"
+                          className="dv-admin-tab"
+                          disabled={busy}
+                          onClick={() => void handleCrmTicketUpdate(row.id, { priority: "HIGH" })}
+                        >
+                          اولویت بالا
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </article>
+              ))
+            : null}
+
+          <h2 style={{ marginTop: "24px" }}>سرنخ‌های CRM (فرم تماس/دمو)</h2>
+          {crmLeadRows !== null && crmLeadRows.length === 0 ? (
+            <div className="dv-empty">سرنخی ثبت نشده است.</div>
+          ) : null}
+          {crmLeadRows !== null
+            ? crmLeadRows.map((lead) => (
+                <article key={lead.id} className="dv-card dv-b2b-app">
+                  <h3>
+                    {lead.contactName} — <span dir="ltr">{lead.contactPhone}</span> |{" "}
+                    {LEAD_STATUS_LABELS[lead.status] ?? lead.status} |{" "}
+                    {lead.source === "DEMO_REQUEST" ? "درخواست دمو" : "فرم تماس"}
+                  </h3>
+                  <p className="dv-muted">{lead.message}</p>
+                  <div className="dv-pay-actions">
+                    {(["CONTACTED", "QUALIFIED", "DISCARDED"] as const)
+                      .filter((status) => status !== lead.status)
+                      .map((status) => (
+                        <button
+                          key={status}
+                          type="button"
+                          className="dv-admin-tab"
+                          disabled={busy}
+                          onClick={() => void handleCrmLeadUpdate(lead.id, status)}
+                        >
+                          → {LEAD_STATUS_LABELS[status]}
+                        </button>
+                      ))}
+                  </div>
+                </article>
+              ))
+            : null}
+
+          <h2 style={{ marginTop: "24px" }}>پروفایل مشتری (۳۶۰-lite)</h2>
+          <div className="dv-admin-filter">
+            <input
+              type="text"
+              dir="ltr"
+              aria-label="شماره موبایل مشتری"
+              placeholder="09123456789"
+              value={crmPhone}
+              onChange={(event) => setCrmPhone(event.target.value)}
+            />
+            <button type="button" className="dv-btn dv-btn-gold" disabled={busy} onClick={() => void handleCustomerLookup()}>
+              استعلام مشتری
+            </button>
+          </div>
+          {crmCustomer !== null ? (
+            <div className="dv-card dv-b2b-app">
+              <h3>
+                مشتری <span dir="ltr">{crmCustomer.phone}</span>
+              </h3>
+              <p>
+                سفارش‌ها: {formatFaNumber(crmCustomer.ordersCount)} | مجموع پرداخت‌شده:{" "}
+                {formatPrice(crmCustomer.paidTotalMinor, "IRR")} | آخرین سفارش:{" "}
+                {crmCustomer.lastOrderStatus ?? "—"}
+                {crmCustomer.lastOrderAt !== null
+                  ? ` (${new Date(crmCustomer.lastOrderAt).toISOString().slice(0, 10)})`
+                  : ""}
+              </p>
+              <p className="dv-muted">
+                تیکت‌ها: {formatFaNumber(crmCustomer.ticketsCount)} | درخواست همکاری:{" "}
+                {formatFaNumber(crmCustomer.applicationsCount)} | سازمان:{" "}
+                {crmCustomer.organizationName ?? "—"}
+              </p>
             </div>
           ) : null}
         </section>

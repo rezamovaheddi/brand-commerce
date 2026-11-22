@@ -12,6 +12,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { B2bModule } from './modules/b2b/b2b.module';
+import { SupportModule } from './modules/support/support.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { B2bModule } from './modules/b2b/b2b.module';
     InventoryModule,
     AdminModule,
     B2bModule,
+    SupportModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

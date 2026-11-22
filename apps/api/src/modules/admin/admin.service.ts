@@ -8,10 +8,15 @@ import {
   AdjustStock,
   B2BApplication,
   CreateOrgMember,
+  CustomerProfile,
+  Lead,
   OrgMember,
+  Ticket,
 } from '@bc/contracts';
 import { PrismaService } from '../../prisma/prisma.service';
 import { B2bService } from '../b2b/b2b.service';
+import { SupportService } from '../support/support.service';
+import type { AdminLeadUpdate, AdminTicketUpdate, TicketReply } from '@bc/contracts';
 import type { Rfq } from '@bc/contracts';
 
 interface MembershipRow {
@@ -53,6 +58,7 @@ export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly b2bService: B2bService,
+    private readonly supportService: SupportService,
   ) {}
 
   async listOrders(
@@ -309,5 +315,31 @@ export class AdminService {
       data: { keyRevokedAt: new Date() },
     });
     return toOrgMemberContract(updated as unknown as MembershipRow);
+  }
+
+  // ---- CRM-lite (TASK-099 + K3) ------------------------------------------------
+
+  async listTickets(status?: string): Promise<{ items: Ticket[] }> {
+    return this.supportService.listTickets(status);
+  }
+
+  async replyTicket(id: string, input: TicketReply): Promise<Ticket> {
+    return this.supportService.replyAsAgent(id, input);
+  }
+
+  async updateTicket(id: string, input: AdminTicketUpdate): Promise<Ticket> {
+    return this.supportService.updateTicket(id, input);
+  }
+
+  async listLeads(status?: string): Promise<{ items: Lead[] }> {
+    return this.supportService.listLeads(status);
+  }
+
+  async updateLead(id: string, input: AdminLeadUpdate): Promise<Lead> {
+    return this.supportService.updateLead(id, input);
+  }
+
+  async customerProfile(phone: string): Promise<CustomerProfile> {
+    return this.supportService.customerProfile(phone);
   }
 }

@@ -16,14 +16,20 @@ import {
   AdminLedgerResponse,
   AdminOrderListResponse,
   AdminOrderStatusQuerySchema,
+  AdminLeadUpdateSchema,
+  AdminTicketUpdateSchema,
   AdjustStockSchema,
   CreateOrgMemberSchema,
   IssueQuoteSchema,
+  TicketReplySchema,
   type AdminB2BDecision,
+  type AdminLeadUpdate,
+  type AdminTicketUpdate,
   type AdjustStock,
   type AdminOrderStatusQuery,
   type CreateOrgMember,
   type IssueQuote,
+  type TicketReply,
 } from '@bc/contracts';
 import { ZodValidationPipe } from '../../common/zod-validation.pipe';
 import { AdminKeyGuard } from './admin-key.guard';
@@ -231,5 +237,66 @@ export class AdminController {
   @ApiNotFoundResponse({ description: 'عضو یافت نشد' })
   async revokeOrgMemberKey(@Param('id') id: string) {
     return this.adminService.revokeOrgMemberKey(id);
+  }
+
+  // ---- CRM-lite (TASK-099 + K3) --------------------------------------------------
+
+  @Get('crm/tickets')
+  @ApiOperation({ summary: 'فهرست تیکت‌های پشتیبانی' })
+  @ApiOkResponse({ description: 'تیکت‌ها با timeline', type: Object })
+  async listTickets(@Query('status') status?: string) {
+    return this.adminService.listTickets(status || undefined);
+  }
+
+  @Post('crm/tickets/:id/replies')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'پاسخ اپراتور به تیکت (پیام AGENT در timeline)' })
+  @ApiOkResponse({ description: 'تیکت پس از پاسخ', type: Object })
+  @ApiBadRequestResponse({ description: 'تیکت بسته است' })
+  @ApiNotFoundResponse({ description: 'تیکت یافت نشد' })
+  async replyTicket(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(TicketReplySchema)) input: TicketReply,
+  ) {
+    return this.adminService.replyTicket(id, input);
+  }
+
+  @Post('crm/tickets/:id/update')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'تغییر وضعیت (ماشین وضعیت domain) / اولویت تیکت' })
+  @ApiOkResponse({ description: 'تیکت پس از تغییر', type: Object })
+  @ApiBadRequestResponse({ description: 'گذار وضعیت مجاز نیست' })
+  @ApiNotFoundResponse({ description: 'تیکت یافت نشد' })
+  async updateTicket(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(AdminTicketUpdateSchema)) input: AdminTicketUpdate,
+  ) {
+    return this.adminService.updateTicket(id, input);
+  }
+
+  @Get('crm/leads')
+  @ApiOperation({ summary: 'فهرست سرنخ‌های CRM (فرم تماس/دمو)' })
+  @ApiOkResponse({ description: 'سرنخ‌ها', type: Object })
+  async listLeads(@Query('status') status?: string) {
+    return this.adminService.listLeads(status || undefined);
+  }
+
+  @Post('crm/leads/:id/update')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'تغییر وضعیت سرنخ' })
+  @ApiOkResponse({ description: 'سرنخ پس از تغییر', type: Object })
+  @ApiNotFoundResponse({ description: 'سرنخ یافت نشد' })
+  async updateLead(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(AdminLeadUpdateSchema)) input: AdminLeadUpdate,
+  ) {
+    return this.adminService.updateLead(id, input);
+  }
+
+  @Get('crm/customers/:phone')
+  @ApiOperation({ summary: 'پروفایل ۳۶۰-lite مشتری بر اساس شماره (سفارش/تیکت/درخواست/سازمان)' })
+  @ApiOkResponse({ description: 'پروفایل تجمیعی', type: Object })
+  async customerProfile(@Param('phone') phone: string) {
+    return this.adminService.customerProfile(phone);
   }
 }

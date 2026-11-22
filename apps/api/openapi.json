@@ -1213,6 +1213,237 @@
         ]
       }
     },
+    "/api/v1/admin/crm/tickets": {
+      "get": {
+        "operationId": "AdminController_listTickets",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "تیکت‌ها با timeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "فهرست تیکت‌های پشتیبانی",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/crm/tickets/{id}/replies": {
+      "post": {
+        "operationId": "AdminController_replyTicket",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "تیکت پس از پاسخ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "تیکت بسته است"
+          },
+          "404": {
+            "description": "تیکت یافت نشد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "پاسخ اپراتور به تیکت (پیام AGENT در timeline)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/crm/tickets/{id}/update": {
+      "post": {
+        "operationId": "AdminController_updateTicket",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "تیکت پس از تغییر",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "گذار وضعیت مجاز نیست"
+          },
+          "404": {
+            "description": "تیکت یافت نشد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "تغییر وضعیت (ماشین وضعیت domain) / اولویت تیکت",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/crm/leads": {
+      "get": {
+        "operationId": "AdminController_listLeads",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "سرنخ‌ها",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "فهرست سرنخ‌های CRM (فرم تماس/دمو)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/crm/leads/{id}/update": {
+      "post": {
+        "operationId": "AdminController_updateLead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "سرنخ پس از تغییر",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "سرنخ یافت نشد"
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "تغییر وضعیت سرنخ",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/crm/customers/{phone}": {
+      "get": {
+        "operationId": "AdminController_customerProfile",
+        "parameters": [
+          {
+            "name": "phone",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "پروفایل تجمیعی",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "پروفایل ۳۶۰-lite مشتری بر اساس شماره (سفارش/تیکت/درخواست/سازمان)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/b2b/applications": {
       "post": {
         "operationId": "B2bController_submit",
@@ -1760,6 +1991,124 @@
         "summary": "پذیرش پیش‌فاکتور سازمانی → سفارش (نقش OWNER/BUYER)",
         "tags": [
           "b2b-org"
+        ]
+      }
+    },
+    "/api/v1/support/tickets": {
+      "post": {
+        "operationId": "SupportController_createTicket",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "تیکت OPEN با پیام اول ساخته شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "مقادیر نامعتبر"
+          }
+        },
+        "summary": "باز کردن تیکت پشتیبانی",
+        "tags": [
+          "support"
+        ]
+      }
+    },
+    "/api/v1/support/tickets/{id}": {
+      "get": {
+        "operationId": "SupportController_getTicket",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "تیکت با timeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "تیکت یافت نشد"
+          }
+        },
+        "summary": "مشاهده تیکت و گفت‌وگوی آن",
+        "tags": [
+          "support"
+        ]
+      }
+    },
+    "/api/v1/support/tickets/{id}/replies": {
+      "post": {
+        "operationId": "SupportController_reply",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "پیام CUSTOMER اضافه شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "تیکت بسته است"
+          },
+          "404": {
+            "description": "تیکت یافت نشد"
+          }
+        },
+        "summary": "پاسخ مشتری به تیکت (تا قبل از بسته‌شدن)",
+        "tags": [
+          "support"
+        ]
+      }
+    },
+    "/api/v1/support/leads": {
+      "post": {
+        "operationId": "SupportController_createLead",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "سرنخ NEW ثبت شد",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "ثبت تماس/درخواست مشاوره (K3 → سرنخ CRM)",
+        "tags": [
+          "support"
         ]
       }
     }

@@ -419,3 +419,83 @@ model QuoteRevision {
   @@unique([quoteId, revisionNo])
   @@index([quoteId])
 }
+
+// ---- CRM-lite (TASK-099 + K3; guest-authored until Identity lands in P7) ----
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum TicketCategory {
+  SUPPORT
+  SALES
+  COMPLAINT
+  ADVERSE_EVENT
+}
+
+enum TicketMessageAuthor {
+  CUSTOMER
+  AGENT
+}
+
+model SupportTicket {
+  id           String          @id @default(cuid())
+  subject      String          @default("")
+  status       TicketStatus    @default(OPEN)
+  priority     TicketPriority  @default(NORMAL)
+  category     TicketCategory  @default(SUPPORT)
+  contactName  String
+  contactPhone String
+  messages     TicketMessage[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([status])
+  @@index([contactPhone])
+}
+
+// Append-only timeline: entries are never edited or deleted.
+model TicketMessage {
+  id        String              @id @default(cuid())
+  ticket    SupportTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId  String
+  author    TicketMessageAuthor
+  body      String
+  createdAt DateTime            @default(now())
+
+  @@index([ticketId, createdAt])
+}
+
+enum LeadSource {
+  CONTACT_FORM
+  DEMO_REQUEST
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  DISCARDED
+}
+
+model CrmLead {
+  id           String     @id @default(cuid())
+  contactName  String
+  contactPhone String
+  message      String
+  source       LeadSource @default(CONTACT_FORM)
+  status       LeadStatus @default(NEW)
+  createdAt    DateTime   @default(now())
+
+  @@index([status])
+}

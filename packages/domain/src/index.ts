@@ -144,3 +144,34 @@ export function checkRfqAttachmentFilename(filename: string): RfqAttachmentCheck
   }
   return "ok";
 }
+
+// ---- Support tickets (TASK-099 CRM-lite) -------------------------------------
+
+export type TicketStatus = "OPEN" | "IN_PROGRESS" | "WAITING_CUSTOMER" | "RESOLVED" | "CLOSED";
+
+/**
+ * Ticket lifecycle. RESOLVED can be reopened (customer disagrees) until the
+ * ticket is CLOSED; CLOSED is terminal — a follow-up question is a new ticket.
+ */
+export const TICKET_TRANSITIONS: Readonly<Record<string, readonly TicketStatus[]>> = {
+  OPEN: ["IN_PROGRESS", "RESOLVED", "CLOSED"],
+  IN_PROGRESS: ["WAITING_CUSTOMER", "RESOLVED", "CLOSED"],
+  WAITING_CUSTOMER: ["IN_PROGRESS", "RESOLVED", "CLOSED"],
+  RESOLVED: ["IN_PROGRESS", "CLOSED"],
+  CLOSED: [],
+} as const;
+
+export function canTransitionTicket(from: string, to: string): boolean {
+  return TICKET_TRANSITIONS[from]?.includes(to as TicketStatus) ?? false;
+}
+
+export function assertTicketTransition(from: string, to: string): void {
+  if (!canTransitionTicket(from, to)) {
+    throw new Error(`invalid ticket transition: ${from} -> ${to}`);
+  }
+}
+
+/** Customers may reply to any non-CLOSED ticket. */
+export function canReplyToTicket(status: string): boolean {
+  return status !== "CLOSED";
+}

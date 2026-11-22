@@ -4,8 +4,11 @@ import {
   RFQ_ATTACHMENT_ALLOWED_MIMES,
   RFQ_ATTACHMENT_MAX_BYTES,
   CartLineInput,
+  assertTicketTransition,
   canActAsOrgBuyer,
   canReadOrgData,
+  canReplyToTicket,
+  canTransitionTicket,
   checkQuantity,
   checkRfqAttachment,
   checkRfqAttachmentFilename,
@@ -186,5 +189,33 @@ describe('RFQ attachments (B3)', () => {
     expect(checkRfqAttachmentFilename('bad\x01name.pdf')).toBe('bad_filename');
     expect(checkRfqAttachmentFilename('a'.repeat(121))).toBe('bad_filename');
     expect(checkRfqAttachmentFilename('')).toBe('bad_filename');
+  });
+});
+
+describe('support ticket lifecycle (TASK-099)', () => {
+  it('allows the working transitions: OPEN → IN_PROGRESS → WAITING_CUSTOMER', () => {
+    expect(canTransitionTicket('OPEN', 'IN_PROGRESS')).toBe(true);
+    expect(canTransitionTicket('IN_PROGRESS', 'WAITING_CUSTOMER')).toBe(true);
+    expect(canTransitionTicket('WAITING_CUSTOMER', 'IN_PROGRESS')).toBe(true);
+  });
+
+  it('allows RESOLVED to be reopened or closed, but CLOSED is terminal', () => {
+    expect(canTransitionTicket('RESOLVED', 'IN_PROGRESS')).toBe(true);
+    expect(canTransitionTicket('RESOLVED', 'CLOSED')).toBe(true);
+    expect(canTransitionTicket('CLOSED', 'OPEN')).toBe(false);
+    expect(canTransitionTicket('CLOSED', 'RESOLVED')).toBe(false);
+    expect(canTransitionTicket('UNKNOWN', 'OPEN')).toBe(false);
+  });
+
+  it('assertTicketTransition throws on invalid moves', () => {
+    expect(() => assertTicketTransition('OPEN', 'WAITING_CUSTOMER')).toThrow(/invalid ticket transition/);
+    expect(() => assertTicketTransition('CLOSED', 'IN_PROGRESS')).toThrow(/invalid ticket transition/);
+    expect(() => assertTicketTransition('OPEN', 'IN_PROGRESS')).not.toThrow();
+  });
+
+  it('customers may reply to any non-CLOSED ticket', () => {
+    expect(canReplyToTicket('OPEN')).toBe(true);
+    expect(canReplyToTicket('RESOLVED')).toBe(true);
+    expect(canReplyToTicket('CLOSED')).toBe(false);
   });
 });

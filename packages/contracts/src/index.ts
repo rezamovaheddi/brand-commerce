@@ -588,3 +588,114 @@ export const QuoteAcceptResponseSchema = z.object({
   quote: QuoteSchema,
 });
 export type QuoteAcceptResponse = z.infer<typeof QuoteAcceptResponseSchema>;
+
+/**
+ * CRM-lite (TASK-099 + K3): support tickets with an append-only customer/agent
+ * timeline, and CRM leads captured from the contact/demo forms. Identity is a
+ * P7 concern — tickets/leads are guest-authored and tracked by id, exactly
+ * like applications and public RFQs.
+ */
+
+export const TicketStatusSchema = z.enum([
+  "OPEN",
+  "IN_PROGRESS",
+  "WAITING_CUSTOMER",
+  "RESOLVED",
+  "CLOSED",
+]);
+export type TicketStatus = z.infer<typeof TicketStatusSchema>;
+
+export const TicketPrioritySchema = z.enum(["LOW", "NORMAL", "HIGH"]);
+export type TicketPriority = z.infer<typeof TicketPrioritySchema>;
+
+export const TicketCategorySchema = z.enum(["SUPPORT", "SALES", "COMPLAINT", "ADVERSE_EVENT"]);
+export type TicketCategory = z.infer<typeof TicketCategorySchema>;
+
+export const TicketMessageAuthorSchema = z.enum(["CUSTOMER", "AGENT"]);
+export type TicketMessageAuthor = z.infer<typeof TicketMessageAuthorSchema>;
+
+export const CreateTicketSchema = z.object({
+  subject: z.string().min(5).max(120),
+  body: z.string().min(10).max(1000),
+  contactName: z.string().min(2).max(80),
+  contactPhone: IranianPhoneSchema,
+  category: TicketCategorySchema.default("SUPPORT"),
+});
+export type CreateTicket = z.infer<typeof CreateTicketSchema>;
+
+export const TicketMessageSchema = z.object({
+  id: z.string(),
+  ticketId: z.string(),
+  author: TicketMessageAuthorSchema,
+  body: z.string(),
+  createdAt: z.string(),
+});
+export type TicketMessage = z.infer<typeof TicketMessageSchema>;
+
+export const TicketSchema = z.object({
+  id: z.string(),
+  subject: z.string(),
+  status: TicketStatusSchema,
+  priority: TicketPrioritySchema,
+  category: TicketCategorySchema,
+  contactName: z.string(),
+  contactPhone: z.string(),
+  messages: z.array(TicketMessageSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Ticket = z.infer<typeof TicketSchema>;
+
+export const TicketReplySchema = z.object({
+  body: z.string().min(2).max(1000),
+});
+export type TicketReply = z.infer<typeof TicketReplySchema>;
+
+export const AdminTicketUpdateSchema = z.object({
+  status: TicketStatusSchema.optional(),
+  priority: TicketPrioritySchema.optional(),
+});
+export type AdminTicketUpdate = z.infer<typeof AdminTicketUpdateSchema>;
+
+export const LeadSourceSchema = z.enum(["CONTACT_FORM", "DEMO_REQUEST"]);
+export type LeadSource = z.infer<typeof LeadSourceSchema>;
+
+export const LeadStatusSchema = z.enum(["NEW", "CONTACTED", "QUALIFIED", "DISCARDED"]);
+export type LeadStatus = z.infer<typeof LeadStatusSchema>;
+
+export const CreateLeadSchema = z.object({
+  contactName: z.string().min(2).max(80),
+  contactPhone: IranianPhoneSchema,
+  message: z.string().min(5).max(500),
+  source: LeadSourceSchema.default("CONTACT_FORM"),
+});
+export type CreateLead = z.infer<typeof CreateLeadSchema>;
+
+export const LeadSchema = z.object({
+  id: z.string(),
+  contactName: z.string(),
+  contactPhone: z.string(),
+  message: z.string(),
+  source: LeadSourceSchema,
+  status: LeadStatusSchema,
+  createdAt: z.string(),
+});
+export type Lead = z.infer<typeof LeadSchema>;
+
+export const AdminLeadUpdateSchema = z.object({
+  status: LeadStatusSchema,
+});
+export type AdminLeadUpdate = z.infer<typeof AdminLeadUpdateSchema>;
+
+/** Contact 360-lite: phone-keyed aggregation across orders/tickets/applications. */
+export const CustomerProfileSchema = z.object({
+  phone: z.string(),
+  ordersCount: z.number().int().nonnegative(),
+  paidTotalMinor: z.number().int().nonnegative(),
+  lastOrderAt: z.string().nullable(),
+  lastOrderStatus: z.string().nullable(),
+  ticketsCount: z.number().int().nonnegative(),
+  applicationsCount: z.number().int().nonnegative(),
+  organizationName: z.string().nullable(),
+});
+export type CustomerProfile = z.infer<typeof CustomerProfileSchema>;

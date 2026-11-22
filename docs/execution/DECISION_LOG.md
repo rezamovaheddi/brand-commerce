@@ -99,3 +99,11 @@
 - چرا (الف) رد شد: خواندن RFQ/پیش‌فاکتور سازمان دیگر بدون هیچ گارد یعنی نشتی داده B2B؛ قواعد نقش (ACCOUNTANT فقط مشاهده) بدون هویت بی‌معناست.
 - تصمیم: OrgMemberGuard روی /b2b/org/* با هدر x-org-key؛ dvorg_ (32 hex) per-member؛ plaintext فقط یک‌بار در لحظه صدور برگردانده می‌شود (hash@unique + keyLast4)؛ ابطال/تعویض فوری از کنسول ادمین؛ scoping سازمانی در where + پاسخ 404 برای cross-org (بدون نشتی وجود، حتی برای پیش‌فاکتور غیرSENT)؛ قواعد نقش pure در @bc/domain (canActAsOrgBuyer/canReadOrgData). جایگزین نهایی: credentials واقعی Identity در P7.
 - وضعیت: ACCEPTED | 2026-11-21
+
+## DEC-015 — وضعیت آسیب‌پذیری‌های وابستگی‌ها (npm audit 2026-11-22)
+- زمینه: `npm audit --omit=dev` هفت یافته (۱ moderate، ۶ high) گزارش می‌کند: zod<4.6.6 (GHSA-mrhx-c7xc-m3w5 — memory exhaustion در کالکشن‌های بزرگ)، postcss≤8.5.22 (سه GHSA، از طریق next)، deepmerge-ts/effect (از طریق @prisma/config). `npm audit fix` غیرشکننده هیچ‌کدام را رفع نمی‌کند (رنج‌های قفل‌شده).
+- گزینه‌ها: (الف) ارتقای breaking فوری (zod@4، next@16) بدون چرخه رگرسیون، (ب) ثبت ریسک با کاهش‌دهنده‌های موجود + بک‌لاگ ارتقا.
+- چرا (الف) رد شد: ارتقای zod/next بدون چرخه تست اختصاصی، دقیقاً همان «ادعای ناتمام» است که قواعد اجرا ممنوعش می‌کند؛ ریسک فعلی محدود شده است.
+- کاهش‌دهنده‌های فعال: سقف body برابر 2MB روی همه endpointها؛ در contracts روی هر کالکشن/رشته سقف صریح .max گذاشته شده (بریف N10، آیتم‌های RFQ ≤20، پیوست ≤750k char)؛ postcss فقط ابزار build فرانت است و از مسیر runtime API دسترس‌پذیر نیست؛ deepmerge-ts/effect زنجیره CLI توسعه prisma است.
+- تصمیم: پذیرش ریسک مستند + بک‌لاگ P8: ارتقای zod@4 و next@16 در چرخه سخت‌سازی اختصاصی با رگرسیون کامل؛ افزودن `npm audit` به CI پس از remote.
+- وضعیت: ACCEPTED | 2026-11-22
