@@ -2115,18 +2115,50 @@
   },
   "info": {
     "title": "Brand Commerce API",
-    "description": "",
+    "description": "Full OpenAPI specification for Brand Commerce Platform (Dermavia)",
     "version": "1.0",
     "contact": {}
   },
   "tags": [
     {
       "name": "products",
-      "description": ""
+      "description": "Catalog and inventory products"
+    },
+    {
+      "name": "cart",
+      "description": "Customer cart operations"
+    },
+    {
+      "name": "checkout",
+      "description": "Order checkout with snapshot pricing"
+    },
+    {
+      "name": "payments",
+      "description": "Sandbox payment adapter & confirmation"
+    },
+    {
+      "name": "b2b",
+      "description": "B2B Wholesale portal and organizations"
+    },
+    {
+      "name": "rfq",
+      "description": "Request for Quote & revision workflow"
+    },
+    {
+      "name": "crm",
+      "description": "Customer Support tickets and 360 profile"
+    },
+    {
+      "name": "inventory",
+      "description": "Atomic raw-SQL stock guard and adjustments"
+    },
+    {
+      "name": "ledger",
+      "description": "Append-only financial transaction ledger"
     },
     {
       "name": "health",
-      "description": ""
+      "description": "Liveness and database connectivity probes"
     }
   ],
   "servers": [],

@@ -6734,6 +6734,19 @@
         "packages/domain/src/index.ts"
       ],
       "rdeps": []
+    },
+    {
+      "id": "scripts/generate-openapi.ts",
+      "label": "generate-openapi.ts",
+      "source_file": "scripts/generate-openapi.ts",
+      "layer": "other",
+      "domain": "Core Platform (هسته پلتفرم)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [],
+      "rdeps": []
     }
   ],
   "edges": [
@@ -8987,10 +9000,11 @@
     "frontend": 119,
     "contracts": 137,
     "database": 24,
-    "domain-logic": 21
+    "domain-logic": 21,
+    "other": 1
   },
   "domains": {
-    "Core Platform (هسته پلتفرم)": 23,
+    "Core Platform (هسته پلتفرم)": 24,
     "B2B Wholesale & RFQ (سازمانی، عمده و استعلام قیمت)": 81,
     "Cart & Checkout (سبد خرید و تسویه)": 97,
     "Inventory & Ledger (انبارداری، رزرواسیون و لجر مالی)": 17,
