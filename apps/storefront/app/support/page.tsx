@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { Ticket } from "@bc/contracts";
+import type { Ticket, TicketCategory } from "@bc/contracts";
 import {
   CartApiError,
   createLead,
@@ -20,6 +20,7 @@ const EMPTY_TICKET = {
   contactPhone: "",
   subject: "",
   body: "",
+  category: "SUPPORT" as TicketCategory,
 };
 
 const EMPTY_LEAD = {
@@ -36,12 +37,43 @@ const STATUS_LABELS: Record<string, string> = {
   CLOSED: "بسته شده",
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  SUPPORT: "پشتیبانی سفارش و ارسال",
-  SALES: "مشاوره خرید و سفارش عمده",
-  COMPLAINT: "رسیدگی به شکایات",
-  ADVERSE_EVENT: "گزارش حساسیت و عوارض محصول",
+const CATEGORY_LABELS: Record<string, { label: string; desc: string }> = {
+  SUPPORT: {
+    label: "پشتیبانی سفارش و ارسال",
+    desc: "رهگیری بسته پستی، تغییر آدرس، وضعیت پرداخت یا فاکتور",
+  },
+  SALES: {
+    label: "مشاوره خرید و سفارش عمده",
+    desc: "انتخاب روتین، بررسی ترکیبات، تخفیف‌های ویژه یا خرید تعدادی",
+  },
+  COMPLAINT: {
+    label: "رسیدگی به شکایات و انتقادات",
+    desc: "بررسی نارضایتی از بسته ارسالی، نحوه تحویل یا تاخیر",
+  },
+  ADVERSE_EVENT: {
+    label: "گزارش حساسیت و عوارض محصول",
+    desc: "ارجاع مستقیم به مسئول ایمنی بالینی (Regulatory & Safety)",
+  },
 };
+
+const FAQS = [
+  {
+    q: "ارسال سفارش‌ها چقدر زمان می‌برد و هزینه آن چگونه محاسبه می‌شود؟",
+    a: "سفارش‌های تهران از طریق پیک ویژه همان روز یا روز کاری بعد و سفارش‌های شهرستان از طریق پست پیشتاز ظرف ۲ الی ۳ روز کاری تحویل می‌گردند. برای خریدهای بالای ۲۵۰ هزار تومان (۲,۵۰۰,۰۰۰ ریال)، ارسال کاملاً رایگان خواهد بود.",
+  },
+  {
+    q: "چگونه می‌توانم از اصالت و کیفیت محصولات اطمینان حاصل کنم؟",
+    a: "تمامی محصولات درماویا در اتاق‌های تمیز استاندارد ISO 22716 و تحت فرآیند پرس سرد تولید می‌شوند. هر محصول دارای بچ‌نامبر یکتا و شناسه اصالت بوده و مستقیماً از انبار مرکزی با کنترل دما ارسال می‌گردد.",
+  },
+  {
+    q: "آیا در صورت عدم سازگاری پوستی امکان عودت وجود دارد؟",
+    a: "بله، درماویا متعهد به رضایت کامل شماست. در صورت بروز هرگونه حساسیت پوستی، کافی است تیکتی در دسته‌بندی «گزارش حساسیت» ثبت نمایید تا مشاوران بالینی پرونده شما را ارزیابی و فرآیند تعویض یا استرداد وجه را اجرا نمایند.",
+  },
+  {
+    q: "آیا برای ثبت تیکت نیاز به ورود یا ثبت‌نام در سایت دارم؟",
+    a: "خیر، جهت سهولت و دسترسی سریع، ثبت تیکت صرفاً با نام و شماره موبایل انجام شده و با کد رهگیری اختصاصی (CUID) بدون نیاز به رمز عبور قابل پیگیری در لحظه است.",
+  },
+];
 
 export default function SupportPage() {
   const [tab, setTab] = useState<"ticket" | "lead" | "track">("ticket");
@@ -51,8 +83,11 @@ export default function SupportPage() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [reply, setReply] = useState("");
   const [createdLead, setCreatedLead] = useState(false);
+  const [newTicketCreated, setNewTicketCreated] = useState<Ticket | null>(null);
+  const [copiedId, setCopiedId] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const replyFocus = useRef<HTMLTextAreaElement>(null);
 
   const handleCreateTicket = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -68,12 +103,12 @@ export default function SupportPage() {
         contactPhone: ticketForm.contactPhone,
         subject: ticketForm.subject,
         body: ticketForm.body,
-        category: "SUPPORT",
+        category: ticketForm.category,
       });
       setTicket(created);
       setTrackId(created.id);
+      setNewTicketCreated(created);
       setTicketForm(EMPTY_TICKET);
-      setTab("track");
     } catch (cause) {
       setError(cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در ثبت تیکت.");
     } finally {
@@ -104,14 +139,17 @@ export default function SupportPage() {
     }
   };
 
-  const handleTrack = async (): Promise<void> => {
-    if (trackId.trim() === "" || busy) {
+  const handleTrack = async (targetId?: string): Promise<void> => {
+    const idToFetch = (targetId ?? trackId).trim();
+    if (idToFetch === "" || busy) {
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      setTicket(await getTicket(trackId.trim()));
+      const res = await getTicket(idToFetch);
+      setTicket(res);
+      setTrackId(res.id);
       setReply("");
     } catch (cause) {
       const message = cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره.";
@@ -140,16 +178,43 @@ export default function SupportPage() {
     }
   };
 
+  const handleCopyTicketId = (id: string) => {
+    navigator.clipboard?.writeText(id);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2500);
+  };
+
   const canReply = ticket !== null && ticket.status !== "CLOSED";
 
   return (
     <div className="dv-b2b-container">
       {/* Hero */}
-      <div className="dv-b2b-hero">
-        <h1 className="dv-b2b-header-title">مرکز پشتیبانی و ارتباط با مشتریان DERMAVIA</h1>
-        <p className="dv-b2b-header-desc">
+      <div className="dv-b2b-hero" style={{ textAlign: "center", padding: "44px 24px" }}>
+        <span className="dv-badge" style={{ background: "rgba(197, 160, 89, 0.2)", color: "var(--gold-deep)", fontWeight: 700, marginBottom: 12 }}>
+          HUMAN CLINICAL SUPPORT
+        </span>
+        <h1 className="dv-b2b-header-title" style={{ fontSize: "2.2rem", margin: "0 0 14px", fontWeight: 800 }}>
+          مرکز پشتیبانی و ارتباط با مشتریان DERMAVIA
+        </h1>
+        <p className="dv-b2b-header-desc" style={{ maxWidth: 780, margin: "0 auto 24px", lineHeight: 1.8 }}>
           پاسخگویی انسانی، بدون ربات‌های خودکار. برای پیگیری سفارش، مشاوره اختصاصی پوست، گزارش عوارض یا سؤالات فروش تیکت ثبت نمایید؛ کارشناسان بالینی در اسرع وقت پاسخگوی شما خواهند بود.
         </p>
+
+        {/* Quick Trust Badges */}
+        <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff", padding: "8px 14px", borderRadius: 9999, border: "1px solid var(--dv-line)", fontSize: "0.82rem", color: "var(--dv-ink)" }}>
+            <span>⚡</span>
+            <span>پاسخگویی تضمینی کمتر از ۲۴ ساعت</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff", padding: "8px 14px", borderRadius: 9999, border: "1px solid var(--dv-line)", fontSize: "0.82rem", color: "var(--dv-ink)" }}>
+            <span>🔬</span>
+            <span>مشاوران رسمی درماتولوژی</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff", padding: "8px 14px", borderRadius: 9999, border: "1px solid var(--dv-line)", fontSize: "0.82rem", color: "var(--dv-ink)" }}>
+            <span>🛡️</span>
+            <span>پیگیری سریع بدون نیاز به لاگین</span>
+          </div>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -159,7 +224,10 @@ export default function SupportPage() {
           role="tab"
           aria-selected={tab === "ticket"}
           className={`dv-admin-tab-btn ${tab === "ticket" ? "is-active" : ""}`}
-          onClick={() => setTab("ticket")}
+          onClick={() => {
+            setTab("ticket");
+            setNewTicketCreated(null);
+          }}
         >
           ثبت تیکت جدید
         </button>
@@ -168,7 +236,10 @@ export default function SupportPage() {
           role="tab"
           aria-selected={tab === "lead"}
           className={`dv-admin-tab-btn ${tab === "lead" ? "is-active" : ""}`}
-          onClick={() => setTab("lead")}
+          onClick={() => {
+            setTab("lead");
+            setNewTicketCreated(null);
+          }}
         >
           درخواست مشاوره تخصصی
         </button>
@@ -191,68 +262,130 @@ export default function SupportPage() {
 
       {/* Tab 1: Ticket Creation */}
       {tab === "ticket" ? (
-        <div className="dv-b2b-card" style={{ maxWidth: 650, margin: "0 auto" }}>
-          <h2>ثبت تیکت پشتیبانی</h2>
-          <form onSubmit={handleCreateTicket}>
-            <div className="dv-b2b-field-grid">
-              <div className="dv-checkout-field">
-                <label className="dv-checkout-label" htmlFor="sup-name">نام و نام خانوادگی</label>
-                <input
-                  id="sup-name"
-                  className="dv-checkout-input"
-                  value={ticketForm.contactName}
-                  onChange={(event) => setTicketForm({ ...ticketForm, contactName: event.target.value })}
-                  required
-                  minLength={2}
-                />
+        <div className="dv-b2b-card" style={{ maxWidth: 700, margin: "0 auto" }}>
+          {newTicketCreated ? (
+            <div style={{ background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 16, padding: 32, textAlign: "center" }}>
+              <div style={{ fontSize: "2.4rem", marginBottom: 8 }}>✓</div>
+              <h2 style={{ color: "#065f46", margin: "0 0 10px", fontSize: "1.5rem" }}>تیکت شما با موفقیت ثبت شد</h2>
+              <p style={{ color: "#047857", fontSize: "0.95rem", lineHeight: 1.7, maxWidth: 520, margin: "0 auto 20px" }}>
+                شناسه پیگیری زیر به درخواست شما تخصیص یافت. لطفاً این شناسه را یادداشت فرمایید تا در هر زمان بتوانید پاسخ کارشناسان را در بخش «پیگیری تیکت» مشاهده نمایید.
+              </p>
+              
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "#fff", border: "1px solid #10b981", borderRadius: 12, padding: "10px 18px", marginBottom: 24 }}>
+                <span style={{ fontSize: "0.85rem", color: "var(--dv-muted)" }}>شناسه پیگیری:</span>
+                <code dir="ltr" style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--dv-navy)" }}>{newTicketCreated.id}</code>
+                <button
+                  type="button"
+                  className="dv-btn"
+                  onClick={() => handleCopyTicketId(newTicketCreated.id)}
+                  style={{ background: "#f0fdf4", border: "1px solid #10b981", padding: "4px 10px", fontSize: "0.8rem", color: "#047857" }}
+                >
+                  {copiedId ? "کپی شد! ✓" : "کپی شناسه"}
+                </button>
               </div>
 
-              <div className="dv-checkout-field">
-                <label className="dv-checkout-label" htmlFor="sup-phone">شماره موبایل</label>
-                <input
-                  id="sup-phone"
-                  dir="ltr"
-                  inputMode="numeric"
-                  className="dv-checkout-input"
-                  placeholder="09123456789"
-                  value={ticketForm.contactPhone}
-                  onChange={(event) => setTicketForm({ ...ticketForm, contactPhone: event.target.value })}
-                  required
-                />
+              <div>
+                <button
+                  type="button"
+                  className="dv-btn dv-btn-gold"
+                  onClick={() => {
+                    setTab("track");
+                    setTrackId(newTicketCreated.id);
+                  }}
+                  style={{ padding: "10px 24px" }}
+                >
+                  مشاهده وضعیت و شروع گفت‌وگو →
+                </button>
               </div>
             </div>
+          ) : (
+            <>
+              <h2>ثبت تیکت پشتیبانی</h2>
+              <p className="dv-muted" style={{ fontSize: "0.88rem", marginBottom: 20 }}>
+                لطفاً اطلاعات خود را تکمیل فرمایید تا کارشناسان دپارتمان مربوطه رسیدگی نمایند.
+              </p>
 
-            <div className="dv-checkout-field">
-              <label className="dv-checkout-label" htmlFor="sup-subject">موضوع درخواست</label>
-              <input
-                id="sup-subject"
-                className="dv-checkout-input"
-                placeholder="مثال: پیگیری ارسال بسته یا سؤال در مورد سرم ویتامین C"
-                value={ticketForm.subject}
-                onChange={(event) => setTicketForm({ ...ticketForm, subject: event.target.value })}
-                required
-                minLength={5}
-              />
-            </div>
+              <form onSubmit={handleCreateTicket}>
+                {/* Category Selection */}
+                <div style={{ marginBottom: 20 }}>
+                  <label className="dv-checkout-label" htmlFor="sup-cat">دسته‌بندی درخواست</label>
+                  <select
+                    id="sup-cat"
+                    className="dv-checkout-input"
+                    value={ticketForm.category}
+                    onChange={(e) => setTicketForm({ ...ticketForm, category: e.target.value as TicketCategory })}
+                    style={{ background: "#fff", fontWeight: 600, color: "var(--dv-navy)" }}
+                  >
+                    {Object.entries(CATEGORY_LABELS).map(([catKey, catVal]) => (
+                      <option key={catKey} value={catKey}>
+                        {catVal.label} — ({catVal.desc})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className="dv-checkout-field">
-              <label className="dv-checkout-label" htmlFor="sup-body">شرح کامل پیام</label>
-              <textarea
-                id="sup-body"
-                className="dv-checkout-input dv-checkout-textarea"
-                value={ticketForm.body}
-                onChange={(event) => setTicketForm({ ...ticketForm, body: event.target.value })}
-                rows={4}
-                placeholder="لطفاً شماره سفارش یا جزئیات درخواست را بنویسید..."
-                minLength={10}
-                required
-              />
-            </div>
+                <div className="dv-b2b-field-grid">
+                  <div className="dv-checkout-field">
+                    <label className="dv-checkout-label" htmlFor="sup-name">نام و نام خانوادگی</label>
+                    <input
+                      id="sup-name"
+                      className="dv-checkout-input"
+                      value={ticketForm.contactName}
+                      onChange={(event) => setTicketForm({ ...ticketForm, contactName: event.target.value })}
+                      required
+                      minLength={2}
+                      placeholder="مثال: سارا محمدی"
+                    />
+                  </div>
 
-            <button type="submit" className="dv-btn dv-btn-gold dv-btn-block" disabled={busy} aria-busy={busy} style={{ marginTop: 14 }}>
-              {busy ? "در حال ثبت تیکت…" : "ارسال تیکت پشتیبانی"}
-            </button>
-          </form>
+                  <div className="dv-checkout-field">
+                    <label className="dv-checkout-label" htmlFor="sup-phone">شماره موبایل</label>
+                    <input
+                      id="sup-phone"
+                      dir="ltr"
+                      inputMode="numeric"
+                      className="dv-checkout-input"
+                      placeholder="09123456789"
+                      value={ticketForm.contactPhone}
+                      onChange={(event) => setTicketForm({ ...ticketForm, contactPhone: event.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="dv-checkout-field">
+                  <label className="dv-checkout-label" htmlFor="sup-subject">موضوع درخواست</label>
+                  <input
+                    id="sup-subject"
+                    className="dv-checkout-input"
+                    placeholder="مثال: پیگیری ارسال بسته یا سؤال در مورد سرم ویتامین C"
+                    value={ticketForm.subject}
+                    onChange={(event) => setTicketForm({ ...ticketForm, subject: event.target.value })}
+                    required
+                    minLength={5}
+                  />
+                </div>
+
+                <div className="dv-checkout-field">
+                  <label className="dv-checkout-label" htmlFor="sup-body">شرح کامل پیام</label>
+                  <textarea
+                    id="sup-body"
+                    className="dv-checkout-input dv-checkout-textarea"
+                    value={ticketForm.body}
+                    onChange={(event) => setTicketForm({ ...ticketForm, body: event.target.value })}
+                    rows={4}
+                    placeholder="لطفاً شماره سفارش یا جزئیات درخواست را بنویسید..."
+                    minLength={10}
+                    required
+                  />
+                </div>
+
+                <button type="submit" className="dv-btn dv-btn-gold dv-btn-block" disabled={busy} aria-busy={busy} style={{ marginTop: 14 }}>
+                  {busy ? "در حال ثبت تیکت…" : "ارسال تیکت پشتیبانی"}
+                </button>
+              </form>
+            </>
+          )}
         </div>
       ) : null}
 
@@ -294,6 +427,7 @@ export default function SupportPage() {
                     onChange={(event) => setLeadForm({ ...leadForm, contactName: event.target.value })}
                     required
                     minLength={2}
+                    placeholder="مثال: علی رضایی"
                   />
                 </div>
 
@@ -339,21 +473,33 @@ export default function SupportPage() {
         <div className="dv-b2b-card" style={{ maxWidth: 750, margin: "0 auto" }}>
           <h2>پیگیری گفت‌وگو و وضعیت تیکت</h2>
           <p className="dv-muted" style={{ fontSize: "0.88rem", marginBottom: 16 }}>
-            کد رهگیری تیکت خود (شروع با tkt-...) را وارد کنید تا پاسخ کارشناس را مشاهده و در صورت نیاز پیام جدید ارسال کنید.
+            شناسه تیکت خود را وارد کنید تا پاسخ کارشناس را مشاهده و در صورت نیاز پیام جدید ارسال کنید.
           </p>
 
-          <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
+          <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
             <input
               type="text"
               dir="ltr"
               className="dv-checkout-input"
               aria-label="شناسه تیکت"
-              placeholder="tkt-..."
+              placeholder="شناسه تیکت (مثال: cmwrg2dba...)"
               value={trackId}
               onChange={(event) => setTrackId(event.target.value)}
             />
             <button type="button" className="dv-btn dv-btn-gold" onClick={() => void handleTrack()} disabled={busy}>
-              استعلام
+              {busy ? "در حال جستجو…" : "استعلام"}
+            </button>
+          </div>
+
+          {/* Quick Sample Button for Testing */}
+          <div style={{ marginBottom: 24 }}>
+            <button
+              type="button"
+              className="dv-link"
+              onClick={() => void handleTrack("cmwrg2dba0007ezwkvzzaxmj1")}
+              style={{ fontSize: "0.82rem", color: "var(--dv-gold)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            >
+              ✧ مشاهده نمونه گفت‌وگوی فعال (شناسه تستی cmwrg2dba0007ezwkvzzaxmj1)
             </button>
           </div>
 
@@ -361,20 +507,22 @@ export default function SupportPage() {
             <div style={{ background: "#fcf9f2", border: "1px solid rgba(212, 175, 55, 0.35)", borderRadius: 14, padding: 22 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 16 }}>
                 <div>
-                  <h3 style={{ margin: "0 0 6px", color: "var(--dv-navy)", fontSize: "1.1rem" }}>
+                  <h3 style={{ margin: "0 0 6px", color: "var(--dv-navy)", fontSize: "1.15rem", fontWeight: 800 }}>
                     {ticket.subject || "تیکت پشتیبانی"}
                   </h3>
-                  <span className="dv-muted" style={{ fontSize: "0.85rem" }}>
-                    دسته‌بندی: {CATEGORY_LABELS[ticket.category] ?? ticket.category} | شناسه: <strong dir="ltr">{ticket.id}</strong>
-                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.84rem", color: "var(--dv-muted)" }}>
+                    <span>دسته‌بندی: <strong>{CATEGORY_LABELS[ticket.category]?.label ?? ticket.category}</strong></span>
+                    <span>•</span>
+                    <span>شناسه: <code dir="ltr" style={{ color: "var(--dv-navy)" }}>{ticket.id}</code></span>
+                  </div>
                 </div>
-                <span className="dv-badge" style={{ background: "var(--dv-navy)", color: "#fffaf0" }}>
+                <span className="dv-badge" style={{ background: "var(--dv-navy)", color: "#fffaf0", padding: "6px 12px", fontSize: "0.85rem", fontWeight: 700 }}>
                   {STATUS_LABELS[ticket.status] ?? ticket.status}
                 </span>
               </div>
 
               {/* Chat Timeline */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBlock: 18 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBlock: 20 }}>
                 {ticket.messages.map((msg) => {
                   const isAgent = msg.author === "AGENT";
                   return (
@@ -382,23 +530,26 @@ export default function SupportPage() {
                       key={msg.id}
                       style={{
                         alignSelf: isAgent ? "flex-start" : "flex-end",
-                        maxWidth: "80%",
-                        background: isAgent ? "#ffffff" : "var(--dv-cream)",
-                        border: isAgent ? "1px solid var(--dv-line)" : "1px solid rgba(212, 175, 55, 0.3)",
-                        borderRadius: 14,
-                        padding: "12px 16px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                        maxWidth: "85%",
+                        background: isAgent ? "#ffffff" : "linear-gradient(135deg, #fbf7ee 0%, #f6efe0 100%)",
+                        border: isAgent ? "1px solid var(--dv-line)" : "1px solid rgba(197, 160, 89, 0.4)",
+                        borderRadius: 16,
+                        padding: "14px 18px",
+                        boxShadow: "0 3px 12px rgba(0,0,0,0.04)",
                       }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 4, fontSize: "0.78rem" }}>
-                        <strong style={{ color: isAgent ? "#047857" : "var(--dv-navy)" }}>
-                          {isAgent ? "👨‍🔬 کارشناس پشتیبانی Dermavia" : "شما (کاربر)"}
-                        </strong>
-                        <span className="dv-muted">
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, marginBottom: 6, fontSize: "0.8rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span>{isAgent ? "🔬" : "👤"}</span>
+                          <strong style={{ color: isAgent ? "#047857" : "var(--dv-navy)" }}>
+                            {isAgent ? "کارشناس بالینی Dermavia" : "شما (کاربر)"}
+                          </strong>
+                        </div>
+                        <span className="dv-muted" style={{ fontSize: "0.75rem" }}>
                           {new Date(msg.createdAt).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
-                      <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--dv-ink)", lineHeight: 1.7 }}>
+                      <p style={{ margin: 0, fontSize: "0.92rem", color: "var(--dv-ink)", lineHeight: 1.8 }}>
                         {msg.body}
                       </p>
                     </div>
@@ -408,9 +559,9 @@ export default function SupportPage() {
 
               {/* Reply Box */}
               {canReply ? (
-                <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(212, 175, 55, 0.25)" }}>
-                  <label htmlFor="sup-reply" style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", marginBottom: 6 }}>
-                    ارسال پاسخ به کارشناس:
+                <div style={{ marginTop: 22, paddingTop: 18, borderTop: "1px solid rgba(212, 175, 55, 0.25)" }}>
+                  <label htmlFor="sup-reply" style={{ display: "block", fontWeight: 700, fontSize: "0.9rem", marginBottom: 8, color: "var(--dv-navy)" }}>
+                    ارسال پاسخ تکمیلی به کارشناس:
                   </label>
                   <textarea
                     id="sup-reply"
@@ -425,22 +576,76 @@ export default function SupportPage() {
                   <button
                     type="button"
                     className="dv-btn dv-btn-gold"
-                    style={{ marginTop: 10 }}
+                    style={{ marginTop: 12, padding: "10px 22px" }}
                     disabled={busy}
                     onClick={() => void handleReply()}
                   >
-                    {busy ? "در حال ارسال…" : "ثبت پاسخ"}
+                    {busy ? "در حال ارسال…" : "ثبت پاسخ به گفت‌وگو"}
                   </button>
                 </div>
               ) : (
                 <p className="dv-muted" style={{ margin: "16px 0 0", textAlign: "center", fontSize: "0.88rem" }}>
-                  این تیکت با موفقیت بسته شده است. در صورت نیاز می‌توانید تیکت جدیدی ایجاد کنید.
+                  این تیکت با موفقیت بسته شده است. در صورت نیاز به پیگیری‌های بیشتر، می‌توانید تیکت جدیدی ایجاد کنید.
                 </p>
               )}
             </div>
           ) : null}
         </div>
       ) : null}
+
+      {/* Common FAQ Accordion Section */}
+      <div style={{ maxWidth: 750, margin: "48px auto 0", background: "#fff", border: "1px solid var(--dv-line)", borderRadius: 20, padding: 32 }}>
+        <h2 style={{ fontSize: "1.35rem", color: "var(--dv-navy)", margin: "0 0 8px", fontWeight: 800 }}>
+          پرسش‌های متداول مشتریان (FAQ)
+        </h2>
+        <p style={{ fontSize: "0.88rem", color: "var(--dv-muted)", margin: "0 0 24px" }}>
+          پاسخ سریع به سؤالات پرتکرار پیرامون سفارشات، اصالت و شرایط بازگشت کالا
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {FAQS.map((faq, index) => {
+            const isOpen = expandedFaq === index;
+            return (
+              <div
+                key={faq.q}
+                style={{
+                  border: "1px solid var(--dv-line)",
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  transition: "border-color 0.2s ease",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setExpandedFaq(isOpen ? null : index)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "16px 18px",
+                    background: isOpen ? "rgba(246, 241, 232, 0.4)" : "#fff",
+                    textAlign: "right",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: "var(--dv-navy)",
+                  }}
+                >
+                  <span>{faq.q}</span>
+                  <span style={{ fontSize: "1.2rem", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s ease" }}>
+                    ▾
+                  </span>
+                </button>
+                {isOpen ? (
+                  <div style={{ padding: "14px 18px", fontSize: "0.9rem", color: "var(--dv-ink-soft)", lineHeight: 1.8, background: "#faf8f4", borderTop: "1px solid var(--dv-line)" }}>
+                    {faq.a}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
