@@ -183,18 +183,15 @@ export default function CartPage() {
                 <span>جمع کل</span>
                 <span>{formatPrice(cart.subtotalMinor, cart.currency)}</span>
               </div>
-              {/* Honest disabled checkout: wired to real payments in phase P3. */}
-              <button
-                type="button"
-                className="dv-btn dv-btn-block"
-                disabled
-                aria-disabled="true"
-                title="پرداخت در فاز P3 فعال می‌شود — هیچ سفارشی ثبت نمی‌شود"
+              <Link
+                href="/checkout"
+                className="dv-btn dv-btn-gold dv-btn-block"
+                style={{ textAlign: "center", textDecoration: "none", display: "block" }}
               >
-                ادامه و پرداخت
-              </button>
+                ادامه و ثبت سفارش
+              </Link>
               <p className="dv-cart-note">
-                پرداخت در فاز بعدی پلتفرم فعال می‌شود — هیچ سفارشی ثبت نمی‌شود.
+                ثبت سفارش امن با نشانی پستی و شبیه‌ساز پرداخت سندباکس
               </p>
             </footer>
           </>
