@@ -307,21 +307,47 @@ export default function B2BApplyPage() {
       <div className="dv-b2b-card">
         <h3>پیگیری درخواست نمایندگی</h3>
         <p className="dv-muted" style={{ fontSize: "0.85rem", marginBottom: 14 }}>
-          شناسه پیگیری دریافتی (شروع با app-...) را وارد کنید تا وضعیت پرونده و پیام‌های کارشناس بازرگانی را مشاهده فرمایید.
+          شناسه پیگیری پرونده خود را وارد کنید تا وضعیت بررسی و یادداشت‌های کارشناس بازرگانی را مشاهده فرمایید.
         </p>
 
-        <div style={{ display: "flex", gap: 10, maxWidth: 500, marginBottom: 16 }}>
+        <div style={{ display: "flex", gap: 10, maxWidth: 500, marginBottom: 12 }}>
           <input
             type="text"
             dir="ltr"
             className="dv-checkout-input"
             aria-label="شناسه پیگیری"
-            placeholder="app-..."
+            placeholder="شناسه پیگیری (مثال: cmw...)"
             value={trackId}
             onChange={(event) => setTrackId(event.target.value)}
           />
           <button type="button" className="dv-btn dv-btn-gold" onClick={() => void handleTrack()} disabled={busy}>
             استعلام
+          </button>
+        </div>
+
+        {/* Quick Sample Tracking Button */}
+        <div style={{ marginBottom: 18 }}>
+          <button
+            type="button"
+            className="dv-link"
+            onClick={() => {
+              setTrackId("cmwreuvgp0002ezk0two4grkx");
+              void (async () => {
+                setBusy(true);
+                setError(null);
+                setTracked(null);
+                try {
+                  setTracked(await getB2BApplication("cmwreuvgp0002ezk0two4grkx"));
+                } catch {
+                  setError("خطایی در پیگیری پرونده رخ داد.");
+                } finally {
+                  setBusy(false);
+                }
+              })();
+            }}
+            style={{ fontSize: "0.82rem", color: "var(--dv-gold)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+          >
+            ✧ مشاهده نمونه پرونده فعال و مدارک پیوست (شناسه تستی cmwreuvgp...)
           </button>
         </div>
 
