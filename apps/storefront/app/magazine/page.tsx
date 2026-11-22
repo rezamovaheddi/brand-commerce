@@ -26,7 +26,7 @@ const ARTICLES: Article[] = [
     summary: "نگاهی عمومی به نقش سد پوستی، رطوبت و عواملی که می‌توانند تجربه و سلامت پوست را دگرگون سازند.",
     minutes: 5,
     glyph: "✧",
-    products: [{ name: "کرم مغذی بازسازنده خاویار", slug: "ethereal-cream-cleanser", variantId: "cl_sample_v_2" }],
+    products: [{ name: "کرم مغذی بازسازنده خاویار", slug: "ethereal-cream-cleanser", variantId: "cmwqednwq000bezd46qmazkpm" }],
     body: [
       ["شروع از یک مفهوم زیستی ساده", "سطح پوست فقط یک لایه ظاهری نیست. لایه شاخی پوست در کنار لیپیدهای طبیعی و پیوندهای بین‌سلولی، اصلی‌ترین سد محافظ بدن در برابر آلودگی‌ها و از دست رفتن رطوبت است."],
       ["چه تغییراتی را ثبت کنیم؟", "احساس کشیدگی، خارش، قرمزی یا پوسته‌پوسته شدن پس از شست‌وشو، نشانه‌هایی از تضعیف سد دفاعی هستند. در چنین شرایطی باید از شوینده‌های ملایم با سورفکتانت‌های اسیدی استفاده شود."],
@@ -42,8 +42,8 @@ const ARTICLES: Article[] = [
     minutes: 4,
     glyph: "◌",
     products: [
-      { name: "اکسیر جوانساز سلولی", slug: "ethereal-vitamin-c-serum", variantId: "cl_sample_v_3" },
-      { name: "ژل شست‌وشوی ملایم", slug: "ethereal-gentle-cleanser", variantId: "cl_sample_v_1" },
+      { name: "اکسیر جوانساز سلولی", slug: "ethereal-vitamin-c-serum", variantId: "cmwqednwt000fezd4x6qsnenv" },
+      { name: "ژل شست‌وشوی ملایم", slug: "ethereal-gentle-cleanser", variantId: "cmwqednwj0007ezd4vyii3l8c" },
     ],
     body: [
       ["کمتر اما باکیفیت‌تر", "پوست به ده محصول مختلف نیاز ندارد؛ نظم و استمرار مهم‌ترین عامل اثربخشی است. پایه هر روتین پایدار سه چیز است: پاکسازی، تغذیه فعال و محافظت."],
@@ -59,7 +59,7 @@ const ARTICLES: Article[] = [
     summary: "INCI چیست، چرا نام بین‌المللی مواد اهمیت دارد و چطور ترکیبات فریبنده را شناسایی کنیم؟",
     minutes: 6,
     glyph: "⌘",
-    products: [{ name: "سرم هیالورونیک اسید اتیریال", slug: "ethereal-hyaluronic-serum", variantId: "cl_sample_v_4" }],
+    products: [{ name: "سرم هیالورونیک اسید اتیریال", slug: "ethereal-hyaluronic-serum", variantId: "cmwqednww000jezd4nyoc59vo" }],
     body: [
       ["استاندارد بین‌المللی نام‌گذاری (INCI)", "فهرست INCI استاندارد جهانی برای شفافیت کامل فرمولاسیون است. مواد اولیه به ترتیب غلظت از بیشترین به کمترین درج می‌شوند."],
       ["دام درصدها و نام‌های تجاری", "حضور نام یک عصاره گیاهی در انتهای لیست به معنای غلظت مؤثر آن نیست. مواد فعال اصلی باید در میان ۵ ترکیب نخست فرمول قرار داشته باشند."],
@@ -88,7 +88,7 @@ const ARTICLES: Article[] = [
     summary: "چرا واژه‌های کلی نظیر «حاوی عصاره‌های طبیعی» بدون انتشار آنالیز آزمایشگاهی کافی نیستند؟",
     minutes: 5,
     glyph: "✦",
-    products: [{ name: "اکسیر جوانساز سلولی", slug: "ethereal-vitamin-c-serum", variantId: "cl_sample_v_3" }],
+    products: [{ name: "اکسیر جوانساز سلولی", slug: "ethereal-vitamin-c-serum", variantId: "cmwqednwt000fezd4x6qsnenv" }],
     body: [
       ["فهرست مواد اولیه فراتر از برچسب ظاهری", "خریدار آگاه نیاز دارد تا سازگاری، غلظت موثر و روش استخراج مواد فعال را بررسی کند."],
       ["پایداری ترکیبات آنتی‌اکسیدانی", "ویتامین C و رتینوئیدها در صورت عدم فرموله‌شدن در محیط بدون اکسیژن و ظروف تیره به سرعت اکسید شده و اثربخشی خود را از دست می‌دهند."]
@@ -103,8 +103,8 @@ const ARTICLES: Article[] = [
     minutes: 3,
     glyph: "☼",
     products: [
-      { name: "شیر پاک‌کننده خامه‌ای", slug: "ethereal-cream-cleanser", variantId: "cl_sample_v_2" },
-      { name: "ژل شست‌وشوی ملایم", slug: "ethereal-gentle-cleanser", variantId: "cl_sample_v_1" },
+      { name: "شیر پاک‌کننده خامه‌ای", slug: "ethereal-cream-cleanser", variantId: "cmwqednwq000bezd46qmazkpm" },
+      { name: "ژل شست‌وشوی ملایم", slug: "ethereal-gentle-cleanser", variantId: "cmwqednwj0007ezd4vyii3l8c" },
     ],
     body: [
       ["صبح: محافظت در برابر استرس‌های محیطی", "در روز اولویت پوست مقابله با رادیکال‌های آزاد ناشی از نور خورشید و آلودگی هوا است. آنتی‌اکسیدان‌ها و ضدآفتاب‌ها قهرمانان صبح هستند."],
