@@ -236,7 +236,7 @@ button[aria-disabled="true"],
 }
 
 .dv-page {
-  padding-block: 10px 56px;
+  padding-block: clamp(38px, 4.5vw, 50px) 72px;
 }
 
 /* ------------------------------------------------------ product card */
@@ -4438,7 +4438,7 @@ button[aria-disabled="true"],
 .dv-b2b-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 20px 80px;
+  padding: 48px 20px 80px;
 }
 
 .dv-b2b-hero {
