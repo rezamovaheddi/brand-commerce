@@ -62,10 +62,10 @@ export default function Header({ onOpenConsultation }: HeaderProps) {
   const navLinks = [
     { href: "/", label: "خانه" },
     { href: "/products", label: "محصولات" },
-    { href: "/#catalog", label: "کاتالوگ سه‌بعدی" },
     { href: "/loyalty", label: "باشگاه مشتریان" },
     { href: "/magazine", label: "مجله" },
     { href: "/about", label: "درباره ما" },
+    { href: "/support", label: "پشتیبانی" },
     { href: "/contact", label: "تماس" },
   ];
 
