@@ -2089,6 +2089,38 @@
       "rdeps": []
     },
     {
+      "id": "apps/storefront/app/design-system/page.tsx",
+      "label": "page.tsx",
+      "source_file": "apps/storefront/app/design-system/page.tsx",
+      "layer": "frontend",
+      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [
+        "apps/storefront/components/SampleBadge.tsx"
+      ],
+      "rdeps": [
+        "apps/storefront/app/design-system/page.tsx#DesignSystemPage"
+      ]
+    },
+    {
+      "id": "apps/storefront/app/design-system/page.tsx#DesignSystemPage",
+      "label": "DesignSystemPage",
+      "source_file": "apps/storefront/app/design-system/page.tsx",
+      "layer": "frontend",
+      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
+      "kind": "function",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/storefront/app/design-system/page.tsx"
+      ],
+      "rdeps": []
+    },
+    {
       "id": "apps/storefront/app/loyalty/page.tsx",
       "label": "page.tsx",
       "source_file": "apps/storefront/app/loyalty/page.tsx",
@@ -2670,6 +2702,7 @@
       "external": false,
       "deps": [],
       "rdeps": [
+        "apps/storefront/app/design-system/page.tsx",
         "apps/storefront/app/products/[slug]/page.tsx",
         "apps/storefront/components/ProductCard.tsx",
         "apps/storefront/components/SampleBadge.tsx#SampleBadge"
@@ -7071,6 +7104,11 @@
       "relation": "member_of"
     },
     {
+      "from": "apps/storefront/app/design-system/page.tsx#DesignSystemPage",
+      "to": "apps/storefront/app/design-system/page.tsx",
+      "relation": "member_of"
+    },
+    {
       "from": "apps/storefront/app/loyalty/page.tsx#LoyaltyPage",
       "to": "apps/storefront/app/loyalty/page.tsx",
       "relation": "member_of"
@@ -8656,6 +8694,11 @@
       "relation": "imports"
     },
     {
+      "from": "apps/storefront/app/design-system/page.tsx",
+      "to": "apps/storefront/components/SampleBadge.tsx",
+      "relation": "imports"
+    },
+    {
       "from": "apps/storefront/app/loyalty/page.tsx",
       "to": "apps/storefront/lib/format.ts",
       "relation": "imports"
@@ -8997,7 +9040,7 @@
     "api-controller": 20,
     "api-service": 21,
     "test": 17,
-    "frontend": 119,
+    "frontend": 121,
     "contracts": 137,
     "database": 24,
     "domain-logic": 21,
@@ -9012,7 +9055,7 @@
     "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)": 36,
     "CRM & Support (پشتیبانی و تیکتینگ)": 38,
     "Database & Schema (پایگاه داده و مدل‌ها)": 8,
-    "B2C Storefront (فروشگاه B2C و تجربه کاربری)": 51,
+    "B2C Storefront (فروشگاه B2C و تجربه کاربری)": 53,
     "Shared Contracts & Logic (قراردادها و منطق دامنه)": 46
   }
 }
