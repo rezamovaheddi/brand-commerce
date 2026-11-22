@@ -9,15 +9,20 @@
   ],
   "scripts": {
     "build": "npm run build -w @bc/contracts && npm run build -w @bc/domain && npm run build -w @bc/api && npm run build -w @bc/storefront",
-    "test": "npm run test -w @bc/contracts && npm run test -w @bc/domain && npm run test -w @bc/api",
+    "test": "npm run test -w @bc/contracts && npm run test -w @bc/domain && npm run test -w @bc/api && npm run test:e2e -w @bc/api",
     "lint": "eslint .",
+    "tokens:validate": "python scripts/validate_dtcg_tokens.py",
+    "contrast:check": "node scripts/contrast-check.mjs",
+    "security:audit": "node scripts/security-audit.mjs",
+    "graph:generate": "python scripts/generate_brand_arch_graph.py",
     "prisma:generate": "npm run generate -w @bc/database",
     "prisma:migrate": "npm run migrate -w @bc/database",
     "prisma:seed": "npm run seed -w @bc/database",
     "api:dev": "npm run start:dev -w @bc/api",
     "web:dev": "npm run dev -w @bc/storefront",
     "openapi:export": "node scripts/export-openapi.mjs",
-    "verify": "npm run lint && npm run build && npm run test"
+    "openapi:generate": "node scripts/generate-openapi.mjs",
+    "verify": "npm run lint && npm run tokens:validate && npm run contrast:check && npm run security:audit && npm run build && npm run test"
   },
   "engines": {
     "node": ">=20.0.0"
