@@ -281,6 +281,20 @@ export default function OrgPortalPage() {
             ) : null}
           </form>
 
+          {/* Quick Demo Test Button */}
+          <div style={{ marginTop: 14, textAlign: "center" }}>
+            <button
+              type="button"
+              className="dv-link"
+              onClick={() => {
+                setKeyInput("dvorg_fa16962f6d0d398f3c00207c4026f4db");
+              }}
+              style={{ fontSize: "0.82rem", color: "var(--dv-gold)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            >
+              ✧ ورود نمونه با کلید سازمانی تستی (شرکت پخش سلامت پویا)
+            </button>
+          </div>
+
           <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--dv-line)", textAlign: "center" }}>
             <p className="dv-muted" style={{ fontSize: "0.88rem" }}>
               هنوز عضو شبکه سازمانی نشده‌اید؟{" "}
