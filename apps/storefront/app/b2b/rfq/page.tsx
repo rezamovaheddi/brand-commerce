@@ -135,14 +135,16 @@ export default function RfqPage() {
     }
   };
 
-  const handleTrack = async (): Promise<void> => {
-    if (trackId.trim() === "" || busy) {
+  const handleTrack = async (targetId?: string): Promise<void> => {
+    const idToFetch = (targetId ?? trackId).trim();
+    if (idToFetch === "" || busy) {
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      setRfq(await getRfq(trackId.trim()));
+      setRfq(await getRfq(idToFetch));
+      setTrackId(idToFetch);
     } catch (cause) {
       const message = cause instanceof CartApiError ? cause.message : "خطای غیرمنتظره در پیگیری.";
       setError(message === "پاسخ نامعتبر بود." ? "درخواستی با این شناسه یافت نشد." : message);
@@ -374,21 +376,33 @@ export default function RfqPage() {
       <div className="dv-b2b-card">
         <h3>پیگیری و بررسی پیش‌فاکتور صادر شده</h3>
         <p className="dv-muted" style={{ fontSize: "0.85rem", marginBottom: 14 }}>
-          کد استعلام خود (مثال: rfq-...) را وارد کنید تا وضعیت بررسی فنی یا پیش‌فاکتور رسمی را ملاحظه نمایید.
+          شناسه پیگیری استعلام قیمت خود را وارد کنید تا وضعیت بررسی فنی یا پیش‌فاکتور رسمی را ملاحظه نمایید.
         </p>
 
-        <div style={{ display: "flex", gap: 10, maxWidth: 500, marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: 10, maxWidth: 500, marginBottom: 12 }}>
           <input
             type="text"
             dir="ltr"
             className="dv-checkout-input"
             aria-label="شناسه درخواست قیمت"
-            placeholder="rfq-..."
+            placeholder="شناسه استعلام (مثال: cmw...)"
             value={trackId}
             onChange={(event) => setTrackId(event.target.value)}
           />
           <button type="button" className="dv-btn dv-btn-gold" onClick={() => void handleTrack()} disabled={busy}>
             استعلام
+          </button>
+        </div>
+
+        {/* Quick Sample Tracking Button */}
+        <div style={{ marginBottom: 18 }}>
+          <button
+            type="button"
+            className="dv-link"
+            onClick={() => void handleTrack("cmwqw4ee80000ezas3lktqwp0")}
+            style={{ fontSize: "0.82rem", color: "var(--dv-gold)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+          >
+            ✧ مشاهده نمونه استعلام فرمولاسیون اختصاصی و پیش‌فاکتور OEM (شناسه تستی cmwqw4ee8...)
           </button>
         </div>
 
