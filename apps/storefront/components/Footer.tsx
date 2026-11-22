@@ -154,6 +154,11 @@ export default function Footer() {
                   کنسول مدیریت و اپراتور Backoffice
                 </Link>
               </li>
+              <li>
+                <Link href="/design-system" className="dv-link" style={{ color: "var(--dv-gold)", fontSize: "0.9rem", fontWeight: 600 }}>
+                  سیستم طراحی زنده و آزمایشگاه کنتراست
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
