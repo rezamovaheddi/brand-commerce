@@ -27,6 +27,39 @@
 
   /* Brand background hint: subtle radial cream -> parchment (#f6f1e8 -> #efe8dc). */
   --dv-bg-gradient: radial-gradient(140% 100% at 50% 0%, #f6f1e8 0%, #efe8dc 100%);
+
+  /* Atmospheric & Luxury Ethereal Palette (Dermavia V6) */
+  --color-cosmic-950: #0c132b;
+  --color-cosmic-900: #152147;
+  --color-cosmic-800: #253463;
+  --color-cosmic-600: #4c5280;
+  --color-twilight-400: #877b9b;
+  --color-horizon-200: #dfc2aa;
+  --color-horizon-100: #edd6c0;
+
+  --text-hero-ivory: #fffbf2;
+  --text-hero-champagne: #f4d996;
+  --text-hero-muted: #e5dfee;
+  --text-bronze-active: #7d5618;
+  --text-espresso: #231a15;
+  --text-espresso-soft: #4e4037;
+
+  --surface-nav-cream: rgba(246, 241, 232, 0.90);
+  --surface-cart-scrim: rgba(15, 22, 46, 0.80);
+  --surface-card-inner: rgba(255, 250, 242, 0.08);
+  --surface-pill-glass: rgba(20, 28, 56, 0.56);
+  --surface-parchment: #f4efe6;
+  --surface-parchment-deep: #e8dfd0;
+  --surface-checkout: #f8f4ed;
+
+  --gold-bright: #fff4cf;
+  --gold-pure: #e2be74;
+  --gold-rich: #c29340;
+  --gold-deep: #855e1c;
+
+  --glass-blur-nav: 16px;
+  --glass-blur-panel: 20px;
+  --glass-blur-pill: 10px;
 }
 
 /* Persian script: letter-spacing must stay 0 so joined glyphs are never broken. */

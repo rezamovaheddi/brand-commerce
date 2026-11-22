@@ -24,3 +24,9 @@ export function formatPrice(priceMinor: number, currency: string): string {
   const unit = currency === "IRR" ? "IRR" : currency;
   return `${faNumberFormatter.format(priceMinor)} ${unit}`;
 }
+
+/** Convenience helper defaulting currency to IRR. */
+export function formatPriceMinor(priceMinor: number, currency = "IRR"): string {
+  return formatPrice(priceMinor, currency);
+}
+

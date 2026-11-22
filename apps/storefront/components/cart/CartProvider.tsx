@@ -40,6 +40,10 @@ type CartContextValue = {
   refresh: () => Promise<void>;
   /** Clears the global error and restores a calm status. */
   clearError: () => void;
+  /** Controls slide-over Cart Drawer visibility */
+  isDrawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -98,6 +102,10 @@ export default function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart | null>(null);
   const [status, setStatus] = useState<CartStatus>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+
+  const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
 
   // The id lives in a ref so async callbacks always read the latest value
   // without stale-closure hazards; state (`cart`) mirrors it for rendering.
@@ -165,6 +173,7 @@ export default function CartProvider({ children }: { children: ReactNode }) {
       setCart(next);
       setError(null);
       setStatus("ready");
+      setIsDrawerOpen(true);
     } catch (cause) {
       // Keep the last known cart visible; the caller (PDP button) surfaces
       // the thrown CartApiError as inline feedback.
@@ -263,8 +272,11 @@ export default function CartProvider({ children }: { children: ReactNode }) {
       remove,
       refresh,
       clearError,
+      isDrawerOpen,
+      openDrawer,
+      closeDrawer,
     }),
-    [cart, status, error, add, update, remove, refresh, clearError],
+    [cart, status, error, add, update, remove, refresh, clearError, isDrawerOpen, openDrawer, closeDrawer],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

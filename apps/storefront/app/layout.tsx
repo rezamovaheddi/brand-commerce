@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Vazirmatn } from "next/font/google";
-import Header from "../components/Header";
 import Footer from "../components/Footer";
 import CartProvider from "../components/cart/CartProvider";
+import StorefrontShell from "../components/StorefrontShell";
 import "../styles/tokens.css";
 import "../styles/globals.css";
 
@@ -26,8 +26,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className={vazir.variable}>
         <a href="#main" className="skip-link">پرش به محتوای اصلی</a>
         <CartProvider>
-          <Header />
-          <main id="main">{children}</main>
+          <StorefrontShell>
+            {children}
+          </StorefrontShell>
         </CartProvider>
         <Footer />
       </body>
