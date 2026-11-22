@@ -568,6 +568,7 @@ export default function SupportPage() {
                     ref={replyFocus}
                     className="dv-checkout-input dv-checkout-textarea"
                     placeholder="پیام یا توضیحات تکمیلی خود را وارد فرمایید..."
+                    value={reply}
                     onChange={(event) => setReply(event.target.value)}
                     rows={3}
                     minLength={2}
