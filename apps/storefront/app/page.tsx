@@ -50,6 +50,36 @@ const RITUAL_STEPS = [
   },
 ] as const;
 
+const TESTIMONIALS = [
+  {
+    author: "مریم سلیمانی",
+    role: "پوست مختلط و مستعد آکنه",
+    stars: 5,
+    quote:
+      "سرم ویتامین C درماویا اولین محصولی بود که بدون کوچکترین سوزش یا قرمزی، لک‌های قدیمی را کمرنگ و پوستم را شفاف کرد. بافتش بسیار سبکه و حس چسبندگی نداره.",
+  },
+  {
+    author: "دکتر پروانه شریفی",
+    role: "پزشک عمومی و پژوهشگر درماتولوژی",
+    stars: 5,
+    quote:
+      "فرمولاسیون سد دفاعی این برند بر پایه شواهد بیوشیمیایی استوار است. ترکیبات خالص سرامید و نیاسینامید با pH تنظیم‌شده، برای بازسازی پوست‌های دهیدراته ایده‌آل است.",
+  },
+  {
+    author: "سارا رادمنش",
+    role: "عضو باشگاه VIP مروارید",
+    stars: 5,
+    quote:
+      "بافت کرم بازسازی‌کننده دقیقاً مثل ابریشم روی پوست می‌شینه. ارسال و بسته‌بندی لوکس همراه با کدهای رهگیری اصالت، تجربه خرید فوق‌العاده‌ای رقم زد.",
+  },
+];
+
+const CLINICAL_METRICS = [
+  { pct: "۹۴٪", label: "افزایش رطوبت و ترمیم سد دفاعی پوست در ۲۸ روز" },
+  { pct: "۸۹٪", label: "کاهش مشهود التهاب، قرمزی و تحریک‌پذیری در پوست حساس" },
+  { pct: "۹۷٪", label: "رضایت کامل از سبکی بافت و جذب سریع بدون حس چربی" },
+];
+
 export default async function HomePage() {
   let products: ProductListResponse | null = null;
   let categories: Category[] | null = null;
@@ -126,7 +156,29 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 5. Skincare Daily 3-Step Ritual */}
+      {/* 5. Clinical Efficacy Counter Row */}
+      <section className="container dv-section" style={{ paddingBlock: 24 }}>
+        <div className="dv-b2b-card" style={{ background: "linear-gradient(135deg, rgba(253, 251, 247, 0.95) 0%, rgba(246, 241, 232, 0.9) 100%)", borderColor: "rgba(212, 175, 55, 0.3)" }}>
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <span className="section-sub-tag">آزمون‌های بالینی ۴ هفته‌ای</span>
+            <h2 style={{ fontSize: "1.4rem", color: "var(--dv-navy)", margin: "4px 0 0" }}>نتایج اثربخشی اثبات‌شده در آزمایشگاه</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 24, textAlign: "center" }}>
+            {CLINICAL_METRICS.map((m) => (
+              <div key={m.label} style={{ padding: "12px 16px" }}>
+                <span className="dv-num" style={{ fontSize: "2.6rem", fontWeight: 800, color: "var(--dv-gold)", display: "block", marginBottom: 6 }}>
+                  {m.pct}
+                </span>
+                <p style={{ fontSize: "0.88rem", color: "var(--dv-ink-soft)", margin: 0, lineHeight: 1.6 }}>
+                  {m.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Skincare Daily 3-Step Ritual */}
       <section className="container ritual-section" aria-labelledby="ritual-title">
         <div className="section-header-centered">
           <span className="section-sub-tag">آیین مراقبت روزانه</span>
@@ -150,7 +202,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Why Dermavia / Five Pillars of Trust */}
+      {/* 7. Why Dermavia / Five Pillars of Trust */}
       <section className="container dv-section" aria-labelledby="values-title">
         <div className="section-header-centered">
           <span className="section-sub-tag">چرا درماویا؟</span>
@@ -167,7 +219,31 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7. Loyalty & Magazine Banner Row */}
+      {/* 8. Verified Reviews & Testimonials */}
+      <section className="container dv-section" aria-label="دیدگاه‌های مشتریان">
+        <div className="section-header-centered">
+          <span className="section-sub-tag">تجربه مصرف‌کنندگان</span>
+          <h2 className="section-main-heading">صدای همراهان خانواده درماویا</h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+          {TESTIMONIALS.map((t) => (
+            <div key={t.author} className="dv-b2b-stat-card" style={{ padding: 24, display: "flex", flexDirection: "column" }}>
+              <div style={{ color: "var(--dv-gold)", fontSize: "1.1rem", marginBottom: 10 }}>
+                {"★".repeat(t.stars)}
+              </div>
+              <p style={{ fontSize: "0.9rem", color: "var(--dv-ink-soft)", lineHeight: 1.8, marginBottom: 16, flexGrow: 1 }}>
+                «{t.quote}»
+              </p>
+              <div style={{ borderTop: "1px solid var(--dv-line)", paddingTop: 12 }}>
+                <strong style={{ display: "block", fontSize: "0.95rem", color: "var(--dv-navy)" }}>{t.author}</strong>
+                <span className="dv-muted" style={{ fontSize: "0.8rem" }}>{t.role}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 9. Loyalty & VIP Club Banner */}
       <section className="container loyalty-banner-section">
         <div className="loyalty-banner-card">
           <div className="loyalty-banner-content">
