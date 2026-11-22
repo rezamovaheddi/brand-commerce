@@ -4677,3 +4677,68 @@ button[aria-disabled="true"],
   background: var(--dv-cream);
   color: var(--dv-ink);
 }
+
+/* Order Stepper Progress */
+.dv-order-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin: 24px 0 32px;
+  padding: 20px 16px;
+  background: #ffffff;
+  border: 1px solid var(--dv-line);
+  border-radius: var(--dv-radius-card);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+.dv-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  gap: 8px;
+  flex: 1;
+}
+
+.dv-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: 2px solid #e5e7eb;
+  color: var(--dv-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: all 0.2s var(--dv-ease);
+}
+
+.dv-step.is-done .dv-step-circle {
+  background: var(--dv-gold);
+  border-color: var(--dv-gold);
+  color: #1c1913;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.dv-step.is-active .dv-step-circle {
+  background: var(--dv-navy);
+  border-color: var(--dv-navy);
+  color: #ffffff;
+}
+
+.dv-step-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--dv-muted);
+  text-align: center;
+}
+
+.dv-step.is-done .dv-step-label,
+.dv-step.is-active .dv-step-label {
+  color: var(--dv-navy);
+  font-weight: 700;
+}

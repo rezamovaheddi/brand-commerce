@@ -262,6 +262,32 @@ export default function OrderPage({ params }: OrderPageProps) {
         کد سفارش: <span dir="ltr">{order.id}</span>
       </p>
 
+      {/* Visual Order Progress Stepper */}
+      {status !== "CANCELLED" && status !== "REFUNDED" ? (
+        <div className="dv-order-stepper" aria-label="مراحل وضعیت سفارش">
+          <div className="dv-step is-done">
+            <span className="dv-step-circle">✓</span>
+            <span className="dv-step-label">ثبت سفارش</span>
+          </div>
+          <div className={`dv-step ${status === "PAID" || status === "SHIPPED" || status === "DELIVERED" ? "is-done" : status === "AWAITING_PAYMENT" ? "is-active" : ""}`}>
+            <span className="dv-step-circle">{status === "PAID" || status === "SHIPPED" || status === "DELIVERED" ? "✓" : "۲"}</span>
+            <span className="dv-step-label">پرداخت بانکی</span>
+          </div>
+          <div className={`dv-step ${status === "PAID" ? "is-active" : status === "SHIPPED" || status === "DELIVERED" ? "is-done" : ""}`}>
+            <span className="dv-step-circle">{status === "SHIPPED" || status === "DELIVERED" ? "✓" : "۳"}</span>
+            <span className="dv-step-label">آماده‌سازی انبار</span>
+          </div>
+          <div className={`dv-step ${status === "SHIPPED" ? "is-active" : status === "DELIVERED" ? "is-done" : ""}`}>
+            <span className="dv-step-circle">{status === "DELIVERED" ? "✓" : "۴"}</span>
+            <span className="dv-step-label">ارسال پستی</span>
+          </div>
+          <div className={`dv-step ${status === "DELIVERED" ? "is-done" : ""}`}>
+            <span className="dv-step-circle">۵</span>
+            <span className="dv-step-label">تحویل نهایی</span>
+          </div>
+        </div>
+      ) : null}
+
       {/* Polite announcements: state changes land here without stealing focus. */}
       <p className="dv-order-announce" role="status" aria-live="polite">
         {announcement}
