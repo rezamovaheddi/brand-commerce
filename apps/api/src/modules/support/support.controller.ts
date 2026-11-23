@@ -5,6 +5,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import {
@@ -38,6 +39,14 @@ export class SupportController {
     @Body(new ZodValidationPipe(CreateTicketSchema)) input: CreateTicket,
   ): Promise<Ticket> {
     return this.supportService.createTicket(input);
+  }
+
+  @Get('tickets/by-phone/:phone')
+  @ApiOperation({ summary: 'فهرست تیکت‌های یک شماره تماس' })
+  @ApiParam({ name: 'phone', description: 'شماره تلفن مشتری' })
+  @ApiOkResponse({ description: 'فهرست تیکت‌ها', type: Object })
+  async listTicketsByPhone(@Param('phone') phone: string): Promise<{ items: Ticket[] }> {
+    return this.supportService.listTicketsByPhone(phone);
   }
 
   @Get('tickets/:id')

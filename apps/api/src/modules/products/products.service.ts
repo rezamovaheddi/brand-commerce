@@ -9,6 +9,40 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { toContract } from './product.mapper';
 
+/**
+ * Computes a deterministic search relevance score for ranking catalog results (GAP-013).
+ * Higher score = more relevant result:
+ * - Exact title match: 100
+ * - Prefix match (title starts with query): 60
+ * - Substring match within title: 30
+ * - Description match: 10
+ */
+export function computeSearchRelevance(
+  product: { nameFa: string; nameEn: string; descriptionFa?: string | null; descriptionEn?: string | null },
+  query: string,
+): number {
+  const q = query.trim().toLowerCase();
+  if (!q) return 0;
+
+  const fa = (product.nameFa || '').trim().toLowerCase();
+  const en = (product.nameEn || '').trim().toLowerCase();
+
+  let score = 0;
+  if (fa === q || en === q) {
+    score = 100;
+  } else if (fa.startsWith(q) || en.startsWith(q)) {
+    score = 60;
+  } else if (fa.includes(q) || en.includes(q)) {
+    score = 30;
+  } else if (
+    (product.descriptionFa && product.descriptionFa.toLowerCase().includes(q)) ||
+    (product.descriptionEn && product.descriptionEn.toLowerCase().includes(q))
+  ) {
+    score = 10;
+  }
+  return score;
+}
+
 /** Read model for the public catalog: only ACTIVE rows are ever exposed. */
 @Injectable()
 export class ProductsService {
@@ -34,8 +68,17 @@ export class ProductsService {
       this.prisma.product.count({ where }),
     ]);
 
+    const items = rows.map(toContract);
+    if (q) {
+      items.sort((a, b) => {
+        const scoreA = computeSearchRelevance(a, q);
+        const scoreB = computeSearchRelevance(b, q);
+        return scoreB - scoreA;
+      });
+    }
+
     return {
-      items: rows.map(toContract),
+      items,
       total,
       page,
       limit,

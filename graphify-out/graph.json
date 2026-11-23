@@ -258,6 +258,38 @@
       "rdeps": []
     },
     {
+      "id": "apps/api/src/modules/admin/audit.service.ts",
+      "label": "audit.service.ts",
+      "source_file": "apps/api/src/modules/admin/audit.service.ts",
+      "layer": "api-service",
+      "domain": "Core Platform (هسته پلتفرم)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": [
+        "apps/api/src/modules/admin/audit.service.ts#AuditService"
+      ]
+    },
+    {
+      "id": "apps/api/src/modules/admin/audit.service.ts#AuditService",
+      "label": "AuditService",
+      "source_file": "apps/api/src/modules/admin/audit.service.ts",
+      "layer": "api-service",
+      "domain": "Core Platform (هسته پلتفرم)",
+      "kind": "class",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/api/src/modules/admin/audit.service.ts"
+      ],
+      "rdeps": []
+    },
+    {
       "id": "apps/api/src/modules/b2b/b2b.controller.ts",
       "label": "b2b.controller.ts",
       "source_file": "apps/api/src/modules/b2b/b2b.controller.ts",
@@ -1341,7 +1373,8 @@
         "packages/contracts/src/index.ts"
       ],
       "rdeps": [
-        "apps/api/src/modules/products/products.service.ts#ProductsService"
+        "apps/api/src/modules/products/products.service.ts#ProductsService",
+        "apps/api/src/modules/products/products.service.ts#computeSearchRelevance"
       ]
     },
     {
@@ -1351,6 +1384,21 @@
       "layer": "api-service",
       "domain": "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)",
       "kind": "class",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/api/src/modules/products/products.service.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "apps/api/src/modules/products/products.service.ts#computeSearchRelevance",
+      "label": "computeSearchRelevance",
+      "source_file": "apps/api/src/modules/products/products.service.ts",
+      "layer": "api-service",
+      "domain": "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)",
+      "kind": "function",
       "language": "TypeScript",
       "is_symbol": true,
       "external": false,
@@ -1850,6 +1898,40 @@
       "rdeps": []
     },
     {
+      "id": "apps/storefront/app/account/page.tsx",
+      "label": "page.tsx",
+      "source_file": "apps/storefront/app/account/page.tsx",
+      "layer": "frontend",
+      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [
+        "apps/storefront/components/SampleBadge.tsx",
+        "apps/storefront/lib/format.ts",
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": [
+        "apps/storefront/app/account/page.tsx#AccountPage"
+      ]
+    },
+    {
+      "id": "apps/storefront/app/account/page.tsx#AccountPage",
+      "label": "AccountPage",
+      "source_file": "apps/storefront/app/account/page.tsx",
+      "layer": "frontend",
+      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
+      "kind": "function",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/storefront/app/account/page.tsx"
+      ],
+      "rdeps": []
+    },
+    {
       "id": "apps/storefront/app/admin/page.tsx",
       "label": "page.tsx",
       "source_file": "apps/storefront/app/admin/page.tsx",
@@ -2213,6 +2295,38 @@
       "external": false,
       "deps": [
         "apps/storefront/app/orders/loading.tsx"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "apps/storefront/app/orders/page.tsx",
+      "label": "page.tsx",
+      "source_file": "apps/storefront/app/orders/page.tsx",
+      "layer": "frontend",
+      "domain": "Cart & Checkout (سبد خرید و تسویه)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [
+        "apps/storefront/components/SampleBadge.tsx"
+      ],
+      "rdeps": [
+        "apps/storefront/app/orders/page.tsx#OrdersIndexPage"
+      ]
+    },
+    {
+      "id": "apps/storefront/app/orders/page.tsx#OrdersIndexPage",
+      "label": "OrdersIndexPage",
+      "source_file": "apps/storefront/app/orders/page.tsx",
+      "layer": "frontend",
+      "domain": "Cart & Checkout (سبد خرید و تسویه)",
+      "kind": "function",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/storefront/app/orders/page.tsx"
       ],
       "rdeps": []
     },
@@ -2739,7 +2853,9 @@
       "external": false,
       "deps": [],
       "rdeps": [
+        "apps/storefront/app/account/page.tsx",
         "apps/storefront/app/design-system/page.tsx",
+        "apps/storefront/app/orders/page.tsx",
         "apps/storefront/app/products/[slug]/page.tsx",
         "apps/storefront/components/ProductCard.tsx",
         "apps/storefront/components/SampleBadge.tsx#SampleBadge"
@@ -3534,6 +3650,7 @@
       "external": false,
       "deps": [],
       "rdeps": [
+        "apps/storefront/app/account/page.tsx",
         "apps/storefront/app/admin/page.tsx",
         "apps/storefront/app/b2b/portal/page.tsx",
         "apps/storefront/app/b2b/rfq/page.tsx",
@@ -3553,10 +3670,26 @@
         "apps/storefront/components/PriceTag.tsx",
         "apps/storefront/components/cart/CartButton.tsx",
         "apps/storefront/components/cart/VariantAddToCart.tsx",
+        "apps/storefront/lib/format.ts#formatFaDigits",
         "apps/storefront/lib/format.ts#formatFaNumber",
         "apps/storefront/lib/format.ts#formatPrice",
         "apps/storefront/lib/format.ts#formatPriceMinor"
       ]
+    },
+    {
+      "id": "apps/storefront/lib/format.ts#formatFaDigits",
+      "label": "formatFaDigits",
+      "source_file": "apps/storefront/lib/format.ts",
+      "layer": "frontend",
+      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
+      "kind": "function",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/storefront/lib/format.ts"
+      ],
+      "rdeps": []
     },
     {
       "id": "apps/storefront/lib/format.ts#formatFaNumber",
@@ -3803,6 +3936,7 @@
       "rdeps": [
         "apps/api/src/modules/admin/admin.controller.ts",
         "apps/api/src/modules/admin/admin.service.ts",
+        "apps/api/src/modules/admin/audit.service.ts",
         "apps/api/src/modules/b2b/b2b.controller.ts",
         "apps/api/src/modules/b2b/b2b.service.ts",
         "apps/api/src/modules/b2b/org-member.guard.ts",
@@ -3836,6 +3970,7 @@
         "apps/api/test/rfq-attachments.e2e-spec.ts",
         "apps/api/test/rfq-quote.e2e-spec.ts",
         "apps/api/test/support.e2e-spec.ts",
+        "apps/storefront/app/account/page.tsx",
         "apps/storefront/app/b2b/apply/page.tsx",
         "apps/storefront/app/b2b/portal/page.tsx",
         "apps/storefront/app/b2b/rfq/page.tsx",
@@ -3884,6 +4019,12 @@
         "packages/contracts/src/index.ts#ApiErrorSchema",
         "packages/contracts/src/index.ts#ApplicationAttachmentMeta",
         "packages/contracts/src/index.ts#ApplicationAttachmentMetaSchema",
+        "packages/contracts/src/index.ts#AuditLog",
+        "packages/contracts/src/index.ts#AuditLogListResponse",
+        "packages/contracts/src/index.ts#AuditLogListResponseSchema",
+        "packages/contracts/src/index.ts#AuditLogQuery",
+        "packages/contracts/src/index.ts#AuditLogQuerySchema",
+        "packages/contracts/src/index.ts#AuditLogSchema",
         "packages/contracts/src/index.ts#B2BApplication",
         "packages/contracts/src/index.ts#B2BApplicationSchema",
         "packages/contracts/src/index.ts#B2BApplicationStatus",
@@ -5002,6 +5143,51 @@
       "rdeps": []
     },
     {
+      "id": "packages/contracts/src/index.ts#AuditLogSchema",
+      "label": "AuditLogSchema",
+      "source_file": "packages/contracts/src/index.ts",
+      "layer": "contracts",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "symbol",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/contracts/src/index.ts#AuditLogQuerySchema",
+      "label": "AuditLogQuerySchema",
+      "source_file": "packages/contracts/src/index.ts",
+      "layer": "contracts",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "symbol",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/contracts/src/index.ts#AuditLogListResponseSchema",
+      "label": "AuditLogListResponseSchema",
+      "source_file": "packages/contracts/src/index.ts",
+      "layer": "contracts",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "symbol",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": []
+    },
+    {
       "id": "packages/contracts/src/index.ts#ProductStatus",
       "label": "ProductStatus",
       "source_file": "packages/contracts/src/index.ts",
@@ -6037,6 +6223,51 @@
       "rdeps": []
     },
     {
+      "id": "packages/contracts/src/index.ts#AuditLog",
+      "label": "AuditLog",
+      "source_file": "packages/contracts/src/index.ts",
+      "layer": "contracts",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "type",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/contracts/src/index.ts#AuditLogQuery",
+      "label": "AuditLogQuery",
+      "source_file": "packages/contracts/src/index.ts",
+      "layer": "contracts",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "type",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/contracts/src/index.ts#AuditLogListResponse",
+      "label": "AuditLogListResponse",
+      "source_file": "packages/contracts/src/index.ts",
+      "layer": "contracts",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "type",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": []
+    },
+    {
       "id": "packages/database/prisma/schema.prisma",
       "label": "schema.prisma",
       "source_file": "packages/database/prisma/schema.prisma",
@@ -6049,6 +6280,7 @@
       "deps": [],
       "rdeps": [
         "model_ApplicationAttachment",
+        "model_AuditLog",
         "model_B2BApplication",
         "model_Cart",
         "model_CartItem",
@@ -6414,6 +6646,21 @@
       "source_file": "packages/database/prisma/schema.prisma",
       "layer": "database",
       "domain": "CRM & Support (پشتیبانی و تیکتینگ)",
+      "kind": "model",
+      "language": "Prisma",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/database/prisma/schema.prisma"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "model_AuditLog",
+      "label": "Model AuditLog",
+      "source_file": "packages/database/prisma/schema.prisma",
+      "layer": "database",
+      "domain": "Database & Schema (پایگاه داده و مدل‌ها)",
       "kind": "model",
       "language": "Prisma",
       "is_symbol": true,
@@ -6863,6 +7110,11 @@
       "relation": "member_of"
     },
     {
+      "from": "apps/api/src/modules/admin/audit.service.ts#AuditService",
+      "to": "apps/api/src/modules/admin/audit.service.ts",
+      "relation": "member_of"
+    },
+    {
       "from": "apps/api/src/modules/b2b/b2b.controller.ts#B2bController",
       "to": "apps/api/src/modules/b2b/b2b.controller.ts",
       "relation": "member_of"
@@ -7063,6 +7315,11 @@
       "relation": "member_of"
     },
     {
+      "from": "apps/api/src/modules/products/products.service.ts#computeSearchRelevance",
+      "to": "apps/api/src/modules/products/products.service.ts",
+      "relation": "member_of"
+    },
+    {
       "from": "apps/api/src/modules/support/support.controller.ts#SupportController",
       "to": "apps/api/src/modules/support/support.controller.ts",
       "relation": "member_of"
@@ -7105,6 +7362,11 @@
     {
       "from": "apps/storefront/app/about/page.tsx#AboutPage",
       "to": "apps/storefront/app/about/page.tsx",
+      "relation": "member_of"
+    },
+    {
+      "from": "apps/storefront/app/account/page.tsx#AccountPage",
+      "to": "apps/storefront/app/account/page.tsx",
       "relation": "member_of"
     },
     {
@@ -7160,6 +7422,11 @@
     {
       "from": "apps/storefront/app/orders/loading.tsx#OrderLoading",
       "to": "apps/storefront/app/orders/loading.tsx",
+      "relation": "member_of"
+    },
+    {
+      "from": "apps/storefront/app/orders/page.tsx#OrdersIndexPage",
+      "to": "apps/storefront/app/orders/page.tsx",
       "relation": "member_of"
     },
     {
@@ -7405,6 +7672,11 @@
     {
       "from": "apps/storefront/lib/cart-client.ts#CartApiErrorKind",
       "to": "apps/storefront/lib/cart-client.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "apps/storefront/lib/format.ts#formatFaDigits",
+      "to": "apps/storefront/lib/format.ts",
       "relation": "member_of"
     },
     {
@@ -7788,6 +8060,21 @@
       "relation": "member_of"
     },
     {
+      "from": "packages/contracts/src/index.ts#AuditLogSchema",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/contracts/src/index.ts#AuditLogQuerySchema",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/contracts/src/index.ts#AuditLogListResponseSchema",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "member_of"
+    },
+    {
       "from": "packages/contracts/src/index.ts#ProductStatus",
       "to": "packages/contracts/src/index.ts",
       "relation": "member_of"
@@ -8133,6 +8420,21 @@
       "relation": "member_of"
     },
     {
+      "from": "packages/contracts/src/index.ts#AuditLog",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/contracts/src/index.ts#AuditLogQuery",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/contracts/src/index.ts#AuditLogListResponse",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "member_of"
+    },
+    {
       "from": "model_Category",
       "to": "packages/database/prisma/schema.prisma",
       "relation": "schema_def"
@@ -8283,6 +8585,11 @@
       "relation": "schema_def"
     },
     {
+      "from": "model_AuditLog",
+      "to": "packages/database/prisma/schema.prisma",
+      "relation": "schema_def"
+    },
+    {
       "from": "packages/domain/src/index.ts#checkQuantity",
       "to": "packages/domain/src/index.ts",
       "relation": "member_of"
@@ -8389,6 +8696,11 @@
     },
     {
       "from": "apps/api/src/modules/admin/admin.service.ts",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/api/src/modules/admin/audit.service.ts",
       "to": "packages/contracts/src/index.ts",
       "relation": "imports"
     },
@@ -8628,6 +8940,21 @@
       "relation": "imports"
     },
     {
+      "from": "apps/storefront/app/account/page.tsx",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/app/account/page.tsx",
+      "to": "apps/storefront/components/SampleBadge.tsx",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/app/account/page.tsx",
+      "to": "apps/storefront/lib/format.ts",
+      "relation": "imports"
+    },
+    {
       "from": "apps/storefront/app/admin/page.tsx",
       "to": "apps/storefront/lib/admin-client.ts",
       "relation": "imports"
@@ -8760,6 +9087,11 @@
     {
       "from": "apps/storefront/app/magazine/page.tsx",
       "to": "apps/storefront/components/cart/CartProvider.tsx",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/app/orders/page.tsx",
+      "to": "apps/storefront/components/SampleBadge.tsx",
       "relation": "imports"
     },
     {
@@ -9102,24 +9434,24 @@
     "api-module": 47,
     "backend": 7,
     "api-controller": 20,
-    "api-service": 21,
+    "api-service": 24,
     "test": 17,
-    "frontend": 123,
-    "contracts": 137,
-    "database": 24,
+    "frontend": 128,
+    "contracts": 143,
+    "database": 25,
     "domain-logic": 21,
     "other": 1
   },
   "domains": {
-    "Core Platform (هسته پلتفرم)": 24,
+    "Core Platform (هسته پلتفرم)": 26,
     "B2B Wholesale & RFQ (سازمانی، عمده و استعلام قیمت)": 81,
-    "Cart & Checkout (سبد خرید و تسویه)": 97,
+    "Cart & Checkout (سبد خرید و تسویه)": 99,
     "Inventory & Ledger (انبارداری، رزرواسیون و لجر مالی)": 17,
     "Payments & Refund (درگاه پرداخت و استرداد)": 16,
-    "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)": 38,
+    "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)": 39,
     "CRM & Support (پشتیبانی و تیکتینگ)": 38,
-    "Database & Schema (پایگاه داده و مدل‌ها)": 8,
-    "B2C Storefront (فروشگاه B2C و تجربه کاربری)": 53,
-    "Shared Contracts & Logic (قراردادها و منطق دامنه)": 46
+    "Database & Schema (پایگاه داده و مدل‌ها)": 9,
+    "B2C Storefront (فروشگاه B2C و تجربه کاربری)": 56,
+    "Shared Contracts & Logic (قراردادها و منطق دامنه)": 52
   }
 }

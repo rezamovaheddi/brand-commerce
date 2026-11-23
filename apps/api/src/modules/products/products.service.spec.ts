@@ -3,7 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ProductsController } from './products.controller';
-import { ProductsService } from './products.service';
+import { ProductsService, computeSearchRelevance } from './products.service';
 
 type MockFn = jest.Mock<Promise<unknown>, unknown[]>;
 
@@ -110,6 +110,97 @@ describe('ProductsService', () => {
           { nameEn: { contains: 'serum', mode: 'insensitive' } },
         ],
       });
+    });
+
+    it('ranks results by search relevance when q is provided (GAP-013)', async () => {
+      const mockRows = [
+        {
+          id: 'p-substring',
+          slug: 'advanced-brightening-serum',
+          nameFa: 'سرم روشن‌کننده پیشرفته',
+          nameEn: 'Advanced Brightening Serum',
+          descriptionFa: 'سرم ضد لک',
+          descriptionEn: 'Brightening serum',
+          status: 'ACTIVE',
+          isSample: true,
+          category: { slug: 'serums', nameFa: 'سرم‌ها', nameEn: 'Serums' },
+          variants: [],
+          createdAt: new Date('2026-01-02'),
+        },
+        {
+          id: 'p-exact',
+          slug: 'serum',
+          nameFa: 'سرم',
+          nameEn: 'Serum',
+          descriptionFa: 'سرم خالص',
+          descriptionEn: 'Pure serum',
+          status: 'ACTIVE',
+          isSample: true,
+          category: { slug: 'serums', nameFa: 'سرم‌ها', nameEn: 'Serums' },
+          variants: [],
+          createdAt: new Date('2026-01-01'),
+        },
+        {
+          id: 'p-prefix',
+          slug: 'serum-retinol',
+          nameFa: 'سرم رتینول',
+          nameEn: 'Serum Retinol',
+          descriptionFa: 'ضد چروک',
+          descriptionEn: 'Anti wrinkle',
+          status: 'ACTIVE',
+          isSample: true,
+          category: { slug: 'serums', nameFa: 'سرم‌ها', nameEn: 'Serums' },
+          variants: [],
+          createdAt: new Date('2026-01-03'),
+        },
+      ];
+
+      productFindMany.mockResolvedValue(mockRows);
+      productCount.mockResolvedValue(3);
+
+      const result = await service.list({ page: 1, limit: 12, q: 'serum' });
+
+      // Exact match (100) first, prefix match (60) second, substring match (30) third
+      expect(result.items[0].slug).toBe('serum');
+      expect(result.items[1].slug).toBe('serum-retinol');
+      expect(result.items[2].slug).toBe('advanced-brightening-serum');
+    });
+  });
+
+  describe('computeSearchRelevance()', () => {
+    it('scores exact title match highest (100)', () => {
+      const product = { nameFa: 'سرم ویتامین C', nameEn: 'Vitamin C Serum' };
+      expect(computeSearchRelevance(product, 'vitamin c serum')).toBe(100);
+      expect(computeSearchRelevance(product, 'سرم ویتامین c')).toBe(100);
+    });
+
+    it('scores prefix title match second (60)', () => {
+      const product = { nameFa: 'سرم نیاسینامید', nameEn: 'Niacinamide Serum 10%' };
+      expect(computeSearchRelevance(product, 'niacinamide')).toBe(60);
+      expect(computeSearchRelevance(product, 'سرم')).toBe(60);
+    });
+
+    it('scores substring title match third (30)', () => {
+      const product = { nameFa: 'کرم ضدآفتاب رنگی', nameEn: 'Tinted Sunscreen' };
+      expect(computeSearchRelevance(product, 'ضدآفتاب')).toBe(30);
+      expect(computeSearchRelevance(product, 'sun')).toBe(30);
+    });
+
+    it('scores description match fourth (10)', () => {
+      const product = {
+        nameFa: 'کرم شب',
+        nameEn: 'Night Cream',
+        descriptionFa: 'حاوی هیالورونیک اسید برای آبرسانی عمیق',
+        descriptionEn: 'Deep hydrating formula',
+      };
+      expect(computeSearchRelevance(product, 'هیالورونیک')).toBe(10);
+      expect(computeSearchRelevance(product, 'hydrating')).toBe(10);
+    });
+
+    it('returns 0 when there is no match or query is empty', () => {
+      const product = { nameFa: 'شوینده صورت', nameEn: 'Facial Cleanser' };
+      expect(computeSearchRelevance(product, 'رتینول')).toBe(0);
+      expect(computeSearchRelevance(product, '')).toBe(0);
     });
   });
 

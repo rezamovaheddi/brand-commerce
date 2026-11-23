@@ -6,6 +6,7 @@ import {
   AdminLedgerResponse,
   AdminOrderListResponse,
   AdjustStock,
+  AuditLog,
   B2BApplication,
   CreateOrgMember,
   CustomerProfile,
@@ -16,6 +17,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { B2bService } from '../b2b/b2b.service';
 import { SupportService } from '../support/support.service';
+import { AuditService } from './audit.service';
 import type { AdminLeadUpdate, AdminTicketUpdate, TicketReply } from '@bc/contracts';
 import type { Rfq } from '@bc/contracts';
 
@@ -59,6 +61,7 @@ export class AdminService {
     private readonly prisma: PrismaService,
     private readonly b2bService: B2bService,
     private readonly supportService: SupportService,
+    private readonly auditService: AuditService,
   ) {}
 
   async listOrders(
@@ -137,6 +140,14 @@ export class AdminService {
           refId: input.note,
         },
       });
+    });
+
+    await this.auditService.record({
+      action: 'STOCK_ADJUST',
+      entityType: 'InventoryItem',
+      entityId: variantId,
+      actorId: 'operator',
+      detailsJson: { deltaOnHand: input.deltaOnHand, note: input.note },
     });
     const updated = await this.prisma.inventoryItem.findUniqueOrThrow({
       where: { variantId },
@@ -341,5 +352,10 @@ export class AdminService {
 
   async customerProfile(phone: string): Promise<CustomerProfile> {
     return this.supportService.customerProfile(phone);
+  }
+
+  /** Lists immutable audit log records (GAP-031). */
+  async listAuditLogs(entityType?: string, action?: string, limit?: number): Promise<{ items: AuditLog[] }> {
+    return this.auditService.list({ entityType, action, limit });
   }
 }

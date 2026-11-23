@@ -143,6 +143,21 @@ export class SupportService {
     return { items: rows.map((row) => toTicketContract(row as unknown as TicketRowWithMessages)) };
   }
 
+  /** Lists tickets opened by a specific contact phone number (GAP-012). */
+  async listTicketsByPhone(phone: string): Promise<{ items: Ticket[] }> {
+    const normalized = phone.trim();
+    if (!normalized) {
+      return { items: [] };
+    }
+    const rows = await this.prisma.supportTicket.findMany({
+      where: { contactPhone: normalized },
+      include: TICKET_INCLUDE,
+      orderBy: { updatedAt: 'desc' },
+      take: 50,
+    });
+    return { items: rows.map((row) => toTicketContract(row as unknown as TicketRowWithMessages)) };
+  }
+
   /** Agent reply appends to the timeline without changing status. */
   async replyAsAgent(id: string, input: TicketReply): Promise<Ticket> {
     const ticket = await this.prisma.supportTicket.findUnique({ where: { id }, select: { status: true } });

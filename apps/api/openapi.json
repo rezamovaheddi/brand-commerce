@@ -308,6 +308,41 @@
         ]
       }
     },
+    "/api/v1/orders/by-phone/{phone}": {
+      "get": {
+        "operationId": "OrdersController_listOrdersByPhone",
+        "parameters": [
+          {
+            "name": "phone",
+            "required": true,
+            "in": "path",
+            "description": "شماره تلفن مشتری",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "فهرست سفارش‌ها",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "فهرست سفارش‌های یک شماره تماس",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
     "/api/v1/orders/{id}": {
       "get": {
         "operationId": "OrdersController_getOrder",
@@ -689,6 +724,58 @@
           }
         ],
         "summary": "۱۰۰ ردیف آخر دفتر موجودی",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/audit-logs": {
+      "get": {
+        "operationId": "AdminController_listAuditLogs",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ردیف‌های لاگ ممیزی",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-admin-key": []
+          }
+        ],
+        "summary": "فهرست لاگ‌های ممیزی امنیتی (تغییرناپذیر GAP-031)",
         "tags": [
           "admin"
         ]
@@ -2014,6 +2101,38 @@
           }
         },
         "summary": "باز کردن تیکت پشتیبانی",
+        "tags": [
+          "support"
+        ]
+      }
+    },
+    "/api/v1/support/tickets/by-phone/{phone}": {
+      "get": {
+        "operationId": "SupportController_listTicketsByPhone",
+        "parameters": [
+          {
+            "name": "phone",
+            "required": true,
+            "in": "path",
+            "description": "شماره تلفن مشتری",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "فهرست تیکت‌ها",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "فهرست تیکت‌های یک شماره تماس",
         "tags": [
           "support"
         ]

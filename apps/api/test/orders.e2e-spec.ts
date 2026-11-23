@@ -84,6 +84,13 @@ const fakePrismaCore = {
     findMany: jest.fn(async (): Promise<Array<Record<string, unknown>>> => []),
   },
   order: {
+    findMany: jest.fn(async (args?: { where?: { phone?: string } }) => {
+      const phone = args?.where?.phone;
+      if (phone) {
+        return state.orders.filter((o) => o.phone === phone);
+      }
+      return state.orders;
+    }),
     findUnique: jest.fn(async (args?: { where?: { id?: string } }) => {
       return state.orders.find((o) => o.id === args?.where?.id) ?? null;
     }),
@@ -145,6 +152,17 @@ describe('Orders API (e2e, in-memory Prisma)', () => {
     expect(order.subtotalMinor).toBe(4_500_000);
     expect(order.lines[0]).toMatchObject({ sku: 'DMV-SRM-30C', lineTotalMinor: 4_500_000 });
     expect(order.address.city).toBe('تهران');
+  });
+
+  it('lists orders associated with a phone number (GAP-012)', async () => {
+    const res = await request(app.getHttpServer()).get('/api/v1/orders/by-phone/09123456789').expect(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(1);
+    expect(res.body[0].id).toBe('ord-1');
+    expect(res.body[0].address.phone).toBe('09123456789');
+
+    const emptyRes = await request(app.getHttpServer()).get('/api/v1/orders/by-phone/09999999999').expect(200);
+    expect(emptyRes.body).toEqual([]);
   });
 
   it('cancels a DRAFT order', async () => {

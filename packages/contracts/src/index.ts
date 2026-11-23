@@ -699,3 +699,29 @@ export const CustomerProfileSchema = z.object({
   organizationName: z.string().nullable(),
 });
 export type CustomerProfile = z.infer<typeof CustomerProfileSchema>;
+
+// ---- Security Audit Trail (GAP-031 / S-021) --------------------------------
+export const AuditLogSchema = z.object({
+  id: z.string(),
+  action: z.string(),
+  entityType: z.string(),
+  entityId: z.string(),
+  actorId: z.string().nullable(),
+  ipAddress: z.string().nullable(),
+  detailsJson: z.unknown().nullable(),
+  createdAt: z.string(),
+});
+export type AuditLog = z.infer<typeof AuditLogSchema>;
+
+export const AuditLogQuerySchema = z.object({
+  entityType: z.string().optional(),
+  action: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
+export type AuditLogQuery = z.infer<typeof AuditLogQuerySchema>;
+
+export const AuditLogListResponseSchema = z.object({
+  items: z.array(AuditLogSchema),
+});
+export type AuditLogListResponse = z.infer<typeof AuditLogListResponseSchema>;
+

@@ -8,6 +8,14 @@ import { OrdersService } from './orders.service';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @Get('by-phone/:phone')
+  @ApiOperation({ summary: 'فهرست سفارش‌های یک شماره تماس' })
+  @ApiParam({ name: 'phone', description: 'شماره تلفن مشتری' })
+  @ApiOkResponse({ description: 'فهرست سفارش‌ها', type: [Object] })
+  async listOrdersByPhone(@Param('phone') phone: string): Promise<Order[]> {
+    return this.ordersService.listByPhone(phone);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'مشاهده سفارش' })
   @ApiParam({ name: 'id', description: 'شناسه سفارش' })

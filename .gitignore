@@ -33,3 +33,8 @@ packages/database/generated/
 .mimosa/
 docs/.mimosa/
 docs/execution/.mimosa/
+
+# database dumps & backups
+backups/
+*.dump
+

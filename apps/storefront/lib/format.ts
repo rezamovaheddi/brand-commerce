@@ -6,6 +6,12 @@
 
 const faNumberFormatter = new Intl.NumberFormat("fa-IR");
 
+/** Converts ASCII digits in any string or number to Persian digits (۰-۹). */
+export function formatFaDigits(value: string | number): string {
+  const persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  return String(value).replace(/[0-9]/g, (d) => persianDigits[parseInt(d, 10)] ?? d);
+}
+
 /** Formats an integer with Persian digits (fa-IR locale). */
 export function formatFaNumber(value: number): string {
   return faNumberFormatter.format(value);
@@ -20,7 +26,7 @@ export function formatFaNumber(value: number): string {
  * not claim "تومان" before conversion rules are settled. When the decision
  * lands, only this function needs to change.
  */
-export function formatPrice(priceMinor: number, currency: string): string {
+export function formatPrice(priceMinor: number, currency = "IRR"): string {
   const unit = currency === "IRR" ? "IRR" : currency;
   return `${faNumberFormatter.format(priceMinor)} ${unit}`;
 }

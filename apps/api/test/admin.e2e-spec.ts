@@ -57,6 +57,7 @@ const state = {
   orders: [] as FakeOrderRow[],
   inventory: new Map<string, FakeInventoryRow>(),
   ledger: [] as Array<Record<string, unknown>>,
+  auditLogs: [] as Array<Record<string, unknown>>,
 };
 
 function makeApp(adminKey: string | undefined): Promise<INestApplication> {
@@ -131,6 +132,18 @@ const fakePrisma = {
     }),
     findMany: jest.fn(async () => [...state.ledger].sort((a, b) => (b.createdAt as Date).getTime() - (a.createdAt as Date).getTime())),
   },
+  auditLog: {
+    create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => {
+      const row = {
+        id: `aud-${state.auditLogs.length + 1}`,
+        createdAt: new Date('2026-01-04T00:00:00.000Z'),
+        ...data,
+      };
+      state.auditLogs.push(row);
+      return row;
+    }),
+    findMany: jest.fn(async () => [...state.auditLogs].sort((a, b) => (b.createdAt as Date).getTime() - (a.createdAt as Date).getTime())),
+  },
 } as unknown as PrismaService;
 
 describe('Admin console API (e2e, in-memory Prisma — bootstrap key guard)', () => {
@@ -151,6 +164,7 @@ describe('Admin console API (e2e, in-memory Prisma — bootstrap key guard)', ()
     state.orders = [{ ...ORDER, createdAt: new Date(ORDER.createdAt), lines: [{}, {}] }];
     state.inventory = new Map([['var-1', { ...INVENTORY, variant: { ...INVENTORY.variant, product: { ...INVENTORY.variant.product } } }]]);
     state.ledger = [];
+    state.auditLogs = [];
     jest.clearAllMocks();
   });
 
@@ -241,6 +255,29 @@ describe('Admin console API (e2e, in-memory Prisma — bootstrap key guard)', ()
     const res = await request(app.getHttpServer()).get('/api/v1/admin/ledger').set(auth).expect(200);
     const parsed = AdminLedgerResponseSchema.parse(res.body);
     expect(parsed.items).toHaveLength(1);
+  });
+
+  it('records and lists immutable audit logs on administrative mutations (GAP-031)', async () => {
+    // 1. Initial audit log is empty
+    const initial = await request(app.getHttpServer()).get('/api/v1/admin/audit-logs').set(auth).expect(200);
+    expect(initial.body.items).toHaveLength(0);
+
+    // 2. Perform an administrative mutation (stock adjust)
+    await request(app.getHttpServer())
+      .post('/api/v1/admin/inventory/var-1/adjust')
+      .set(auth)
+      .send({ deltaOnHand: 5, note: 'audit trail verification' })
+      .expect(200);
+
+    // 3. Verify audit log entry was created
+    const after = await request(app.getHttpServer()).get('/api/v1/admin/audit-logs').set(auth).expect(200);
+    expect(after.body.items).toHaveLength(1);
+    expect(after.body.items[0]).toMatchObject({
+      action: 'STOCK_ADJUST',
+      entityType: 'InventoryItem',
+      entityId: 'var-1',
+      actorId: 'operator',
+    });
   });
 });
 

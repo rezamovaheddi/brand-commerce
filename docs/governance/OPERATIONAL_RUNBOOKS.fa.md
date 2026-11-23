@@ -22,7 +22,17 @@
 - **شدت فعال‌سازی در بحران:** SEV-1
 - **پیش‌نیازها:** دسترسی CLI به سرور پایگاه‌داده PostgreSQL 16.
 
-#### فرامین پشتیبان‌گیری (Backup):
+#### فرامین خودکار پشتیبان‌گیری و مانور بازیابی اضطراری:
+```bash
+# ۱. پشتیبان‌گیری خودکار از پایگاه داده (ایجاد فایل SQL با برچسب زمانی و راستی‌آزمایی اسکیما)
+npm run db:backup
+
+# ۲. اجرای خودکار مانور کامل بازیابی اضطراری در دیتابیس ایزوله و سنجش تطابق ۱۰۰٪ ردیف‌ها
+npm run db:drill
+```
+> شواهد و نتایج آخرین مانور بازیابی اضطراری در سند [DRILL_EVIDENCE.md](file:///c:/Users/talas/OneDrive/Desktop/new_dragon_shop/brand-commerce/docs/governance/DRILL_EVIDENCE.md) به صورت تغییرناپذیر ثبت شده است.
+
+#### فرامین دستی پشتیبان‌گیری (Manual Backup):
 ```powershell
 # ایجاد پوشه پشتیبان با برچسب زمانی
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"

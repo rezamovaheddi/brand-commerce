@@ -62,6 +62,7 @@ export default function Header({ onOpenConsultation }: HeaderProps) {
   const navLinks = [
     { href: "/", label: "خانه" },
     { href: "/products", label: "محصولات" },
+    { href: "/account", label: "پیگیری سفارش" },
     { href: "/loyalty", label: "باشگاه مشتریان" },
     { href: "/magazine", label: "مجله" },
     { href: "/about", label: "درباره ما" },
@@ -90,6 +91,28 @@ export default function Header({ onOpenConsultation }: HeaderProps) {
                 {status === "loading" ? "…" : formatFaNumber(count)}
               </span>
             </button>
+
+            <Link
+              href="/account"
+              className="account-nav-link"
+              aria-label="حساب کاربری و پیگیری سفارشات"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                color: "var(--dv-forest-deep, #0c1a15)",
+                textDecoration: "none",
+                transition: "opacity 0.2s ease",
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </Link>
 
             <Link href="/" className="brand-mark" aria-label="صفحه اصلی درماویا">
               <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="28" height="28">

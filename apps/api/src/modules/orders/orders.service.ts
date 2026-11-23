@@ -27,6 +27,21 @@ export class OrdersService {
     return toOrderContract(row);
   }
 
+  /** Lists recent orders associated with a customer phone number (GAP-012). */
+  async listByPhone(phone: string): Promise<Order[]> {
+    const normalized = phone.trim();
+    if (!normalized) {
+      return [];
+    }
+    const rows = await this.prisma.order.findMany({
+      where: { phone: normalized },
+      include: ORDER_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    return rows.map(toOrderContract);
+  }
+
   /** Cancels a DRAFT order; any other transition is rejected by the domain rule. */
   async cancel(id: string): Promise<Order> {
     const row = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });

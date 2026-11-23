@@ -103,6 +103,11 @@ export default function Footer() {
             <h4 style={{ fontSize: "1rem", color: "var(--dv-navy)", margin: "0 0 16px", fontWeight: 700 }}>خدمات و باشگاه مشتریان</h4>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               <li>
+                <Link href="/account" className="dv-link" style={{ color: "var(--dv-gold)", fontSize: "0.9rem", fontWeight: 600 }}>
+                  پورتال حساب کاربری و پیگیری سفارشات
+                </Link>
+              </li>
+              <li>
                 <Link href="/loyalty" className="dv-link" style={{ color: "var(--dv-ink-soft)", fontSize: "0.9rem" }}>
                   باشگاه مشتریان VIP مروارید
                 </Link>

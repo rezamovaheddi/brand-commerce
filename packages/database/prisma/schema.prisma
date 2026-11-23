@@ -499,3 +499,23 @@ model CrmLead {
 
   @@index([status])
 }
+
+// ---- Security Audit Trail (GAP-031 / S-021) --------------------------------
+// Immutable audit record of administrative and privileged operations.
+// Entries are write-once and must NEVER be modified or deleted.
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String
+  actorId     String?
+  ipAddress   String?
+  detailsJson Json?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+

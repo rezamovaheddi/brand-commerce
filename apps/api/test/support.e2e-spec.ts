@@ -118,10 +118,13 @@ const fakePrismaCore = {
       const ticket = state.tickets.find((row) => row.id === args?.where?.id);
       return ticket ? hydrateTicket(ticket) : null;
     }),
-    findMany: jest.fn(async (args?: { where?: { status?: string } }) => {
+    findMany: jest.fn(async (args?: { where?: { status?: string; contactPhone?: string } }) => {
       let rows = [...state.tickets];
       if (args?.where?.status) {
         rows = rows.filter((row) => row.status === args.where?.status);
+      }
+      if (args?.where?.contactPhone) {
+        rows = rows.filter((row) => row.contactPhone === args.where?.contactPhone);
       }
       return rows
         .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
@@ -413,5 +416,33 @@ describe('CRM-lite tickets/leads (e2e, in-memory Prisma)', () => {
     expect(blank.ordersCount).toBe(0);
     expect(blank.paidTotalMinor).toBe(0);
     expect(blank.organizationName).toBeNull();
+  });
+
+  it('lists tickets by phone number for guest customer portal (GAP-012)', async () => {
+    state.tickets = [
+      {
+        id: 'tkt-guest-1',
+        subject: 'پیگیری ارسال',
+        status: 'OPEN',
+        priority: 'NORMAL',
+        category: 'SUPPORT',
+        contactName: 'سارا نوری',
+        contactPhone: '09129876543',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+
+    const res = await request(app.getHttpServer())
+      .get('/api/v1/support/tickets/by-phone/09129876543')
+      .expect(200);
+    expect(res.body.items).toHaveLength(1);
+    expect(res.body.items[0].id).toBe('tkt-guest-1');
+    expect(res.body.items[0].contactPhone).toBe('09129876543');
+
+    const empty = await request(app.getHttpServer())
+      .get('/api/v1/support/tickets/by-phone/09111111111')
+      .expect(200);
+    expect(empty.body.items).toHaveLength(0);
   });
 });

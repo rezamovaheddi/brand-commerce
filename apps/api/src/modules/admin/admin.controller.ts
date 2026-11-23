@@ -82,6 +82,17 @@ export class AdminController {
     return this.adminService.listLedger(variantId || undefined);
   }
 
+  @Get('audit-logs')
+  @ApiOperation({ summary: 'فهرست لاگ‌های ممیزی امنیتی (تغییرناپذیر GAP-031)' })
+  @ApiOkResponse({ description: 'ردیف‌های لاگ ممیزی', type: Object })
+  async listAuditLogs(
+    @Query('entityType') entityType?: string,
+    @Query('action') action?: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.adminService.listAuditLogs(entityType, action, limit);
+  }
+
   // ---- B2B application review (P4 scaffold) --------------------------------
 
   @Get('b2b/applications')
