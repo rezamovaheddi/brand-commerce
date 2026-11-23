@@ -24,6 +24,7 @@
     "openapi:generate": "node scripts/generate-openapi.mjs",
     "db:backup": "node scripts/backup-db.mjs",
     "db:drill": "node scripts/backup-restore-drill.mjs",
+    "monitor": "node scripts/health-monitor.mjs",
     "verify": "npm run lint && npm run tokens:validate && npm run contrast:check && npm run security:audit && npm run build && npm run test"
   },
   "engines": {

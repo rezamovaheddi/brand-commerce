@@ -75,6 +75,22 @@ export const HealthResponseSchema = z.object({
 });
 export type HealthResponse = z.infer<typeof HealthResponseSchema>;
 
+export const SystemTelemetrySchema = z.object({
+  status: z.string(),
+  uptime: z.number(),
+  database: z.string(),
+  nodeVersion: z.string(),
+  memory: z.object({
+    rssMb: z.number(),
+    heapUsedMb: z.number(),
+    heapTotalMb: z.number(),
+    externalMb: z.number(),
+  }),
+  environment: z.string(),
+  timestamp: z.string(),
+});
+export type SystemTelemetry = z.infer<typeof SystemTelemetrySchema>;
+
 export const ApiErrorSchema = z.object({
   statusCode: z.number().int(),
   message: z.union([z.string(), z.array(z.string())]),

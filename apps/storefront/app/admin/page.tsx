@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import type { AuditLog, SystemTelemetry } from "@bc/contracts";
 import {
   AdminApiError,
   adminAdjustStock,
@@ -9,6 +10,8 @@ import {
   adminListLedger,
   adminListOrders,
   adminB2BDecision,
+  adminGetTelemetry,
+  adminListAuditLogs,
   clearAdminKey,
   getAdminKey,
   setAdminKey,
@@ -61,7 +64,7 @@ const STATUS_LABELS: Record<string, string> = {
   REFUNDED: "بازگشت وجه",
 };
 
-type Section = "orders" | "inventory" | "b2b" | "rfq" | "org" | "crm";
+type Section = "orders" | "inventory" | "b2b" | "rfq" | "org" | "crm" | "telemetry" | "audit";
 
 const TICKET_STATUS_LABELS: Record<string, string> = {
   OPEN: "باز",
@@ -114,6 +117,8 @@ export default function AdminPage() {
   const [crmReply, setCrmReply] = useState<{ id: string; body: string } | null>(null);
   const [crmPhone, setCrmPhone] = useState("");
   const [crmCustomer, setCrmCustomer] = useState<AdminCustomerProfile | null>(null);
+  const [telemetry, setTelemetry] = useState<SystemTelemetry | null>(null);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[] | null>(null);
   const [adjust, setAdjust] = useState<{ variantId: string; delta: string; note: string }>({
     variantId: "",
     delta: "",
@@ -143,6 +148,10 @@ export default function AdminPage() {
           ]);
           setCrmTicketRows(tickets);
           setCrmLeadRows(leads);
+        } else if (which === "telemetry") {
+          setTelemetry(await adminGetTelemetry());
+        } else if (which === "audit") {
+          setAuditLogs(await adminListAuditLogs());
         } else {
           const [inv, led] = await Promise.all([adminListInventory(), adminListLedger()]);
           setInventory(inv);
@@ -575,6 +584,28 @@ export default function AdminPage() {
         >
           CRM و پشتیبانی
           <span className="dv-admin-tab-count">{crmTicketRows?.length ?? 0}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "telemetry"}
+          className={`dv-admin-tab-btn ${section === "telemetry" ? "is-active" : ""}`}
+          onClick={() => setSection("telemetry")}
+        >
+          تله‌متری و سلامت
+          <span className="dv-admin-tab-count" style={{ background: telemetry?.status === "healthy" ? "#2d7a4f" : "#b8860b" }}>
+            {telemetry?.status === "healthy" ? "سالم" : "بررسی"}
+          </span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === "audit"}
+          className={`dv-admin-tab-btn ${section === "audit" ? "is-active" : ""}`}
+          onClick={() => setSection("audit")}
+        >
+          لاگ‌های ممیزی
+          <span className="dv-admin-tab-count">{auditLogs?.length ?? 0}</span>
         </button>
       </div>
 
@@ -1396,6 +1427,143 @@ export default function AdminPage() {
               </table>
             </>
           ) : null}
+        </section>
+      )}
+
+      {section === "telemetry" && (
+        <section className="dv-admin-section">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+            <h2 style={{ fontSize: "1.25rem", margin: 0, color: "var(--dv-navy)" }}>
+              داشبورد تله‌متری زنده و سلامت سیستم (SRE Observability GAP-033)
+            </h2>
+            <button
+              type="button"
+              className="dv-btn dv-btn-gold"
+              onClick={() => void loadSection("telemetry", page, statusFilter)}
+              disabled={busy}
+            >
+              🔄 بازخوانی تله‌متری
+            </button>
+          </div>
+
+          {telemetry ? (
+            <div>
+              {/* Telemetry Status Cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 24 }}>
+                <div className="dv-card" style={{ padding: 16, textAlign: "center" }}>
+                  <div style={{ fontSize: "0.85rem", color: "var(--dv-muted)", marginBottom: 6 }}>وضعیت سرویس اصلی API</div>
+                  <div style={{ fontSize: "1.4rem", fontWeight: 800, color: telemetry.status === "healthy" ? "#2d7a4f" : "#dc2626" }}>
+                    {telemetry.status === "healthy" ? "سالم (HEALTHY)" : "اختلال (DEGRADED)"}
+                  </div>
+                </div>
+
+                <div className="dv-card" style={{ padding: 16, textAlign: "center" }}>
+                  <div style={{ fontSize: "0.85rem", color: "var(--dv-muted)", marginBottom: 6 }}>وضعیت اتصال پایگاه‌داده</div>
+                  <div style={{ fontSize: "1.4rem", fontWeight: 800, color: telemetry.database === "up" ? "#2d7a4f" : "#dc2626" }}>
+                    {telemetry.database === "up" ? "متصل (UP - PG 16)" : "قطع (DOWN)"}
+                  </div>
+                </div>
+
+                <div className="dv-card" style={{ padding: 16, textAlign: "center" }}>
+                  <div style={{ fontSize: "0.85rem", color: "var(--dv-muted)", marginBottom: 6 }}>زمان فعالیت پروسه (Uptime)</div>
+                  <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--dv-navy)" }} dir="ltr">
+                    {formatFaNumber(Math.floor(telemetry.uptime))} ثانیه
+                  </div>
+                </div>
+
+                <div className="dv-card" style={{ padding: 16, textAlign: "center" }}>
+                  <div style={{ fontSize: "0.85rem", color: "var(--dv-muted)", marginBottom: 6 }}>مصرف حافظه رم (RSS)</div>
+                  <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "#2563eb" }} dir="ltr">
+                    {telemetry.memory.rssMb} MB
+                  </div>
+                </div>
+              </div>
+
+              {/* Detailed Breakdown */}
+              <div className="dv-card" style={{ padding: 20 }}>
+                <h3 style={{ fontSize: "1.05rem", margin: "0 0 16px", color: "var(--dv-navy)" }}>جزئیات منابع سرور و پلتفرم</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+                  <div>
+                    <span style={{ fontSize: "0.85rem", color: "var(--dv-muted)" }}>نسخه نود پروسه:</span>
+                    <strong style={{ display: "block", fontSize: "0.95rem" }} dir="ltr">{telemetry.nodeVersion}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "0.85rem", color: "var(--dv-muted)" }}>محیط استقرار:</span>
+                    <strong style={{ display: "block", fontSize: "0.95rem" }} dir="ltr">{telemetry.environment}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "0.85rem", color: "var(--dv-muted)" }}>Heap Used / Total:</span>
+                    <strong style={{ display: "block", fontSize: "0.95rem" }} dir="ltr">{telemetry.memory.heapUsedMb} MB / {telemetry.memory.heapTotalMb} MB</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "0.85rem", color: "var(--dv-muted)" }}>زمان‌سنجی آخرین پروب:</span>
+                    <strong style={{ display: "block", fontSize: "0.85rem" }} dir="ltr">{telemetry.timestamp}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="dv-empty">در حال دریافت داده‌های تله‌متری…</div>
+          )}
+        </section>
+      )}
+
+      {section === "audit" && (
+        <section className="dv-admin-section">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+            <h2 style={{ fontSize: "1.25rem", margin: 0, color: "var(--dv-navy)" }}>
+              لاگ‌های ممیزی امنیتی و حاکمیتی (Audit Trail GAP-031)
+            </h2>
+            <button
+              type="button"
+              className="dv-btn dv-btn-gold"
+              onClick={() => void loadSection("audit", page, statusFilter)}
+              disabled={busy}
+            >
+              🔄 به‌روزرسانی لاگ‌ها
+            </button>
+          </div>
+
+          <p style={{ fontSize: "0.88rem", color: "var(--dv-muted)", marginBottom: 16 }}>
+            تمامی تغییرات و اکشن‌های حساس مدیریتی (اصلاح انبار، تأیید/رد نمایندگی B2B، صدور پیش‌فاکتور و پاسخ به تیکت‌ها) در این جدول به صورت دائم و تغییرناپذیر ثبت می‌شوند.
+          </p>
+
+          {auditLogs !== null && auditLogs.length > 0 ? (
+            <table className="dv-admin-table">
+              <thead>
+                <tr>
+                  <th>شناسه لاگ</th>
+                  <th>عملیات (Action)</th>
+                  <th>موجودیت (Entity)</th>
+                  <th>شناسه رکورد</th>
+                  <th>عامل (Actor)</th>
+                  <th>جزئیات</th>
+                  <th>زمان وقوع</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditLogs.map((log) => (
+                  <tr key={log.id}>
+                    <td dir="ltr">{log.id.slice(-8)}</td>
+                    <td>
+                      <span className="dv-badge" style={{ background: "rgba(184, 134, 11, 0.15)", color: "#b8860b" }}>
+                        {log.action}
+                      </span>
+                    </td>
+                    <td>{log.entityType}</td>
+                    <td dir="ltr">{log.entityId}</td>
+                    <td>{log.actorId ?? "system"}</td>
+                    <td dir="ltr" style={{ maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "0.8rem" }}>
+                      {log.detailsJson ? JSON.stringify(log.detailsJson) : "—"}
+                    </td>
+                    <td dir="ltr">{new Date(log.createdAt).toISOString().slice(0, 19).replace("T", " ")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="dv-empty">هیچ لاگ ممیزی جدیدی ثبت نشده است.</div>
+          )}
         </section>
       )}
     </div>

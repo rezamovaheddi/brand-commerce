@@ -1945,7 +1945,8 @@
         "apps/storefront/lib/admin-client.ts",
         "apps/storefront/lib/b2b-client.ts",
         "apps/storefront/lib/format.ts",
-        "apps/storefront/lib/support-client.ts"
+        "apps/storefront/lib/support-client.ts",
+        "packages/contracts/src/index.ts"
       ],
       "rdeps": [
         "apps/storefront/app/admin/page.tsx#AdminPage"
@@ -3971,6 +3972,7 @@
         "apps/api/test/rfq-quote.e2e-spec.ts",
         "apps/api/test/support.e2e-spec.ts",
         "apps/storefront/app/account/page.tsx",
+        "apps/storefront/app/admin/page.tsx",
         "apps/storefront/app/b2b/apply/page.tsx",
         "apps/storefront/app/b2b/portal/page.tsx",
         "apps/storefront/app/b2b/rfq/page.tsx",
@@ -4119,6 +4121,8 @@
         "packages/contracts/src/index.ts#RfqStatusSchema",
         "packages/contracts/src/index.ts#SandboxCallback",
         "packages/contracts/src/index.ts#SandboxCallbackSchema",
+        "packages/contracts/src/index.ts#SystemTelemetry",
+        "packages/contracts/src/index.ts#SystemTelemetrySchema",
         "packages/contracts/src/index.ts#Ticket",
         "packages/contracts/src/index.ts#TicketCategory",
         "packages/contracts/src/index.ts#TicketCategorySchema",
@@ -4245,6 +4249,21 @@
     {
       "id": "packages/contracts/src/index.ts#HealthResponseSchema",
       "label": "HealthResponseSchema",
+      "source_file": "packages/contracts/src/index.ts",
+      "layer": "contracts",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "symbol",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/contracts/src/index.ts#SystemTelemetrySchema",
+      "label": "SystemTelemetrySchema",
       "source_file": "packages/contracts/src/index.ts",
       "layer": "contracts",
       "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
@@ -5295,6 +5314,21 @@
     {
       "id": "packages/contracts/src/index.ts#HealthResponse",
       "label": "HealthResponse",
+      "source_file": "packages/contracts/src/index.ts",
+      "layer": "contracts",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "type",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/contracts/src/index.ts#SystemTelemetry",
+      "label": "SystemTelemetry",
       "source_file": "packages/contracts/src/index.ts",
       "layer": "contracts",
       "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
@@ -7765,6 +7799,11 @@
       "relation": "member_of"
     },
     {
+      "from": "packages/contracts/src/index.ts#SystemTelemetrySchema",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "member_of"
+    },
+    {
       "from": "packages/contracts/src/index.ts#ApiErrorSchema",
       "to": "packages/contracts/src/index.ts",
       "relation": "member_of"
@@ -8111,6 +8150,11 @@
     },
     {
       "from": "packages/contracts/src/index.ts#HealthResponse",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/contracts/src/index.ts#SystemTelemetry",
       "to": "packages/contracts/src/index.ts",
       "relation": "member_of"
     },
@@ -8956,6 +9000,11 @@
     },
     {
       "from": "apps/storefront/app/admin/page.tsx",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/app/admin/page.tsx",
       "to": "apps/storefront/lib/admin-client.ts",
       "relation": "imports"
     },
@@ -9437,7 +9486,7 @@
     "api-service": 24,
     "test": 17,
     "frontend": 128,
-    "contracts": 143,
+    "contracts": 145,
     "database": 25,
     "domain-logic": 21,
     "other": 1
@@ -9452,6 +9501,6 @@
     "CRM & Support (پشتیبانی و تیکتینگ)": 38,
     "Database & Schema (پایگاه داده و مدل‌ها)": 9,
     "B2C Storefront (فروشگاه B2C و تجربه کاربری)": 56,
-    "Shared Contracts & Logic (قراردادها و منطق دامنه)": 52
+    "Shared Contracts & Logic (قراردادها و منطق دامنه)": 54
   }
 }

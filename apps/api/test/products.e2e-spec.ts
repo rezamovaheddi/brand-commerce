@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { ApiError, Category, HealthResponse, ProductListResponse, ProductSchema } from '@bc/contracts';
+import { ApiError, Category, HealthResponse, ProductListResponse, ProductSchema, SystemTelemetrySchema } from '@bc/contracts';
 import { AppModule } from '../src/app.module';
 import { applyAppConfig } from '../src/app.setup';
 import { PrismaService } from '../src/prisma/prisma.service';
@@ -233,6 +233,26 @@ describe('Products API (e2e, in-memory Prisma)', () => {
     expect(response.status).toBe(200);
     expect(body).toMatchObject({ status: 'ok', database: 'up' });
     expect(typeof body.uptime).toBe('number');
+  });
+
+  it('GET /api/v1/health/liveness returns 200 process active', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/health/liveness').expect(200);
+    expect(response.body.status).toBe('ok');
+    expect(typeof response.body.uptime).toBe('number');
+  });
+
+  it('GET /api/v1/health/readiness returns 200 with database verified', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/health/readiness').expect(200);
+    expect(response.body).toEqual({ status: 'ready', database: 'up' });
+  });
+
+  it('GET /api/v1/health/telemetry returns detailed system metrics satisfying schema (GAP-033)', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/health/telemetry').expect(200);
+    const parsed = SystemTelemetrySchema.parse(response.body);
+    expect(parsed.status).toBe('healthy');
+    expect(parsed.database).toBe('up');
+    expect(parsed.memory.rssMb).toBeGreaterThan(0);
+    expect(parsed.memory.heapUsedMb).toBeGreaterThan(0);
   });
 
   it('GET /api/v1/products returns the paginated ACTIVE list only', async () => {

@@ -31,6 +31,66 @@
             }
           }
         },
+        "summary": "بررسی سلامت عمومی سرویس و دیتابیس",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/liveness": {
+      "get": {
+        "operationId": "HealthController_liveness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "پروسه فعال و پاسخگوست",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "پروب حیات (Liveness Probe)",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/readiness": {
+      "get": {
+        "operationId": "HealthController_readiness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "پروب آمادگی ترافیک (Readiness Probe)",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/telemetry": {
+      "get": {
+        "operationId": "HealthController_telemetry",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "داده‌های تله‌متری زنده حافظه و سیستم",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "تله‌متری جامع سیستم و مصرف منابع (GAP-033)",
         "tags": [
           "health"
         ]

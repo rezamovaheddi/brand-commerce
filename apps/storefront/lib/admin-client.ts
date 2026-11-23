@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ApiErrorSchema } from "@bc/contracts";
+import { ApiErrorSchema, type AuditLog, type SystemTelemetry } from "@bc/contracts";
 
 /**
  * Bootstrap admin console transport (browser only). The key lives in
@@ -217,3 +217,33 @@ export async function adminB2BDecision(
     (body) => B2BApplicationRowSchema.safeParse(body).success ? (body as B2BApplicationRow) : null,
   );
 }
+
+export async function adminGetTelemetry(): Promise<SystemTelemetry> {
+  let response: Response;
+  try {
+    response = await fetch(`${BASE}/health/telemetry`);
+  } catch {
+    throw new AdminApiError("سرویس تله‌متری در دسترس نیست.", 0);
+  }
+  const raw: unknown = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new AdminApiError("خطا در دریافت وضعیت تله‌متری.", response.status);
+  }
+  return raw as SystemTelemetry;
+}
+
+export async function adminListAuditLogs(filter?: { entityType?: string; action?: string }): Promise<AuditLog[]> {
+  const params = new URLSearchParams();
+  if (filter?.entityType) params.set("entityType", filter.entityType);
+  if (filter?.action) params.set("action", filter.action);
+  const q = params.toString() ? `?${params.toString()}` : "";
+  return request<AuditLog[]>(
+    `/admin/audit-logs${q}`,
+    { method: "GET" },
+    (body) => {
+      const parsed = z.object({ items: z.array(z.any()) }).safeParse(body);
+      return parsed.success ? (parsed.data.items as AuditLog[]) : null;
+    },
+  );
+}
+
