@@ -4742,3 +4742,32 @@ button[aria-disabled="true"],
   color: var(--dv-navy);
   font-weight: 700;
 }
+
+/* ---------------------------------------------------- Dermalight Footer */
+.dermalight-footer-link {
+  font-size: 0.88rem;
+  color: #64748B;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.dermalight-footer-link:hover {
+  color: var(--dv-action, #7A4B60);
+}
+
+.dermalight-social-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.dermalight-social-btn:hover {
+  background: var(--dv-action, #7A4B60);
+  color: #FFFFFF;
+}
+

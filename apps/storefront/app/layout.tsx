@@ -15,15 +15,18 @@ const vazir = Vazirmatn({
 });
 
 export const metadata: Metadata = {
-  title: "DERMAVIA — مراقبت طبیعی، اعتماد پایدار",
+  title: "درمالایت | مرجع تخصصی نقد، بررسی و تامین محصولات درموکازمتیک",
   description:
-    "فروشگاه محصولات مراقبت از پوست DERMAVIA؛ فرمول‌های ملایم و علمی با شفافیت کامل در ترکیبات.",
+    "فروشگاه تخصصی درمالایت؛ اصالت ۱۰۰٪ تضمین‌شده، فرمولاسیون‌های علمی و مشاوره پوست.",
+  icons: {
+    icon: "/images/dermalight_logo.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={vazir.variable}>
+      <body className={vazir.variable} style={{ background: "#FFFFFF", color: "#1A2254" }}>
         <a href="#main" className="skip-link">پرش به محتوای اصلی</a>
         <CartProvider>
           <StorefrontShell>

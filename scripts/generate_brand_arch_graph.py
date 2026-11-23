@@ -325,7 +325,7 @@ def main():
     html_path1.write_text(html_content, encoding="utf-8")
     print(f"Generated Dashboard in repo: {html_path1}")
 
-    desktop_path = Path("C:/Users/talas/OneDrive/Desktop/brand_arch_graph.html")
+    desktop_path = Path.home() / "Desktop" / "brand_arch_graph.html"
     try:
         desktop_path.write_text(html_content, encoding="utf-8")
         print(f"Generated Dashboard on Desktop: {desktop_path}")

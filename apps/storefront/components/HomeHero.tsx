@@ -1,139 +1,366 @@
 "use client";
 
-import { formatPriceMinor } from "../lib/format";
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useCart } from "./cart/CartProvider";
 
+interface HeroProductVariant {
+  id: string;
+  name: string;
+  subtitle: string;
+  heroImage: string;
+  thumbImage: string;
+  sku: string;
+  slug: string;
+}
+
+const HERO_VARIANTS: HeroProductVariant[] = [
+  {
+    id: "tube",
+    name: "کرم مرطوب‌کننده و بازسازی‌کننده سلولی",
+    subtitle: "فرمولاسیون غنی از سرامیدهای خالص و شی‌باتر ارگانیک",
+    heroImage: "/images/hero_tube_swirl.png",
+    thumbImage: "/images/hero_thumb_tube.png",
+    sku: "DMV-MST-50",
+    slug: "ethereal-barrier-cream",
+  },
+  {
+    id: "pump",
+    name: "لوسیون بدن عمیقاً هیدراته‌کننده",
+    subtitle: "تغذیه ۲۴ ساعته سد دفاعی پوست با بافت ابریشمی و بدون چربی",
+    heroImage: "/images/hero_pump.png",
+    thumbImage: "/images/hero_thumb_pump.png",
+    sku: "DMV-MST-100",
+    slug: "ethereal-light-moisturizer",
+  },
+  {
+    id: "jar",
+    name: "کرم جوانساز و ضدچروک اکسیر شب",
+    subtitle: "تحریک بیوسنتز کلاژن با ریزپپتیدها و نیاسینامید خالص",
+    heroImage: "/images/hero_jar.png",
+    thumbImage: "/images/hero_thumb_jar.png",
+    sku: "DMV-MST-50",
+    slug: "ethereal-barrier-cream",
+  },
+  {
+    id: "dropper",
+    name: "سرم تغذیه‌کننده ویتامینه و اسید هیالورونیک",
+    subtitle: "روشن‌کننده قوی و آنتی‌اکسیدان محافظت‌کننده در برابر آلودگی",
+    heroImage: "/images/hero_dropper.png",
+    thumbImage: "/images/hero_thumb_dropper.png",
+    sku: "DMV-SRM-30H",
+    slug: "ethereal-hyaluronic-serum",
+  },
+];
+
 export default function HomeHero() {
-  const { add } = useCart();
+  const [activeVariantIndex, setActiveVariantIndex] = useState(0);
+  const { add, openDrawer } = useCart();
+  const currentVariant = HERO_VARIANTS[activeVariantIndex];
 
   const handleQuickAdd = async () => {
     try {
-      // cl_sample_v_3 is Ethereal Vitamin C Serum 30ml
-      await add("cl_sample_v_3", 1);
+      await add(currentVariant.sku, 1);
+      openDrawer();
     } catch {
-      window.location.href = "/products";
+      window.location.href = `/products/${currentVariant.slug}`;
     }
   };
 
   return (
-    <section className="ethereal-hero-section">
-      <div className="container hero-container">
-        <div className="hero-content">
-          <div className="hero-badge-pill">
-            <span className="badge-sparkle">✧</span>
-            <span>نوآوری پیشگام در سلامت و زیبایی پوست</span>
-          </div>
+    <section
+      className="dermalight-hero-section"
+      style={{
+        position: "relative",
+        minHeight: "clamp(540px, 62vw, 760px)",
+        width: "100%",
+        overflow: "hidden",
+        background: "radial-gradient(ellipse 90% 80% at 75% 45%, rgba(246, 230, 240, 0.45) 0%, rgba(255, 255, 255, 1) 75%)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        paddingTop: "clamp(80px, 12vw, 140px)",
+        paddingBottom: "clamp(24px, 4vw, 48px)",
+      }}
+    >
+      <div
+        className="container"
+        style={{
+          maxWidth: "1280px",
+          margin: "0 auto",
+          padding: "0 24px",
+          width: "100%",
+          position: "relative",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* Right-aligned Main Hero Product Visual */}
+        <div
+          style={{
+            position: "absolute",
+            top: "clamp(10px, 3vw, 40px)",
+            left: "clamp(20px, 6vw, 80px)",
+            width: "clamp(280px, 36vw, 540px)",
+            height: "clamp(340px, 44vw, 620px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+          }}
+        >
+          {/* Soft Circular Amethyst/Rose Glow behind Product */}
+          <div
+            style={{
+              position: "absolute",
+              width: "clamp(260px, 32vw, 480px)",
+              height: "clamp(260px, 32vw, 480px)",
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(229, 200, 213, 0.75) 0%, rgba(242, 222, 232, 0.35) 55%, transparent 75%)",
+              filter: "blur(40px)",
+              zIndex: 1,
+              pointerEvents: "none",
+            }}
+          />
 
-          <h1 className="hero-headline">
-            اکسیر جوانساز سلولی؛
-            <br />
-            <span className="gold-text-gradient">تلاقی علم و طبیعت ناب</span>
-          </h1>
-
-          <p className="hero-paragraph">
-            فرمولاسیون غنی از پپتیدهای زیست‌فعال، اسید هیالورونیک چندوزنی و عصاره‌های نادر گیاهی.
-            طراحی‌شده برای احیای درخشش ارگانیک و استحکام سد دفاعی پوست شما.
-          </p>
-
-          <div className="hero-price-tag-row">
-            <span className="hero-price-label">قیمت عرضه مستقیم:</span>
-            <span className="hero-price-val dv-num">{formatPriceMinor(3_950_000)}</span>
-            <span className="hero-sample-badge">فرمولاسیون تاییدشده</span>
-          </div>
-
-          <div className="hero-actions-group">
-            <button
-              type="button"
-              className="dv-btn hero-primary-btn"
-              onClick={handleQuickAdd}
-            >
-              افزودن اکسیر به سبد خرید ✨
-            </button>
-            <a href="#catalog" className="dv-outline-btn hero-catalog-btn">
-              ورق زدن کاتالوگ کتابی
-            </a>
-          </div>
-
-          <div className="hero-trust-row">
-            <div className="trust-item">
-              <span className="trust-check">✓</span>
-              <span>فاقد پارابن و گلوتن</span>
-            </div>
-            <div className="trust-item">
-              <span className="trust-check">✓</span>
-              <span>بدون تست حیوانی</span>
-            </div>
-            <div className="trust-item">
-              <span className="trust-check">✓</span>
-              <span>pH متعادل و ضدحساسیت</span>
-            </div>
+          {/* Product Image with smooth transition */}
+          <div
+            key={currentVariant.id}
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              zIndex: 2,
+              animation: "fadeInScale 0.45s ease-out forwards",
+            }}
+          >
+            <Image
+              src={currentVariant.heroImage}
+              alt={currentVariant.name}
+              fill
+              priority
+              sizes="(max-width: 768px) 80vw, 45vw"
+              style={{
+                objectFit: "contain",
+                filter: "drop-shadow(0 20px 35px rgba(110, 80, 100, 0.18))",
+              }}
+            />
           </div>
         </div>
 
-        {/* 3D Bottle Showcase & Golden Aura */}
-        <div className="hero-visual-col">
-          <div className="product-aura-glow" aria-hidden="true" />
-          <div className="cream-ripples-bed" aria-hidden="true" />
+        {/* Hero Branding / Headline Area (Subtle Clinical Elegance) */}
+        <div
+          style={{
+            maxWidth: "600px",
+            marginRight: 0,
+            zIndex: 12,
+            paddingTop: "clamp(20px, 4vw, 60px)",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 14px",
+              borderRadius: 9999,
+              background: "rgba(82, 39, 155, 0.08)",
+              border: "1px solid rgba(82, 39, 155, 0.18)",
+              color: "#52279B",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              marginBottom: 16,
+            }}
+          >
+            <span>✨</span>
+            <span>نوآوری درموکازمتیک با پشتوانه بالینی</span>
+          </div>
 
-          <div className="floating-bottle-wrap">
-            <svg viewBox="0 0 240 340" fill="none" xmlns="http://www.w3.org/2000/svg" className="hero-bottle-svg" aria-label="اکسیر جوانساز سلولی درماویا">
-              <defs>
-                <linearGradient id="hero-glass" x1="12%" y1="15%" x2="88%" y2="85%">
-                  <stop offset="0%" stopColor="#fff8dc" />
-                  <stop offset="22%" stopColor="#f6d27d" />
-                  <stop offset="55%" stopColor="#df9e34" />
-                  <stop offset="84%" stopColor="#b56f18" />
-                  <stop offset="100%" stopColor="#f3cf7c" />
-                </linearGradient>
-                <linearGradient id="hero-goldCap" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#7c571c" />
-                  <stop offset="22%" stopColor="#fae6ad" />
-                  <stop offset="46%" stopColor="#c6933c" />
-                  <stop offset="70%" stopColor="#fff6d6" />
-                  <stop offset="100%" stopColor="#875f21" />
-                </linearGradient>
-                <linearGradient id="hero-bulb" x1="25%" y1="10%" x2="80%" y2="90%">
-                  <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="60%" stopColor="#f3ede2" />
-                  <stop offset="100%" stopColor="#d4c6b2" />
-                </linearGradient>
-                <linearGradient id="hero-shine" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.88" />
-                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-                </linearGradient>
-                <radialGradient id="hero-coreGlow" cx="50%" cy="54%" r="48%">
-                  <stop offset="0%" stopColor="#fff8d6" stopOpacity="0.92" />
-                  <stop offset="65%" stopColor="#f5be54" stopOpacity="0.22" />
-                  <stop offset="100%" stopColor="#b97214" stopOpacity="0" />
-                </radialGradient>
-              </defs>
-              <ellipse cx="120" cy="312" rx="68" ry="15" fill="rgba(55, 34, 12, 0.28)" />
-              <path d="M104,78 C102,48 106,20 120,20 C134,20 138,48 136,78 Z" fill="url(#hero-bulb)" />
-              <ellipse cx="114" cy="44" rx="4.5" ry="14" fill="#ffffff" opacity="0.88" />
-              <rect x="86" y="76" width="68" height="40" rx="6" fill="url(#hero-goldCap)" />
-              <rect x="82" y="110" width="76" height="8" rx="3" fill="url(#hero-goldCap)" />
-              <line x1="88" y1="84" x2="152" y2="84" stroke="#fff8dc" strokeOpacity="0.55" strokeWidth="1.2" />
-              <path d="M84,118 C64,124 54,142 54,166 L54,284 C54,302 68,312 88,312 L152,312 C172,312 186,302 186,284 L186,166 C186,142 176,124 156,118 Z" fill="url(#hero-glass)" stroke="#fff7dd" strokeOpacity="0.65" strokeWidth="1.6" />
-              <path d="M58,282 C58,298 72,308 90,308 L150,308 C168,308 182,298 182,282 L182,290 C182,306 168,314 150,314 L90,314 C72,314 58,306 58,290 Z" fill="#fff8e4" opacity="0.72" />
-              <ellipse cx="120" cy="218" rx="56" ry="74" fill="url(#hero-coreGlow)" />
-              <rect x="115" y="122" width="10" height="148" rx="4" fill="rgba(255,253,245,0.28)" stroke="rgba(255,252,235,0.72)" strokeWidth="1.2" />
-              <path d="M116,270 L124,270 L121.5,286 C121,288 119,288 118.5,286 Z" fill="#fff7da" opacity="0.88" />
-              <rect x="64" y="142" width="14" height="144" rx="7" fill="url(#hero-shine)" />
-              <rect x="166" y="146" width="8" height="138" rx="4" fill="#fff8e1" opacity="0.58" />
-              <path d="M74,134 C86,124 102,122 114,122" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.82" />
-              <g fill="#fffbe6">
-                <circle cx="94" cy="238" r="2.6" opacity="0.92" />
-                <circle cx="144" cy="224" r="2.2" opacity="0.88" />
-                <circle cx="106" cy="264" r="2" opacity="0.84" />
-                <circle cx="136" cy="256" r="2.8" opacity="0.95" />
-                <circle cx="152" cy="196" r="1.9" opacity="0.8" />
-                <circle cx="88" cy="192" r="1.7" opacity="0.78" />
-                <circle cx="126" cy="204" r="1.8" opacity="0.9" />
-              </g>
-            </svg>
+          <h1
+            style={{
+              fontSize: "clamp(1.8rem, 3.2vw, 2.7rem)",
+              fontWeight: 800,
+              color: "#1A2254",
+              lineHeight: 1.35,
+              marginBottom: 14,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            زیبایی اصیل پوست؛
+            <br />
+            <span
+              style={{
+                background: "linear-gradient(135deg, #52279B 0%, #0284C7 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              فرمولاسیون علمی با جذب سلولی
+            </span>
+          </h1>
+
+          <p
+            style={{
+              fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
+              color: "#5A6A85",
+              lineHeight: 1.8,
+              maxWidth: "500px",
+              marginBottom: 24,
+            }}
+          >
+            {currentVariant.subtitle}. ترکیبی هم‌افزا از فناوری نانوپپتیدها و عصاره‌های ناب برای احیای سلامت و شادابی درخشان پوست شما.
+          </p>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              style={{
+                padding: "12px 26px",
+                borderRadius: 14,
+                background: "linear-gradient(135deg, #52279B 0%, #431E82 100%)",
+                color: "#FFFFFF",
+                fontSize: "0.98rem",
+                fontWeight: 700,
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 8px 22px rgba(82, 39, 155, 0.28)",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 12px 28px rgba(82, 39, 155, 0.38)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 8px 22px rgba(82, 39, 155, 0.28)";
+              }}
+            >
+              ثبت سفارش مستقیم
+            </button>
+
+            <Link
+              href="/products"
+              style={{
+                padding: "12px 22px",
+                borderRadius: 14,
+                background: "rgba(255, 255, 255, 0.9)",
+                border: "1.5px solid #CBD5E1",
+                color: "#1A2254",
+                fontSize: "0.95rem",
+                fontWeight: 600,
+                textDecoration: "none",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#52279B";
+                e.currentTarget.style.color = "#52279B";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "#CBD5E1";
+                e.currentTarget.style.color = "#1A2254";
+              }}
+            >
+              مشاهده کاتالوگ
+            </Link>
+          </div>
+        </div>
+
+        {/* Bottom Interactive 4-Product Thumbnail Selector */}
+        <div
+          style={{
+            zIndex: 15,
+            paddingTop: "clamp(30px, 5vw, 60px)",
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "flex-start",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "clamp(18px, 3.5vw, 42px)",
+              padding: "10px 16px",
+              background: "rgba(255, 255, 255, 0.75)",
+              backdropFilter: "blur(12px)",
+              borderRadius: 22,
+              border: "1px solid rgba(226, 232, 240, 0.8)",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
+            }}
+          >
+            {HERO_VARIANTS.map((item, idx) => {
+              const isSelected = idx === activeVariantIndex;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveVariantIndex(idx)}
+                  aria-label={`انتخاب محصول ${item.name}`}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 8,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "4px 8px",
+                    position: "relative",
+                    transition: "transform 0.2s ease",
+                    transform: isSelected ? "scale(1.08)" : "scale(1)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "clamp(46px, 5vw, 64px)",
+                      height: "clamp(58px, 6.5vw, 84px)",
+                      position: "relative",
+                      filter: isSelected ? "drop-shadow(0 6px 14px rgba(82, 39, 155, 0.25))" : "grayscale(25%) opacity(0.8)",
+                      transition: "filter 0.2s ease",
+                    }}
+                  >
+                    <Image
+                      src={item.thumbImage}
+                      alt={item.name}
+                      fill
+                      sizes="64px"
+                      style={{ objectFit: "contain" }}
+                    />
+                  </div>
+
+                  {/* Active Indicator Bar matching node_11_35.svg */}
+                  <div
+                    style={{
+                      width: "clamp(40px, 4vw, 54px)",
+                      height: 5,
+                      borderRadius: 3,
+                      backgroundColor: isSelected ? "#52279B" : "transparent",
+                      transition: "background-color 0.25s ease",
+                    }}
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeInScale {
+          0% {
+            opacity: 0;
+            transform: scale(0.94) translateY(12px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+      `}</style>
     </section>
   );
 }

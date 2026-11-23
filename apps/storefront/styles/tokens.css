@@ -16,6 +16,9 @@
   --dv-line: rgba(70, 52, 31, .14);
   --dv-danger: #8d2e28;
   --dv-success: #24523c;
+  --dv-action: #7A4B60;
+  --dv-action-hover: #653C4F;
+  --dv-dusty-rose: #C38AA3;
   --dv-shadow: 0 16px 40px rgba(28, 25, 19, .08);
   --dv-focus: 0 0 0 3px rgba(154, 107, 34, .3);
   --dv-radius-card: 18px;
