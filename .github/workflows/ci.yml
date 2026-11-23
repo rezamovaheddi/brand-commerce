@@ -30,13 +30,29 @@ jobs:
           node-version: 22
           cache: npm
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Install
         run: npm ci
+
+      - name: Code Quality & Linting
+        run: npm run lint
+
+      - name: DTCG Design Token Validation
+        run: npm run tokens:validate
+
+      - name: WCAG 2.1 AA/AAA Contrast Audit
+        run: npm run contrast:check
+
+      - name: Security & Secret Audit
+        run: npm run security:audit
 
       - name: Generate Prisma client
         run: npm run prisma:generate
 
-      - name: Build (contracts → api → storefront)
+      - name: Build (contracts → domain → api → storefront)
         run: npm run build
 
       - name: Apply migrations
