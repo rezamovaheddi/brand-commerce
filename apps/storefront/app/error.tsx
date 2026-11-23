@@ -19,7 +19,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
 
   return (
     <div className="dv-b2b-container" style={{ textAlign: "center", paddingBlock: "80px 120px" }}>
-      <div className="dv-b2b-card" style={{ maxWidth: 580, margin: "0 auto", padding: "48px 36px" }}>
+      <div className="dv-b2b-card" style={{ maxWidth: 680, margin: "0 auto", padding: "48px 36px" }}>
         <span style={{ fontSize: "3rem", display: "block", marginBottom: 16 }}>⚠️</span>
 
         <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--dv-navy)", margin: "0 0 12px" }}>
@@ -30,6 +30,18 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
           مشکلی در دریافت اطلاعات پیش آمده است. تیم فنی در حال بررسی وضعیت است.
           می‌توانید دوباره تلاش فرمایید یا با پشتیبانی ارتباط برقرار کنید.
         </p>
+
+        {error?.message ? (
+          <div style={{ textAlign: "left", direction: "ltr", background: "#FFF1F2", border: "1px solid #FECDD3", padding: "14px 18px", borderRadius: 12, fontSize: "0.88rem", color: "#9F1239", marginBottom: 24, overflowX: "auto" }}>
+            <strong>Error: </strong> {error.message}
+            {error.digest ? <div style={{ fontSize: "0.78rem", color: "#BE123C", marginTop: 4 }}>Digest: {error.digest}</div> : null}
+            {error.stack ? (
+              <pre style={{ marginTop: 8, fontSize: "0.75rem", whiteSpace: "pre-wrap", color: "#881337" }}>
+                {error.stack.split("\n").slice(0, 5).join("\n")}
+              </pre>
+            ) : null}
+          </div>
+        ) : null}
 
         <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
           <button type="button" onClick={reset} className="dv-btn dv-btn-gold" style={{ paddingInline: 28 }}>

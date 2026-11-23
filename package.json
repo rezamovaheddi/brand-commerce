@@ -20,6 +20,7 @@
     "prisma:seed": "npm run seed -w @bc/database",
     "api:dev": "npm run start:dev -w @bc/api",
     "web:dev": "npm run dev -w @bc/storefront",
+    "dev": "npm run dev -w @bc/storefront",
     "openapi:export": "node scripts/export-openapi.mjs",
     "openapi:generate": "node scripts/generate-openapi.mjs",
     "db:backup": "node scripts/backup-db.mjs",
