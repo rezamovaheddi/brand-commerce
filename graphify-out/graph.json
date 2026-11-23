@@ -2311,6 +2311,7 @@
       "external": false,
       "deps": [
         "apps/storefront/components/PriceTag.tsx",
+        "apps/storefront/components/ProductMediaIllustration.tsx",
         "apps/storefront/components/SampleBadge.tsx",
         "apps/storefront/components/cart/VariantAddToCart.tsx",
         "apps/storefront/lib/api.ts",
@@ -2666,6 +2667,7 @@
       "external": false,
       "deps": [
         "apps/storefront/components/PriceTag.tsx",
+        "apps/storefront/components/ProductMediaIllustration.tsx",
         "apps/storefront/components/SampleBadge.tsx",
         "apps/storefront/lib/product.ts",
         "packages/contracts/src/index.ts"
@@ -2688,6 +2690,40 @@
       "external": false,
       "deps": [
         "apps/storefront/components/ProductCard.tsx"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "apps/storefront/components/ProductMediaIllustration.tsx",
+      "label": "ProductMediaIllustration.tsx",
+      "source_file": "apps/storefront/components/ProductMediaIllustration.tsx",
+      "layer": "frontend",
+      "domain": "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [
+        "packages/contracts/src/index.ts"
+      ],
+      "rdeps": [
+        "apps/storefront/app/products/[slug]/page.tsx",
+        "apps/storefront/components/ProductCard.tsx",
+        "apps/storefront/components/ProductMediaIllustration.tsx#ProductMediaIllustration"
+      ]
+    },
+    {
+      "id": "apps/storefront/components/ProductMediaIllustration.tsx#ProductMediaIllustration",
+      "label": "ProductMediaIllustration",
+      "source_file": "apps/storefront/components/ProductMediaIllustration.tsx",
+      "layer": "frontend",
+      "domain": "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)",
+      "kind": "function",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/storefront/components/ProductMediaIllustration.tsx"
       ],
       "rdeps": []
     },
@@ -3811,6 +3847,7 @@
         "apps/storefront/app/products/page.tsx",
         "apps/storefront/app/support/page.tsx",
         "apps/storefront/components/ProductCard.tsx",
+        "apps/storefront/components/ProductMediaIllustration.tsx",
         "apps/storefront/components/cart/CartProvider.tsx",
         "apps/storefront/lib/admin-client.ts",
         "apps/storefront/lib/api.ts",
@@ -7191,6 +7228,11 @@
       "relation": "member_of"
     },
     {
+      "from": "apps/storefront/components/ProductMediaIllustration.tsx#ProductMediaIllustration",
+      "to": "apps/storefront/components/ProductMediaIllustration.tsx",
+      "relation": "member_of"
+    },
+    {
       "from": "apps/storefront/components/SampleBadge.tsx#SampleBadge",
       "to": "apps/storefront/components/SampleBadge.tsx",
       "relation": "member_of"
@@ -8777,6 +8819,11 @@
     },
     {
       "from": "apps/storefront/app/products/[slug]/page.tsx",
+      "to": "apps/storefront/components/ProductMediaIllustration.tsx",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/app/products/[slug]/page.tsx",
       "to": "apps/storefront/components/cart/VariantAddToCart.tsx",
       "relation": "imports"
     },
@@ -8882,7 +8929,17 @@
     },
     {
       "from": "apps/storefront/components/ProductCard.tsx",
+      "to": "apps/storefront/components/ProductMediaIllustration.tsx",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/components/ProductCard.tsx",
       "to": "apps/storefront/lib/product.ts",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/components/ProductMediaIllustration.tsx",
+      "to": "packages/contracts/src/index.ts",
       "relation": "imports"
     },
     {
@@ -9047,7 +9104,7 @@
     "api-controller": 20,
     "api-service": 21,
     "test": 17,
-    "frontend": 121,
+    "frontend": 123,
     "contracts": 137,
     "database": 24,
     "domain-logic": 21,
@@ -9059,7 +9116,7 @@
     "Cart & Checkout (سبد خرید و تسویه)": 97,
     "Inventory & Ledger (انبارداری، رزرواسیون و لجر مالی)": 17,
     "Payments & Refund (درگاه پرداخت و استرداد)": 16,
-    "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)": 36,
+    "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)": 38,
     "CRM & Support (پشتیبانی و تیکتینگ)": 38,
     "Database & Schema (پایگاه داده و مدل‌ها)": 8,
     "B2C Storefront (فروشگاه B2C و تجربه کاربری)": 53,

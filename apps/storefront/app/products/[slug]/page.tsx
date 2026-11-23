@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import type { Product } from "@bc/contracts";
 import PriceTag from "../../../components/PriceTag";
 import SampleBadge from "../../../components/SampleBadge";
+import ProductMediaIllustration from "../../../components/ProductMediaIllustration";
 import VariantAddToCart, {
   type VariantOption,
 } from "../../../components/cart/VariantAddToCart";
@@ -93,38 +94,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="pdp-media-card">
           <div className="pdp-aura-bed" aria-hidden="true" />
           <div className="pdp-illustration">
-            <svg viewBox="0 0 240 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="pdp-bottle-svg" aria-label={product.nameFa}>
-              <defs>
-                <linearGradient id="pdp-glass" x1="10%" y1="10%" x2="90%" y2="90%">
-                  <stop offset="0%" stopColor="#fff8e7" />
-                  <stop offset="24%" stopColor="#f5d68d" />
-                  <stop offset="58%" stopColor="#dfa342" />
-                  <stop offset="86%" stopColor="#b6731e" />
-                  <stop offset="100%" stopColor="#f4d485" />
-                </linearGradient>
-                <linearGradient id="pdp-cap" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#7c571c" />
-                  <stop offset="30%" stopColor="#fae6ad" />
-                  <stop offset="60%" stopColor="#c6933c" />
-                  <stop offset="100%" stopColor="#875f21" />
-                </linearGradient>
-                <radialGradient id="pdp-glow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
-                  <stop offset="70%" stopColor="#f4cf82" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#b97214" stopOpacity="0" />
-                </radialGradient>
-              </defs>
-              <ellipse cx="120" cy="296" rx="64" ry="14" fill="rgba(45, 30, 15, 0.22)" />
-              {/* Dropper / Pump */}
-              <rect x="94" y="32" width="52" height="42" rx="6" fill="url(#pdp-cap)" />
-              <rect x="88" y="70" width="64" height="10" rx="3" fill="url(#pdp-cap)" />
-              {/* Bottle body */}
-              <rect x="62" y="80" width="116" height="206" rx="20" fill="url(#pdp-glass)" stroke="#fffaf0" strokeWidth="1.8" />
-              <ellipse cx="120" cy="180" rx="46" ry="68" fill="url(#pdp-glow)" />
-              <rect x="74" y="96" width="12" height="174" rx="6" fill="#ffffff" opacity="0.65" />
-              <text x="120" y="165" textAnchor="middle" fill="#5a3d13" fontFamily="Vazirmatn, sans-serif" fontSize="13" fontWeight="800">DERMAVIA</text>
-              <text x="120" y="184" textAnchor="middle" fill="#6d4f24" fontFamily="system-ui, sans-serif" fontSize="8" letterSpacing="1.5">ETHEREAL V6</text>
-            </svg>
+            <ProductMediaIllustration product={product} size="pdp" className="pdp-bottle-svg" />
           </div>
 
           <div className="pdp-quality-badges">

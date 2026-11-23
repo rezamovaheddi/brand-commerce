@@ -15,7 +15,7 @@ S-013,Contract tests,GAP-005,QA,P2,DONE,"14 contract tests validate schema bound
 S-014,Browser e2e suite (Playwright / Visual QA),GAP-008,QA,P2,DONE,"51 Visual QA browser test scenarios documented with screenshots in TEST_EVIDENCE_INDEX.md"
 S-015,Token parity checker,GAP-006,Frontend,P2,DONE,"106 DTCG tokens validated via validate_dtcg_tokens.py and contrast-check.mjs"
 S-016,Cart/checkout UI (sample-marked),GAP-011,Frontend,P2,DONE,"Cart, checkout, and sandbox payment flow active with honest sample badges per DEC-006"
-S-017,Structured logging,GAP-009,Backend,P2,TODO,"Structured logs with request ids"
+S-017,Structured logging,GAP-009,Backend,P2,DONE,"Structured HTTP logs with crypto UUID request ids and duration active"
 S-018,Secrets and env hardening,GAP-029,DevOps,P1,TODO,"Documented secret policy; no plaintext secrets in repo"
 S-019,Staging deploy environment,GAP-033,DevOps,P3,TODO,"Staging reachable with monitoring"
 S-020,Backup and restore drill,GAP-032,DevOps,P2,TODO,"First drill executed and documented"

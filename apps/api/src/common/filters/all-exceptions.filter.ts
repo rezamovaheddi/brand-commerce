@@ -6,7 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 
 /** Error body shape shared with the storefront via contracts ApiErrorSchema. */
 interface ErrorBody {
@@ -25,17 +25,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
+    const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
+    const requestId =
+      request?.headers?.['x-request-id'] ||
+      (request as unknown as { requestId?: string })?.requestId ||
+      'unknown';
 
     const body: ErrorBody =
       exception instanceof HttpException
-        ? this.fromHttpException(exception)
-        : this.fromUnknown(exception);
+        ? this.fromHttpException(exception, String(requestId))
+        : this.fromUnknown(exception, String(requestId));
 
     response.status(body.statusCode).json(body);
   }
 
-  private fromHttpException(exception: HttpException): ErrorBody {
+  private fromHttpException(
+    exception: HttpException,
+    requestId: string,
+  ): ErrorBody {
     const statusCode = exception.getStatus();
     const payload = exception.getResponse();
     let message: string | string[] = exception.message;
@@ -55,13 +63,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    this.logger.warn(`${statusCode} ${JSON.stringify(message)}`);
+    this.logger.warn(`[${requestId}] ${statusCode} ${JSON.stringify(message)}`);
     return { statusCode, message, error };
   }
 
-  private fromUnknown(exception: unknown): ErrorBody {
-    const error = exception instanceof Error ? exception : new Error(String(exception));
-    this.logger.error(error.message, error.stack);
+  private fromUnknown(exception: unknown, requestId: string): ErrorBody {
+    const error =
+      exception instanceof Error ? exception : new Error(String(exception));
+    this.logger.error(`[${requestId}] ${error.message}`, error.stack);
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'Internal server error',
