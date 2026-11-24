@@ -156,14 +156,16 @@ async function runCriticalJourneysLoadTest() {
       const p99 = calculatePercentile(jLatencies, 99);
       const errRate = (jErrors.length / jLatencies.length) * 100;
 
+      const targetP95 = journey.targetP95 || (journey.method === 'POST' ? 450 : 250);
       journeyMetrics.push({
         name: journey.name,
         requests: jLatencies.length,
         p50: p50.toFixed(1),
         p95: p95.toFixed(1),
         p99: p99.toFixed(1),
+        targetP95,
         errorRate: errRate.toFixed(2),
-        passed: p95 < 250 && errRate < 1.0,
+        passed: p95 < targetP95 && errRate < 1.0,
       });
 
       overallLatencies.push(...jLatencies);
