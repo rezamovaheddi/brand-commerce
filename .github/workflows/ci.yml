@@ -167,6 +167,9 @@ jobs:
       - name: Canonical 20-Risk Mitigation Audit (TASK-199 / GAP-031)
         run: npm run risks:verify
 
+      - name: Ecosystem Registry & 46-Skill Workforce Audit (TASK-179 / TASK-177)
+        run: npm run ecosystem:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -199,3 +202,4 @@ jobs:
             docs/evidence/INTEGRATION_ADAPTERS_REPORT.md
             docs/evidence/RISK_MITIGATION_REPORT.md
             docs/governance/RISK_REGISTER_AND_MITIGATION_DOSSIER.md
+            docs/evidence/ECOSYSTEM_AND_SKILLS_REPORT.md

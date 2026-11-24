@@ -2,13 +2,14 @@
 
 جمع‌بندی نهایی: **PRODUCTION & STAGING CERTIFIED (تأیید کامل صلاحیت تولید و استقرار با ۱۰۰٪ انطباق گیت‌ها)**  
 تاریخ آخرین اعتبارسنجی: **2026-11-24**  
-خط لوله ارزیابی کیفیت: **۳۹ گیت خودکار کانونیکال (`npm run verify` خروجی Exit 0)**  
+خط لوله ارزیابی کیفیت: **۴۰ گیت خودکار کانونیکال (`npm run verify` خروجی Exit 0)**  
 مخزن گیت‌هاب: [https://github.com/rezamovaheddi/brand-commerce](https://github.com/rezamovaheddi/brand-commerce) (CI خط لوله گیت‌هاب اکشنز ۱۰۰٪ سبز)  
 پرونده انطباق گیت‌های فاز: [PHASE_GATE_COMPLIANCE_DOSSIER.md](../governance/PHASE_GATE_COMPLIANCE_DOSSIER.md) (پوشش ۱۰۰٪ تمام ۱۹۸ تسک و ۹ فاز)  
 گزارش سوئیت رگرسیون پرریسک: [HIGH_RISK_REGRESSION_REPORT.md](../evidence/HIGH_RISK_REGRESSION_REPORT.md) (تأیید ۱۰۰٪ تمام ۴۰ سناریوی حیاتی در ۱۵ دامنه)  
 گزارش ارزیابی مهارت‌های عامل: [SKILL_EVALUATION_REPORT.md](../evidence/SKILL_EVALUATION_REPORT.md) (تأیید ۱۰۰٪ تمام ۶۰ سناریو در ۷ مهارت اصلی با نمره ۱۰/۱۰)  
 گزارش قراردادها و آداپتورهای یکپارچه‌سازی: [INTEGRATION_ADAPTERS_REPORT.md](../evidence/INTEGRATION_ADAPTERS_REPORT.md) (تأیید ۱۰۰٪ تمام ۷ آداپتور کانونیکال تامین‌کنندگان)  
-پرونده مهار ریسک‌های کانونیکال: [RISK_REGISTER_AND_MITIGATION_DOSSIER.md](../governance/RISK_REGISTER_AND_MITIGATION_DOSSIER.md) (تأیید ۱۰۰٪ مهار و ابطال تمام ۲۰ ریسک پروژه)
+پرونده مهار ریسک‌های کانونیکال: [RISK_REGISTER_AND_MITIGATION_DOSSIER.md](../governance/RISK_REGISTER_AND_MITIGATION_DOSSIER.md) (تأیید ۱۰۰٪ مهار و ابطال تمام ۲۰ ریسک پروژه)  
+گزارش حاکمیت اکوسیستم و مهارت‌های عامل: [ECOSYSTEM_AND_SKILLS_REPORT.md](../evidence/ECOSYSTEM_AND_SKILLS_REPORT.md) (تأیید ۱۰۰٪ تمام ۲۳ مخزن اکوسیستم و ۴۶ مهارت عامل)
 
 ---
 
@@ -53,6 +54,7 @@
 - **ارزیابی جامع مهارت‌های عامل (Agent Skill Evaluation):** ارزیابی ۶۰ سناریوی عملیاتی در ۷ مهارت محوری با میانگین نمره ۱۰/۱۰ و تأیید ۱۰۰٪ گاردریل‌های بحرانی چهارگانه
 - **قراردادها و آداپتورهای یکپارچه‌سازی (Provider Capability Contracts):** ۷ آداپتور کانونیکال تأییدشده شامل درگاه پرداخت سندباکس، لجستیک زنجیره سرد، پیام‌رسانی OTP، سامانه مؤدیان مالیاتی، صدور لجر سپیدار، قرنطینه فایل و احراز هویت شاهکار
 - **پرونده مهار ریسک‌های کانونیکال (Canonical Risk Mitigation):** اعتبارسنجی خودکار و مهار ۱۰۰٪ تمام ۲۰ ریسک پروژه (R-001 تا R-020) بر اساس استاندارد Source A در دامنه‌های کسب‌وکار، حقوقی، مالی، پرداخت، انبارداری، زنجیره تامین، امنیت و حریم خصوصی
+- **حاکمیت اکوسیستم و مهارت‌های عامل (Ecosystem & Agent Workforce):** ممیزی و صحه‌گذاری ۱۰۰٪ تمام ۲۳ مخزن فنی پایش‌شده (با پین دقیق هش و ممیزی عدم وجود کپی‌لفت بر اساس ADR-026 / DEC-012) و انطباق کامل هر ۴۶ مهارت عامل هوش مصنوعی با استانداردهای YAML فرانت‌متر، سقف ۵۰۰ خط و دایرکتوری‌های الزامی References و Evals
 
 ---
 
@@ -60,7 +62,7 @@
 
 - [x] ریپو پایدار و معماری Modular Monolith با ۴ پکیج استاندارد (`@bc/contracts`, `@bc/domain`, `@bc/api`, `@bc/storefront`)
 - [x] پایگاه داده فعال و مایگریشن‌های همگام با PostgreSQL 16
-- [x] خط فرمان یکپارچه ۳۹ گیت ارزیابی کیفیت (`npm run verify`) با خروجی Exit 0
+- [x] خط فرمان یکپارچه ۴۰ گیت ارزیابی کیفیت (`npm run verify`) با خروجی Exit 0
 - [x] کامپایل موفق تمام ۲۱ مسیر استورفرانت در Next.js 15 App Router
 - [x] کارگاه تعاملی کامپوننت‌ها (`/design-system/workshop`)، نگاشت Code Connect و ممیزی رگرسیون بصری ۴ برک‌پوینت
 - [x] چرخه ۶ مرحله‌ای حاکمیت ادعاهای علمی و فراخوان دارویی (`/admin/governance`)

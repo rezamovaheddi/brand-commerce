@@ -1,0 +1,47 @@
+﻿Skill,Purpose,Status
+accessibility-audit,"Audit WCAG 2.2 AA, keyboard, focus, contrast, touch target and reduced motion.",Included in bundle
+api-contract-review,"Review OpenAPI, schemas, error envelope, idempotency and backward compatibility.",Included in bundle
+architecture-review,"Enforce module boundaries, source-of-truth ownership, ADRs and trade-off records.",Included in bundle
+b2b-commerce-rfq,"Implement organization memberships, price lists, MOQ, credit, RFQ and immutable quotes.",Included in bundle
+b2c-commerce-flow,"Implement cart, checkout, payment, order lifecycle and returns.",Included in bundle
+brand-ux-design,Design Warm Clinical Luxury storefront and coherent B2B/backoffice experiences.,Included in bundle
+cms-editorial-workflow,"Build editorial CMS with review, approval, scheduled publish and versioning.",Included in bundle
+database-schema-review,"Review relational model, constraints, indexes, tenancy, migrations and data retention.",Included in bundle
+design-system-governance,"Maintain tokens, components, variants, responsive states and visual regression.",Included in bundle
+e2e-quality-gates,Create deterministic Playwright journeys with test data and evidence.,Included in bundle
+inventory-ledger-invariants,"Enforce lot, expiry, FEFO, reservations, movements and recall invariants.",Included in bundle
+license-supply-chain-audit,"Check repo/dependency licenses, SBOM, CVEs and third-party notices.",Included in bundle
+loyalty-referral-anti-fraud,"Implement append-only points, qualification, reversals, referral attribution and fraud holds.",Included in bundle
+nestjs-domain-module,Implement clean NestJS module boundaries and use cases.,Included in bundle
+nextjs-performance,"Audit Next.js rendering, cache boundaries, image, route and Core Web Vitals.",Included in bundle
+payment-webhook-security,"Implement provider-specific signature, raw body, replay protection and reconciliation.",Included in bundle
+postgres-data-integrity,"Enforce constraints, row locking, transaction isolation and restore checks.",Included in bundle
+project-planning,"Maintain dependency graph, owner, estimate, evidence and acceptance criteria.",Included in bundle
+release-readiness,"Assemble Go/No-Go evidence, migration, rollback, runbook and sign-offs.",Included in bundle
+repository-audit,Inspect a codebase without leaking secret values; produce factual inventory.,Included in bundle
+repository-deep-audit,"Evaluate code health, test quality, security, architecture and reuse decision.",Included in bundle
+safe-migration-planner,Plan expand/contract schema and application migration with rollback.,Included in bundle
+security-threat-model,"Threat model identities, payment, PII, file uploads, tenancy and supply chain.",Included in bundle
+product-information-management,"Design versioned PIM, SKU, INCI, market eligibility, labels and media.",Included in bundle
+cosmetic-claims-compliance,"Gate product claims by evidence, market, channel, approver and validity.",Included in bundle
+custom-manufacturing-rfq,"Manage RFQ, quote revisions, feasibility and OEM gates without premature promises.",Included in bundle
+market-localization-and-tax,"Implement per-market currency, tax, locale, legal and provider adapter boundaries.",Included in bundle
+finance-ledger-invariants,"Review money arithmetic, journal balance, reversal and reconciliation.",Included in bundle
+lot-traceability-and-recall,"Trace product lots through supplier, stock, shipment and customer recall.",Included in bundle
+privacy-and-consent,"Build consent, retention, data rights, restricted cases and marketing suppression.",Included in bundle
+brand-visual-qa,"Compare UI against moodboard tokens and protect contrast, imagery and typography.",Included in bundle
+identity-session-security,Identity/session lifecycle and auth integration,Included; owner=Security/Backend Engineer; ADR-009 and PoC-07
+composable-domain-architecture,"Enforce bounded contexts, ownership, contracts and evolutionary microservice extraction gates.",Preserved from v2.1; registry/evaluation structure normalized in v2.2; semantic approval pending
+language-toolchain-governance,"Maintain supported runtime/compiler versions, polyglot boundaries and reproducible toolchains.",Preserved from v2.1; registry/evaluation structure normalized in v2.2; semantic approval pending
+uiux-master-design,"Execute the Warm Clinical Luxury design brief across storefront, B2B and operational backoffice.",Preserved from v2.1; registry/evaluation structure normalized in v2.2; semantic approval pending
+design-handoff-quality,"Validate design tokens, component specifications, responsive states, accessibility and developer handoff.",Preserved from v2.1; registry/evaluation structure normalized in v2.2; semantic approval pending
+tdd-workflow,"Execute test-first implementation with red/green/refactor, focused assertions and regression protection.",Added in v2.2; structure validated; semantic approval pending
+systematic-debugging,"Reproduce, isolate, form hypotheses, instrument, identify root cause and verify a minimal fix.",Added in v2.2; structure validated; semantic approval pending
+agent-code-review,"Review a scoped diff for correctness, security, architecture, regression, observability and evidence.",Added in v2.2; structure validated; semantic approval pending
+architecture-fitness-enforcement,Translate domain ownership and dependency rules into automated checks and actionable CI failures.,Added in v2.2; structure validated; semantic approval pending
+design-token-engineering,"Govern DTCG tokens, semantic aliases, themes, exports and Figma-to-code parity.",Added in v2.2; structure validated; semantic approval pending
+figma-mcp-design-handoff,Use authorized Figma MCP context and Code Connect mappings to prepare traceable design-to-code handoff.,Added in v2.2; structure validated; semantic approval pending
+visual-regression-accessibility,"Combine visual screenshots, axe automation, RTL/LTR checks and manual accessibility evidence.",Added in v2.2; structure validated; semantic approval pending
+contract-test-governance,"Maintain OpenAPI/AsyncAPI contracts, compatibility policy, consumer-provider verification and schema evolution.",Added in v2.2; structure validated; semantic approval pending
+software-supply-chain-security,"Review third-party source, license, SBOM, vulnerabilities, provenance and dependency update risk.",Added in v2.2; structure validated; semantic approval pending
+skill-evaluation-governance,"Version, validate and evaluate agent skills using scenario fixtures, rubrics and regression baselines.",Added in v2.2; structure validated; semantic approval pending
