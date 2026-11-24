@@ -1,6 +1,10 @@
 /* DERMAVIA storefront — global styles: reset, base typography, utilities.
    All values come from styles/tokens.css (the --dv-* variables). */
 
+:root {
+  --font-vazir: 'Vazirmatn', Tahoma, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 /* ---------------------------------------------------------------- reset */
 *,
 *::before,
