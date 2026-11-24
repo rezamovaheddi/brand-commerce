@@ -173,6 +173,9 @@ jobs:
       - name: Canonical Enterprise RBAC & Security Permission Audit (TASK-033 / GAP-032 / TASK-200)
         run: npm run rbac:verify
 
+      - name: Canonical Data Privacy, Consent & Retention Audit (N20 / TASK-134 / TASK-136)
+        run: npm run privacy:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 

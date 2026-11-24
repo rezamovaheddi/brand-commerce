@@ -1,6 +1,6 @@
 # Comprehensive Capacity Benchmark & Scaling Report
 **Canonical Tracking:** `TASK-140` / `S-059` (`ENG-12` / `P8 Scale & Governance`)  
-**Generated At:** 2026-11-24T10:08:49.919Z  
+**Generated At:** 2026-11-24T10:20:59.310Z  
 **Status:** ALL GREEN / PASS  
 **Verification Target:** Core Monolith (Catalog, Search, Checkout, BullMQ Workers)  
 
@@ -31,8 +31,8 @@
 ## 3. Memory & Resource Leak Stability
 
 - **Initial Heap Used:** `4.76 MB`
-- **Post-Simulated 50,000 Ops Heap:** `10.12 MB`
-- **Net Delta:** `5.36 MB` (Strict threshold: $< 15.0\text{ MB}$)
+- **Post-Simulated 50,000 Ops Heap:** `9.97 MB`
+- **Net Delta:** `5.21 MB` (Strict threshold: $< 15.0\text{ MB}$)
 - **Leak Verdict:** **ZERO MEMORY LEAK DETECTED**
 
 ---

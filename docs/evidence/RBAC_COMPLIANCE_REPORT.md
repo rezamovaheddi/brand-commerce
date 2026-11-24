@@ -1,6 +1,6 @@
 # Canonical Enterprise RBAC & Policy Verification Report (TASK-033 / GAP-032 / TASK-200)
 
-**Generated:** 2026-11-24T10:08:56.474Z
+**Generated:** 2026-11-24T10:21:06.015Z
 **Status:** ALL CHECKS PASSED (100% COMPLIANT)
 **Reference:** `_sources/brand-platform/Brand-Commerce-Platform-v2.2.0/03-architecture/rbac-permission-matrix-fa.csv`
 
