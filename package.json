@@ -12,6 +12,7 @@
     "test": "npm run test -w @bc/contracts && npm run test -w @bc/domain && npm run test -w @bc/api && npm run test:e2e -w @bc/api",
     "lint": "eslint .",
     "tokens:validate": "python scripts/validate_dtcg_tokens.py",
+    "tokens:export": "node scripts/export-dtcg-tokens.mjs",
     "contrast:check": "node scripts/contrast-check.mjs",
     "security:audit": "node scripts/security-audit.mjs",
     "graph:generate": "python scripts/generate_brand_arch_graph.py",

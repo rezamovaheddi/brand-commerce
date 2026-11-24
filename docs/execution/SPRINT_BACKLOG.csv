@@ -35,3 +35,6 @@ S-033,Repository and skill registry,TASK-175,DevEx,P1,DONE,"docs/governance/REPO
 S-034,Build provenance and artifact attestation,TASK-192,DevSecOps,P7,DONE,"scripts/verify-provenance.mjs produces and verifies SHA-256 PROVENANCE_MANIFEST"
 S-035,Monorepo tooling benchmark & cache analysis,TASK-195,DevEx,P8,DONE,"scripts/monorepo-benchmark.mjs benchmarks build/test times; MONOREPO_BENCHMARK_REPORT.md"
 S-036,Skill evaluation harness and 60-scenario rubric,TASK-177,AI Engineering,P1,DONE,"docs/governance/SKILL_EVALUATION_HARNESS.md with 10-point scoring model and critical guardrails"
+S-037,DTCG token exporter & parity engine,TASK-186,Frontend,P2,DONE,"scripts/export-dtcg-tokens.mjs exports CSS/TS tokens with 0% drift; TOKEN_PARITY_REPORT.md"
+S-038,React Server Components & Vercel guidelines,TASK-178,Frontend,P1,DONE,"docs/governance/REACT_SERVER_COMPONENTS_GUIDELINES.md"
+S-039,Superpowers agent workflow protocols,TASK-179,AI Engineering,P1,DONE,"docs/governance/AGENT_WORKFLOW_PROTOCOLS.md"
