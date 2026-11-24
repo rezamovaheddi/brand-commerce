@@ -134,6 +134,12 @@ jobs:
       - name: OpenFeature Provider & Flag Governance (TASK-196)
         run: npm run flags:verify
 
+      - name: Incident Response Tabletop Drill (TASK-138)
+        run: npm run incident:tabletop
+
+      - name: Data Migration Rehearsal & Financial Reconciliation (TASK-104)
+        run: npm run migration:rehearse
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -153,3 +159,5 @@ jobs:
             docs/evidence/CAPACITY_BENCHMARK_REPORT.md
             docs/evidence/CLAIM_EXPIRY_REPORT.md
             docs/evidence/FEATURE_FLAG_POC_REPORT.md
+            docs/evidence/INCIDENT_TABLETOP_REPORT.md
+            docs/evidence/MIGRATION_REHEARSAL_REPORT.md

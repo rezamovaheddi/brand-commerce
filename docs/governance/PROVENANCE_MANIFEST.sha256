@@ -1,6 +1,6 @@
 # Brand Commerce Release Artifact Provenance Manifest
-# Commit: 3d1f689974f9f63971046e44c09d8bfda27eb4b9
-# Timestamp: 2026-11-24T07:45:12.582Z
+# Commit: 0a49769866c6ba1f1e963ef3a81bae44c306a7b1
+# Timestamp: 2026-11-24T07:54:07.070Z
 # Format: <sha256>  <relative_path>
 
 502bb59f2ccea7430e3ca610fff34b794a6b6174df74a5e26e3e1ab2791427c1  apps/api/openapi.json

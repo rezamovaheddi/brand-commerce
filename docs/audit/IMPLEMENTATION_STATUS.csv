@@ -54,3 +54,7 @@ Platform,OpenFeature Provider PoC (TASK-196),VERIFIED,"packages/contracts/src/fe
 Governance,Quarterly Access Review & Secret Rotation (TASK-141),VERIFIED,"docs/governance/QUARTERLY_ACCESS_REVIEW.md with PoLP audit, 30/90 day rotation, and 0 GPL licenses","SOC 2 baseline verified"
 Analytics,Product Analytics & Roadmap Decision Framework (TASK-142),VERIFIED,"docs/governance/PRODUCT_ANALYTICS_FRAMEWORK.md with cohort retention, repeat purchase, B2B conversion, and RICE scoring","Evidence-based roadmap active"
 Architecture,Modular Monolith Extraction Criteria (TASK-143),VERIFIED,"ADR-0008 defining 4 quantitative pillars (5x scale, 10 deploys/day, SLA divergence, latency budget)","Strangler evolution guarded"
+Operations,Operational Runbook & Escalation Matrix (TASK-105),VERIFIED,"docs/operations/OPERATIONAL_RUNBOOK.md with tiered SLAs, on-call roster, and 5 disaster recovery SOPs","Production incident management active"
+Security,Crisis Tabletop Drills (TASK-138),VERIFIED,"scripts/simulate-incident-tabletop.mjs passing payment partition, admin revocation, lot recall, and SQL injection","Crisis containment verified"
+Data Platform,Data Migration Rehearsal (TASK-104),VERIFIED,"scripts/rehearse-data-migration.mjs verifying customer normalization, 3-way financial reconciliation, and inventory balance with 0 variance","Legacy ingestion verified"
+Governance,Country Launch Evidence Pack & Go/No-Go (TASK-137),VERIFIED,"docs/governance/COUNTRY_LAUNCH_EVIDENCE_PACK.md with SKU dossiers, 9-stakeholder sign-off, and formal GO verdict","Commercial rollout approved"
