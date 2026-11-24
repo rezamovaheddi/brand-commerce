@@ -143,6 +143,12 @@ jobs:
       - name: Loyalty Points Ledger & Adverse Event Governance (TASK-092..098/133)
         run: npm run loyalty:verify
 
+      - name: ERP-lite Inventory & Accounting Governance (TASK-076..132)
+        run: npm run inventory:verify
+
+      - name: Automated 4-Persona User Acceptance Testing (TASK-101, 139)
+        run: npm run uat:personas
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -165,3 +171,5 @@ jobs:
             docs/evidence/INCIDENT_TABLETOP_REPORT.md
             docs/evidence/MIGRATION_REHEARSAL_REPORT.md
             docs/evidence/LOYALTY_GOVERNANCE_REPORT.md
+            docs/evidence/INVENTORY_GOVERNANCE_REPORT.md
+            docs/evidence/PERSONA_UAT_REPORT.md

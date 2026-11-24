@@ -1,6 +1,6 @@
 # OpenTelemetry Semantic Conventions & Observability Report (TASK-158)
 
-Generated at: 2026-11-24T08:02:36.164Z  
+Generated at: 2026-11-24T08:13:05.465Z  
 Governance Policy: `docs/governance/OPENTELEMETRY_SPEC.md`  
 Specification Standard: OpenTelemetry v1.28.0  
 Tracing Standard: W3C Trace Context Recommendation  
