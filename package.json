@@ -41,6 +41,9 @@
     "workflow:verify": "node scripts/verify-workflow-platform.mjs",
     "integration:real": "node scripts/run-real-service-integration.mjs",
     "content:verify": "node scripts/verify-content-governance.mjs",
+    "capacity:benchmark": "node scripts/capacity-benchmark.mjs",
+    "claim:enforce": "node scripts/enforce-claim-expiry.mjs",
+    "flags:verify": "node scripts/verify-feature-flags.mjs",
     "load:k6": "node scripts/run-k6-load-tests.mjs",
     "asyncapi:validate": "node scripts/validate-asyncapi.mjs",
     "openapi:lint": "node scripts/lint-openapi.mjs",
@@ -48,7 +51,7 @@
     "metrics:agent": "node scripts/agent-quality-metrics.mjs",
     "provenance:verify": "node scripts/verify-provenance.mjs --check",
     "benchmark:monorepo": "node scripts/monorepo-benchmark.mjs",
-    "verify": "npm run lint && npm run tokens:validate && npm run contrast:check && npm run a11y:audit && npm run arch:fitness && npm run arch:boundaries && npm run pact:verify && npm run figma:verify && npm run polyglot:verify && npm run strangler:simulate && npm run telemetry:verify && npm run budget:check && npm run workflow:verify && npm run content:verify && npm run security:audit && npm run license:audit && npm run asyncapi:validate && npm run openapi:lint && npm run visual:audit && npm run metrics:agent && npm run build && npm run test && npm run integration:real && npm run load:k6 && npm run provenance:verify"
+    "verify": "npm run lint && npm run tokens:validate && npm run contrast:check && npm run a11y:audit && npm run arch:fitness && npm run arch:boundaries && npm run pact:verify && npm run figma:verify && npm run polyglot:verify && npm run strangler:simulate && npm run telemetry:verify && npm run budget:check && npm run workflow:verify && npm run content:verify && npm run capacity:benchmark && npm run claim:enforce && npm run flags:verify && npm run security:audit && npm run license:audit && npm run asyncapi:validate && npm run openapi:lint && npm run visual:audit && npm run metrics:agent && npm run build && npm run test && npm run integration:real && npm run load:k6 && npm run provenance:verify"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -125,6 +125,15 @@ jobs:
       - name: Critical Journey Load Tests (TASK-193)
         run: npm run load:k6
 
+      - name: Capacity Benchmark & Workload Verification (TASK-140)
+        run: npm run capacity:benchmark
+
+      - name: Regulatory Claim Expiry & Market Rules (TASK-144)
+        run: npm run claim:enforce
+
+      - name: OpenFeature Provider & Flag Governance (TASK-196)
+        run: npm run flags:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -141,3 +150,6 @@ jobs:
             apps/api/openapi.json
             docs/governance/SBOM.cdx.json
             docs/governance/PROVENANCE_MANIFEST.sha256
+            docs/evidence/CAPACITY_BENCHMARK_REPORT.md
+            docs/evidence/CLAIM_EXPIRY_REPORT.md
+            docs/evidence/FEATURE_FLAG_POC_REPORT.md
