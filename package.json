@@ -31,9 +31,13 @@
     "load:test": "node scripts/load-test.mjs",
     "a11y:audit": "node scripts/accessibility-audit.mjs",
     "arch:fitness": "node scripts/architecture-fitness.mjs",
+    "asyncapi:validate": "node scripts/validate-asyncapi.mjs",
+    "openapi:lint": "node scripts/lint-openapi.mjs",
+    "visual:audit": "node scripts/visual-regression-audit.mjs",
+    "metrics:agent": "node scripts/agent-quality-metrics.mjs",
     "provenance:verify": "node scripts/verify-provenance.mjs --check",
     "benchmark:monorepo": "node scripts/monorepo-benchmark.mjs",
-    "verify": "npm run lint && npm run tokens:validate && npm run contrast:check && npm run a11y:audit && npm run arch:fitness && npm run security:audit && npm run license:audit && npm run build && npm run test && npm run provenance:verify"
+    "verify": "npm run lint && npm run tokens:validate && npm run contrast:check && npm run a11y:audit && npm run arch:fitness && npm run security:audit && npm run license:audit && npm run asyncapi:validate && npm run openapi:lint && npm run visual:audit && npm run metrics:agent && npm run build && npm run test && npm run provenance:verify"
   },
   "engines": {
     "node": ">=20.0.0"

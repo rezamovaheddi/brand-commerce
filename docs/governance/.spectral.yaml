@@ -1,0 +1,60 @@
+# Spectral Ruleset for Brand Commerce OpenAPI Specification (TASK-182)
+# Strictly validates OpenAPI 3.0/3.1 contracts against naming, descriptions, tags, and standard errors.
+
+extends:
+  - "spectral:oas"
+
+rules:
+  operation-description:
+    description: "Every operation must have a non-empty description explaining business behavior."
+    severity: error
+    recommended: true
+    given: "$.paths.*[get,post,put,delete,patch]"
+    then:
+      field: description
+      function: truthy
+
+  operation-operationId:
+    description: "Every operation must define a unique operationId for client SDK generation."
+    severity: error
+    recommended: true
+    given: "$.paths.*[get,post,put,delete,patch]"
+    then:
+      field: operationId
+      function: truthy
+
+  operation-tags:
+    description: "Every operation must be categorized under at least one domain tag."
+    severity: error
+    recommended: true
+    given: "$.paths.*[get,post,put,delete,patch]"
+    then:
+      field: tags
+      function: truthy
+
+  oas3-api-servers:
+    description: "OpenAPI document must specify at least one valid server target."
+    severity: error
+    recommended: true
+    given: "$"
+    then:
+      field: servers
+      function: truthy
+
+  path-kebab-case:
+    description: "All URL path segments must adhere to lowercase kebab-case naming standard."
+    severity: error
+    recommended: true
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(\\/[a-z0-9]+(-[a-z0-9]+)*|\\/{[a-zA-Z0-9_-]+})+$"
+
+  standard-error-responses:
+    description: "Endpoints must define standard HTTP status responses (2xx success, 4xx/5xx errors)."
+    severity: warn
+    recommended: true
+    given: "$.paths.*[get,post,put,delete,patch].responses"
+    then:
+      function: truthy

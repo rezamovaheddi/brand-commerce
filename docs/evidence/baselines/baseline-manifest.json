@@ -1,0 +1,58 @@
+{
+  "version": "2.2.0",
+  "designOwner": "Lead Product Designer & Visual QA",
+  "verifiedAt": "2026-11-24T06:27:12.486Z",
+  "breakpoints": [
+    {
+      "name": "Mobile Small",
+      "width": 390,
+      "minTouchTarget": 44,
+      "layout": "single-column"
+    },
+    {
+      "name": "Tablet Portrait",
+      "width": 768,
+      "minTouchTarget": 44,
+      "layout": "two-column"
+    },
+    {
+      "name": "Desktop Standard",
+      "width": 1280,
+      "minTouchTarget": 44,
+      "layout": "multi-column"
+    },
+    {
+      "name": "Wide Screen",
+      "width": 1440,
+      "minTouchTarget": 44,
+      "layout": "contained-center"
+    }
+  ],
+  "approvedViews": [
+    {
+      "view": "Storefront Home Hero",
+      "route": "/",
+      "status": "APPROVED"
+    },
+    {
+      "view": "Product Details & Sample Badge",
+      "route": "/products/sample-product",
+      "status": "APPROVED"
+    },
+    {
+      "view": "B2B Wholesale Portal",
+      "route": "/b2b/portal",
+      "status": "APPROVED"
+    },
+    {
+      "view": "Component Workshop",
+      "route": "/design-system/workshop",
+      "status": "APPROVED"
+    },
+    {
+      "view": "Cart & Checkout Flow",
+      "route": "/checkout",
+      "status": "APPROVED"
+    }
+  ]
+}

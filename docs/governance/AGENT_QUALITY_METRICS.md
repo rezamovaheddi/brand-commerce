@@ -1,42 +1,59 @@
-# سنجه‌های کیفیت مهندسی و ارزیابی عامل (Agent Quality & Engineering Metrics) — TASK-198
+# Agent Quality & Engineering Metrics Governance (TASK-198)
 
-تاریخ به‌روزرسانی: **2026-11-24**  
-شاخه فعال: \`main\`  
-محیط CI: **GitHub Actions Workflow (\`rezamovaheddi/brand-commerce\`)**  
-
----
-
-## ۱. پیشرفت سنجه‌های آزمون خودکار (Automated Test Growth)
-
-| مرحله اجرایی | تعداد تست‌ها | سوئیت‌ها | نرخ موفقیت | نرخ رگرسیون |
-|---|---:|---:|---:|---:|
-| **Baseline (P0/P1)** | ۱۴ | ۱ | ۱۰۰٪ | ۰٪ |
-| **Foundation & Pure Domain** | ۳۸ | ۲ | ۱۰۰٪ | ۰٪ |
-| **API Core & Unit Tests** | ۲۰ | ۲ | ۱۰۰٪ | ۰٪ |
-| **Database Integration & E2E (P2..P6)** | ۱۲۳ | ۱۲ | ۱۰۰٪ | ۰٪ |
-| **Customer Portal & Observability** | ۱۹۵ | ۱۷ | ۱۰۰٪ | ۰٪ |
-| **Features, OpenFeature & A11y Gate (v2.2)** | **۲۰۴** | **۱۸** | **۱۰۰٪** | **۰٪** |
+Last Updated: 2026-11-24  
+Status: CANONICAL  
+Target Phase: P8 Scale & Governance (ENG-06, ENG-12)  
+Applicability: All Autonomous Agents, Skills, Subagents, and CI Automated Workflows
 
 ---
 
-## ۲. گیت‌های کیفی هشت‌گانه خط لوله یکپارچه (\`npm run verify\`)
-
-کلیه گیت‌های زیر پیش از هر کامیت و در محیط GitHub Actions اجرا و تایید می‌شوند:
-
-1. **Code Quality & Linting (\`npm run lint\`):** صفر خطای ESLint در سراسر مونوریپو.
-2. **DTCG Design Tokens (\`npm run tokens:validate\`):** اعتبارسنجی ۱۰۶ توکن دیزاین سیستم کانونیکال بر اساس استاندارد DTCG 2025.10.
-3. **WCAG 2.1 Contrast Gate (\`npm run contrast:check\`):** ۱۷/۱۷ آزمون کنتراست رنگ AA و AAA پاس شده.
-4. **Automated Accessibility Audit (\`npm run a11y:audit\`):** اسکن کامل ۴۲ کامپوننت فرانت‌اند برای جهت‌گیری راست‌به‌چپ، برچسب‌های فیلدها و ابعاد لمسی ۴۴ پیکسلی.
-5. **ASVS 5.0 Security Audit (\`npm run security:audit\`):** اسکن ۱۱۹ فایل کد؛ صفر نشت رمز یا کلید، صفر تزریق SQL، رعایت سخت‌گیرانه مقادیر صحیح ارزی بدون اعشار.
-6. **Supply Chain License Audit (\`npm run license:audit\`):** ارزیابی ۲۱۶ وابستگی زمان اجرای پروداکشن و تضمین عدم وجود لایسنس‌های کپی‌لفت ویروسی (GPL/AGPL).
-7. **Monorepo Build (\`npm run build\`):** کامپایل تمیز و بدون خطای تایپ‌اسکریپت در هر ۴ فضای کاری (\`contracts\`، \`domain\`، \`api\`، \`storefront\`).
-8. **Automated Test Suite (\`npm run test\`):** اجرای بدون نقص تمامی ۲۰۴ آزمون واحد، قرارداد، دامین و E2E یکپارچه با پایگاه داده.
+## 1. Principles of Agent Quality
+1. **Quality Over Velocity:** Output speed alone is never a metric of engineering quality. High token generation rates with regressions or unverified assumptions violate engineering standards.
+2. **Explicit Denominators:** Every KPI must be computed with a rigorous, measurable denominator, sample size, and observation period.
+3. **Evidence-Based Acceptance:** A task is only considered accepted when passing the multi-gate verification suite (`npm run verify`), verified by human review, and confirmed green in CI.
+4. **Zero Float Financial Invariant:** No autonomous agent or skill is permitted to generate or merge floating-point currency calculations.
 
 ---
 
-## ۳. سنجه‌های کارایی و پایداری بار (Performance & Load SLA)
+## 2. Core Engineering KPI Framework
 
-طبق گزارش \`docs/evidence/LOAD_TEST_REPORT.md\`:
-- **Throughput:** ~۱۴۰ درخواست در ثانیه روی سخت‌افزار استاندارد.
-- **p95 Latency:** کمتر از ۸۰ میلی‌ثانیه (آستانه مجاز SLA: ۲۵۰ میلی‌ثانیه).
-- **Error Rate:** ۰.۰۰٪ تحت بار هم‌زمان ۲۰ کاربر هم‌زمان.
+| KPI ID | Metric Name | Target SLA | Minimum Acceptable | Measurement Method & Denominator |
+|---|---|---|---|---|
+| **KPI-01** | **PR / Task Acceptance Rate** | \(\ge 98\%\) | \(95\%\) | Accepted tasks / Total tasks submitted to verification |
+| **KPI-02** | **Regression & Rollback Rate** | \(0.00\%\) | \(\le 1.0\%\) | Rolled-back commits / Total merged commits |
+| **KPI-03** | **CI First-Pass Rate** | \(\ge 95\%\) | \(90\%\) | Successful CI workflow runs / Total CI workflow runs |
+| **KPI-04** | **Architecture Fitness Score** | \(100\%\) | \(100\%\) | Passing architectural rules / Total rules (5 rules) |
+| **KPI-05** | **Test Pass Rate & Regressions** | \(100\%\) | \(100\%\) | Passing automated test cases / Total test cases |
+| **KPI-06** | **Supply Chain Security & License** | \(0\) violations | \(0\) violations | Viral copyleft packages / Total scanned dependencies (216 deps) |
+| **KPI-07** | **A11Y & Contrast Compliance** | \(100\%\) | \(100\%\) | WCAG 2.1 AA/AAA passing checks / Total checks (17 checks) |
+| **KPI-08** | **Release Artifact Provenance** | \(100\%\) | \(100\%\) | Verified SHA-256 digests / Total release artifacts (5 artifacts) |
+
+---
+
+## 3. Human Review & Quality Gates
+- **Gate 1: Pre-Commit Automated Verification:**
+  - ESLint (`npm run lint`)
+  - DTCG Token Parity (`npm run tokens:validate`)
+  - WCAG Contrast Check (`npm run contrast:check`)
+  - Accessibility Audit (`npm run a11y:audit`)
+  - Architecture Fitness (`npm run arch:fitness`)
+  - Security Secret Scanner (`npm run security:audit`)
+  - License Compliance (`npm run license:audit`)
+  - AsyncAPI Contract Validation (`npm run asyncapi:validate`)
+  - OpenAPI Spectral Linter (`npm run openapi:lint`)
+  - Visual Regression Audit (`npm run visual:audit`)
+  - Multi-Workspace Build (`npm run build`)
+  - Automated Tests (`npm run test`)
+  - Provenance Verification (`npm run provenance:verify`)
+- **Gate 2: Remote CI GitHub Actions:**
+  - Clean containerized Linux execution against live PostgreSQL container.
+  - Smoke tests on API endpoints (`GET /api/v1/health`, `GET /api/v1/products`).
+- **Gate 3: Visual & Human QA Signoff:**
+  - Browser subagent visual inspection with screenshot artifacts.
+  - Review of Persian typography kerning and mobile responsive touch targets.
+
+---
+
+## 4. Cost and Efficiency Tracking
+- **Token Efficiency:** Context window compaction protocol (`/compact`) triggered when history exceeds 40 turns.
+- **Cache Hit Ratio:** Workspace dependency cache and Next.js compiler cache monitored to minimize remote runner build times (\(< 90\,\text{s}\) target).

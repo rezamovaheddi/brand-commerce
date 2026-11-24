@@ -38,3 +38,8 @@ S-036,Skill evaluation harness and 60-scenario rubric,TASK-177,AI Engineering,P1
 S-037,DTCG token exporter & parity engine,TASK-186,Frontend,P2,DONE,"scripts/export-dtcg-tokens.mjs exports CSS/TS tokens with 0% drift; TOKEN_PARITY_REPORT.md"
 S-038,React Server Components & Vercel guidelines,TASK-178,Frontend,P1,DONE,"docs/governance/REACT_SERVER_COMPONENTS_GUIDELINES.md"
 S-039,Superpowers agent workflow protocols,TASK-179,AI Engineering,P1,DONE,"docs/governance/AGENT_WORKFLOW_PROTOCOLS.md"
+S-040,AsyncAPI 3.1 Event Contract & Domain Schemas,TASK-181,Architecture,P1,DONE,"docs/governance/asyncapi.yaml, packages/contracts/src/events.ts, scripts/validate-asyncapi.mjs"
+S-041,OpenAPI Spectral Lint Governance Suite,TASK-182,Backend,P1,DONE,"docs/governance/.spectral.yaml, scripts/lint-openapi.mjs passing 69 operations"
+S-042,Component Workshop & Story Inventory,TASK-187,Frontend,P2,DONE,"apps/storefront/app/design-system/workshop/page.tsx, docs/evidence/STORYBOOK_INVENTORY.md"
+S-043,Visual Regression Pipeline & Baseline Snapshot Harness,TASK-189,QA,P2,DONE,"scripts/visual-regression-audit.mjs passing 4 breakpoints; VISUAL_REGRESSION_REPORT.md"
+S-044,Agent Quality & Engineering Metrics Dashboard,TASK-198,DevOps,P8,DONE,"docs/governance/AGENT_QUALITY_METRICS.md, scripts/agent-quality-metrics.mjs; AGENT_METRICS_REPORT.md"
