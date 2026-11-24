@@ -76,6 +76,9 @@ jobs:
       - name: Workflow Platform Saga Verification (TASK-151)
         run: npm run workflow:verify
 
+      - name: PIM Regulatory Content Governance (TASK-113)
+        run: npm run content:verify
+
       - name: AsyncAPI 3.1 Schema Validation (TASK-181)
         run: npm run asyncapi:validate
 
@@ -118,6 +121,9 @@ jobs:
           sleep 5
           curl -sf http://localhost:3001/api/v1/health | tee /dev/stderr | grep -q '"status":"ok"'
           curl -sf "http://localhost:3001/api/v1/products?limit=3" | grep -q '"totalPages"'
+
+      - name: Critical Journey Load Tests (TASK-193)
+        run: npm run load:k6
 
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export

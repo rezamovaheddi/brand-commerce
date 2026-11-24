@@ -1,6 +1,6 @@
 # Microservice Strangler Extraction Simulation Report (TASK-152)
 
-Generated at: 2026-11-24T07:00:23.838Z  
+Generated at: 2026-11-24T07:17:54.587Z  
 Target Candidate: `Notification & SMS Dispatcher Service` (Risk Tier: Low)  
 Governance Standard: `docs/governance/STRANGLER_EXTRACTION_SIMULATION.md`  
 
