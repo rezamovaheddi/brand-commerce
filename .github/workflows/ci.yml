@@ -158,6 +158,9 @@ jobs:
       - name: Canonical 40-Scenario High-Risk Regression Suite (QA-004 / TASK-189)
         run: npm run regression:verify
 
+      - name: Agent Skill Evaluation & 60-Scenario Rubric Audit (TASK-177)
+        run: npm run skills:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -186,3 +189,4 @@ jobs:
             docs/evidence/MONOREPO_BENCHMARK_REPORT.md
             docs/governance/PHASE_GATE_COMPLIANCE_DOSSIER.md
             docs/evidence/HIGH_RISK_REGRESSION_REPORT.md
+            docs/evidence/SKILL_EVALUATION_REPORT.md
