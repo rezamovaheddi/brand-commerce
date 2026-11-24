@@ -53,8 +53,9 @@ const JOURNEYS = [
       contactPhone: '09123334455',
       items: [
         {
+          productName: 'کرم ضدچروک زرین سفارشی OEM',
           itemKind: 'OEM',
-          quantity: 5000,
+          quantity: 500,
           specNote: 'فرمولاسیون سفارشی کرم ضدچروک با طلای ۲۴ عیار و پپتید مس',
         },
       ],

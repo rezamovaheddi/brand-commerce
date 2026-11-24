@@ -1,6 +1,6 @@
 # گزارش آزمون بار سناریوهای حیاتی و مدل کارایی k6 (TASK-193 / ENG-12)
 
-تاریخ ارزیابی: 2026-11-24T07:26:44.061Z  
+تاریخ ارزیابی: 2026-11-24T07:30:05.416Z  
 ابزار شبیه‌سازی: **k6 Performance Suite & Concurrent Worker Harness**  
 وضعیت کلی: **ALL SLO THRESHOLDS PASSED (100% GREEN)**  
 اسکریپت k6 مرجع: [tests/k6/critical-journeys.js](../../tests/k6/critical-journeys.js)
@@ -11,9 +11,9 @@
 
 | شاخص عملکردی | حد نصاب هدف (SLO Target) | نتیجه به‌دست‌آمده | وضعیت |
 |---|---|---|---|
-| **تاخیر p50 (میانه زمان پاسخ)** | < 80 ms | **24.0 ms** | **PASSED** |
-| **تاخیر p95 (صدک ۹۵)** | < 250 ms | **35.6 ms** | **PASSED** |
-| **تاخیر p99 (صدک ۹۹)** | < 450 ms | **36.8 ms** | **PASSED** |
+| **تاخیر p50 (میانه زمان پاسخ)** | < 80 ms | **26.3 ms** | **PASSED** |
+| **تاخیر p95 (صدک ۹۵)** | < 250 ms | **35.7 ms** | **PASSED** |
+| **تاخیر p99 (صدک ۹۹)** | < 450 ms | **36.6 ms** | **PASSED** |
 | **نرخ خطا (Error Rate)** | < 0.50% | **0.00%** | **PASSED** |
 | **توان عملیاتی (Throughput)** | > 100 req/s | **160.0 req/s** | **PASSED** |
 
@@ -23,11 +23,11 @@
 
 | سناریوی حیاتی (Critical Journey) | حجم درخواست | تاخیر p50 | تاخیر p95 | تاخیر p99 | نرخ خطا | وضعیت گیت |
 |---|---|---|---|---|---|---|
-| **Catalog Search & Pagination** | 40 | 21.2 ms | 36.0 ms | 36.8 ms | 0.00% | **PASSED** |
-| **Cart Query & Totalization** | 40 | 22.6 ms | 35.6 ms | 36.8 ms | 0.00% | **PASSED** |
-| **B2B Wholesale Org Lookup** | 40 | 24.2 ms | 35.5 ms | 35.7 ms | 0.00% | **PASSED** |
-| **B2B RFQ Formulation Submission** | 40 | 24.4 ms | 35.4 ms | 36.6 ms | 0.00% | **PASSED** |
-| **High-Concurrency Health Probe** | 40 | 25.5 ms | 34.9 ms | 36.2 ms | 0.00% | **PASSED** |
+| **Catalog Search & Pagination** | 40 | 26.9 ms | 35.9 ms | 36.7 ms | 0.00% | **PASSED** |
+| **Cart Query & Totalization** | 40 | 27.2 ms | 35.5 ms | 37.0 ms | 0.00% | **PASSED** |
+| **B2B Wholesale Org Lookup** | 40 | 23.6 ms | 35.1 ms | 35.9 ms | 0.00% | **PASSED** |
+| **B2B RFQ Formulation Submission** | 40 | 24.4 ms | 33.9 ms | 35.9 ms | 0.00% | **PASSED** |
+| **High-Concurrency Health Probe** | 40 | 28.3 ms | 35.7 ms | 36.6 ms | 0.00% | **PASSED** |
 
 ---
 
