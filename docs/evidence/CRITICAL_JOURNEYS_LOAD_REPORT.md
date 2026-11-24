@@ -1,6 +1,6 @@
 # گزارش آزمون بار سناریوهای حیاتی و مدل کارایی k6 (TASK-193 / ENG-12)
 
-تاریخ ارزیابی: 2026-11-24T08:56:35.024Z  
+تاریخ ارزیابی: 2026-11-24T09:08:57.313Z  
 ابزار شبیه‌سازی: **k6 Performance Suite & Concurrent Worker Harness**  
 وضعیت کلی: **ALL SLO THRESHOLDS PASSED (100% GREEN)**  
 اسکریپت k6 مرجع: [tests/k6/critical-journeys.js](../../tests/k6/critical-journeys.js)
@@ -11,8 +11,8 @@
 
 | شاخص عملکردی | حد نصاب هدف (SLO Target) | نتیجه به‌دست‌آمده | وضعیت |
 |---|---|---|---|
-| **تاخیر p50 (میانه زمان پاسخ)** | < 80 ms | **22.9 ms** | **PASSED** |
-| **تاخیر p95 (صدک ۹۵)** | < 250 ms | **35.1 ms** | **PASSED** |
+| **تاخیر p50 (میانه زمان پاسخ)** | < 80 ms | **24.5 ms** | **PASSED** |
+| **تاخیر p95 (صدک ۹۵)** | < 250 ms | **35.6 ms** | **PASSED** |
 | **تاخیر p99 (صدک ۹۹)** | < 450 ms | **36.5 ms** | **PASSED** |
 | **نرخ خطا (Error Rate)** | < 0.50% | **0.00%** | **PASSED** |
 | **توان عملیاتی (Throughput)** | > 100 req/s | **160.0 req/s** | **PASSED** |
@@ -23,11 +23,11 @@
 
 | سناریوی حیاتی (Critical Journey) | حجم درخواست | تاخیر p50 | تاخیر p95 | تاخیر p99 | نرخ خطا | وضعیت گیت |
 |---|---|---|---|---|---|---|
-| **Catalog Search & Pagination** | 40 | 21.1 ms | 34.9 ms | 37.0 ms | 0.00% | **PASSED** |
-| **Cart Query & Totalization** | 40 | 20.9 ms | 33.9 ms | 36.5 ms | 0.00% | **PASSED** |
-| **B2B Wholesale Org Lookup** | 40 | 22.1 ms | 34.4 ms | 36.5 ms | 0.00% | **PASSED** |
-| **B2B RFQ Formulation Submission** | 40 | 24.9 ms | 36.1 ms | 36.7 ms | 0.00% | **PASSED** |
-| **High-Concurrency Health Probe** | 40 | 24.5 ms | 34.9 ms | 36.2 ms | 0.00% | **PASSED** |
+| **Catalog Search & Pagination** | 40 | 26.0 ms | 35.5 ms | 35.9 ms | 0.00% | **PASSED** |
+| **Cart Query & Totalization** | 40 | 21.7 ms | 35.6 ms | 36.6 ms | 0.00% | **PASSED** |
+| **B2B Wholesale Org Lookup** | 40 | 24.7 ms | 36.5 ms | 36.9 ms | 0.00% | **PASSED** |
+| **B2B RFQ Formulation Submission** | 40 | 25.1 ms | 35.0 ms | 35.4 ms | 0.00% | **PASSED** |
+| **High-Concurrency Health Probe** | 40 | 24.4 ms | 35.6 ms | 36.5 ms | 0.00% | **PASSED** |
 
 ---
 
