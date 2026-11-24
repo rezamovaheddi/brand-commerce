@@ -1,6 +1,6 @@
 # گزارش ارزیابی پلتفرم گردش کار و الگوی ساگا (TASK-151 / AR-07)
 
-تاریخ اجرا: 2026-11-24T09:57:34.796Z  
+تاریخ اجرا: 2026-11-24T10:08:48.969Z  
 وضعیت ارزیابی: **ALL PASSED (100% SUCCESS)**  
 سند معماری مرتبط: [ADR-0007-workflow-orchestration-platform.md](../adr/ADR-0007-workflow-orchestration-platform.md)
 
