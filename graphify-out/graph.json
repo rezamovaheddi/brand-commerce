@@ -751,6 +751,68 @@
       "rdeps": []
     },
     {
+      "id": "apps/api/src/modules/features/features.controller.ts",
+      "label": "features.controller.ts",
+      "source_file": "apps/api/src/modules/features/features.controller.ts",
+      "layer": "api-controller",
+      "domain": "Core Platform (هسته پلتفرم)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [
+        "packages/domain/src/index.ts"
+      ],
+      "rdeps": [
+        "apps/api/src/modules/features/features.controller.ts#FeaturesController"
+      ]
+    },
+    {
+      "id": "apps/api/src/modules/features/features.controller.ts#FeaturesController",
+      "label": "FeaturesController",
+      "source_file": "apps/api/src/modules/features/features.controller.ts",
+      "layer": "api-controller",
+      "domain": "Core Platform (هسته پلتفرم)",
+      "kind": "class",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/api/src/modules/features/features.controller.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "apps/api/src/modules/features/features.module.ts",
+      "label": "features.module.ts",
+      "source_file": "apps/api/src/modules/features/features.module.ts",
+      "layer": "api-module",
+      "domain": "Core Platform (هسته پلتفرم)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [],
+      "rdeps": [
+        "apps/api/src/modules/features/features.module.ts#FeaturesModule"
+      ]
+    },
+    {
+      "id": "apps/api/src/modules/features/features.module.ts#FeaturesModule",
+      "label": "FeaturesModule",
+      "source_file": "apps/api/src/modules/features/features.module.ts",
+      "layer": "api-module",
+      "domain": "Core Platform (هسته پلتفرم)",
+      "kind": "class",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "apps/api/src/modules/features/features.module.ts"
+      ],
+      "rdeps": []
+    },
+    {
       "id": "apps/api/src/modules/health/health.controller.ts",
       "label": "health.controller.ts",
       "source_file": "apps/api/src/modules/health/health.controller.ts",
@@ -1636,6 +1698,19 @@
       "rdeps": []
     },
     {
+      "id": "apps/api/test/features.e2e-spec.ts",
+      "label": "features.e2e-spec.ts",
+      "source_file": "apps/api/test/features.e2e-spec.ts",
+      "layer": "test",
+      "domain": "Core Platform (هسته پلتفرم)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [],
+      "rdeps": []
+    },
+    {
       "id": "apps/api/test/orders.e2e-spec.ts",
       "label": "orders.e2e-spec.ts",
       "source_file": "apps/api/test/orders.e2e-spec.ts",
@@ -1858,28 +1933,12 @@
       "is_symbol": false,
       "external": false,
       "deps": [
-        "apps/storefront/components/CategoryGrid.tsx",
-        "apps/storefront/components/DermaClubBanner.tsx",
+        "apps/storefront/components/BookCatalog.tsx",
         "apps/storefront/components/HomeHero.tsx",
-        "apps/storefront/components/SpecialOffers.tsx",
-        "apps/storefront/components/WhyDermatologists.tsx"
-      ],
-      "rdeps": [
-        "apps/storefront/app/page.tsx#HomePage"
-      ]
-    },
-    {
-      "id": "apps/storefront/app/page.tsx#HomePage",
-      "label": "HomePage",
-      "source_file": "apps/storefront/app/page.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "function",
-      "language": "TypeScript",
-      "is_symbol": true,
-      "external": false,
-      "deps": [
-        "apps/storefront/app/page.tsx"
+        "apps/storefront/components/ProductCard.tsx",
+        "apps/storefront/lib/api.ts",
+        "apps/storefront/lib/format.ts",
+        "packages/contracts/src/index.ts"
       ],
       "rdeps": []
     },
@@ -2500,6 +2559,7 @@
         "apps/storefront/lib/format.ts"
       ],
       "rdeps": [
+        "apps/storefront/app/page.tsx",
         "apps/storefront/components/BookCatalog.tsx#BookCatalog"
       ]
     },
@@ -2553,37 +2613,6 @@
       "rdeps": []
     },
     {
-      "id": "apps/storefront/components/CategoryGrid.tsx",
-      "label": "CategoryGrid.tsx",
-      "source_file": "apps/storefront/components/CategoryGrid.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "file",
-      "language": "TypeScript",
-      "is_symbol": false,
-      "external": false,
-      "deps": [],
-      "rdeps": [
-        "apps/storefront/app/page.tsx",
-        "apps/storefront/components/CategoryGrid.tsx#CategoryGrid"
-      ]
-    },
-    {
-      "id": "apps/storefront/components/CategoryGrid.tsx#CategoryGrid",
-      "label": "CategoryGrid",
-      "source_file": "apps/storefront/components/CategoryGrid.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "function",
-      "language": "TypeScript",
-      "is_symbol": true,
-      "external": false,
-      "deps": [
-        "apps/storefront/components/CategoryGrid.tsx"
-      ],
-      "rdeps": []
-    },
-    {
       "id": "apps/storefront/components/CreamCanopy.tsx",
       "label": "CreamCanopy.tsx",
       "source_file": "apps/storefront/components/CreamCanopy.tsx",
@@ -2611,69 +2640,6 @@
       "external": false,
       "deps": [
         "apps/storefront/components/CreamCanopy.tsx"
-      ],
-      "rdeps": []
-    },
-    {
-      "id": "apps/storefront/components/DermaClubBanner.tsx",
-      "label": "DermaClubBanner.tsx",
-      "source_file": "apps/storefront/components/DermaClubBanner.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "file",
-      "language": "TypeScript",
-      "is_symbol": false,
-      "external": false,
-      "deps": [],
-      "rdeps": [
-        "apps/storefront/app/page.tsx",
-        "apps/storefront/components/DermaClubBanner.tsx#DermaClubBanner"
-      ]
-    },
-    {
-      "id": "apps/storefront/components/DermaClubBanner.tsx#DermaClubBanner",
-      "label": "DermaClubBanner",
-      "source_file": "apps/storefront/components/DermaClubBanner.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "function",
-      "language": "TypeScript",
-      "is_symbol": true,
-      "external": false,
-      "deps": [
-        "apps/storefront/components/DermaClubBanner.tsx"
-      ],
-      "rdeps": []
-    },
-    {
-      "id": "apps/storefront/components/DermalightLogo.tsx",
-      "label": "DermalightLogo.tsx",
-      "source_file": "apps/storefront/components/DermalightLogo.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "file",
-      "language": "TypeScript",
-      "is_symbol": false,
-      "external": false,
-      "deps": [],
-      "rdeps": [
-        "apps/storefront/components/DermalightLogo.tsx#DermalightLogo",
-        "apps/storefront/components/Footer.tsx",
-        "apps/storefront/components/Header.tsx"
-      ]
-    },
-    {
-      "id": "apps/storefront/components/DermalightLogo.tsx#DermalightLogo",
-      "label": "DermalightLogo",
-      "source_file": "apps/storefront/components/DermalightLogo.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "function",
-      "language": "TypeScript",
-      "is_symbol": true,
-      "external": false,
-      "deps": [
-        "apps/storefront/components/DermalightLogo.tsx"
       ],
       "rdeps": []
     },
@@ -2722,7 +2688,7 @@
       "is_symbol": false,
       "external": false,
       "deps": [
-        "apps/storefront/components/DermalightLogo.tsx"
+        "apps/storefront/components/LeafMark.tsx"
       ],
       "rdeps": [
         "apps/storefront/app/layout.tsx",
@@ -2755,7 +2721,6 @@
       "is_symbol": false,
       "external": false,
       "deps": [
-        "apps/storefront/components/DermalightLogo.tsx",
         "apps/storefront/components/cart/CartProvider.tsx",
         "apps/storefront/lib/format.ts"
       ],
@@ -2790,7 +2755,8 @@
       "is_symbol": false,
       "external": false,
       "deps": [
-        "apps/storefront/components/cart/CartProvider.tsx"
+        "apps/storefront/components/cart/CartProvider.tsx",
+        "apps/storefront/lib/format.ts"
       ],
       "rdeps": [
         "apps/storefront/app/page.tsx",
@@ -2825,6 +2791,7 @@
       "deps": [],
       "rdeps": [
         "apps/storefront/app/contact/page.tsx",
+        "apps/storefront/components/Footer.tsx",
         "apps/storefront/components/LeafMark.tsx#LeafMark"
       ]
     },
@@ -2896,6 +2863,7 @@
         "packages/contracts/src/index.ts"
       ],
       "rdeps": [
+        "apps/storefront/app/page.tsx",
         "apps/storefront/app/products/page.tsx",
         "apps/storefront/components/ProductCard.tsx#ProductCard"
       ]
@@ -2966,9 +2934,7 @@
         "apps/storefront/app/orders/page.tsx",
         "apps/storefront/app/products/[slug]/page.tsx",
         "apps/storefront/components/ProductCard.tsx",
-        "apps/storefront/components/SampleBadge.tsx#SampleBadge",
-        "apps/storefront/components/SpecialOffers.tsx",
-        "apps/storefront/components/WhyDermatologists.tsx"
+        "apps/storefront/components/SampleBadge.tsx#SampleBadge"
       ]
     },
     {
@@ -3016,40 +2982,6 @@
       "external": false,
       "deps": [
         "apps/storefront/components/SkinConsultationModal.tsx"
-      ],
-      "rdeps": []
-    },
-    {
-      "id": "apps/storefront/components/SpecialOffers.tsx",
-      "label": "SpecialOffers.tsx",
-      "source_file": "apps/storefront/components/SpecialOffers.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "file",
-      "language": "TypeScript",
-      "is_symbol": false,
-      "external": false,
-      "deps": [
-        "apps/storefront/components/SampleBadge.tsx",
-        "apps/storefront/components/cart/CartProvider.tsx"
-      ],
-      "rdeps": [
-        "apps/storefront/app/page.tsx",
-        "apps/storefront/components/SpecialOffers.tsx#SpecialOffers"
-      ]
-    },
-    {
-      "id": "apps/storefront/components/SpecialOffers.tsx#SpecialOffers",
-      "label": "SpecialOffers",
-      "source_file": "apps/storefront/components/SpecialOffers.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "function",
-      "language": "TypeScript",
-      "is_symbol": true,
-      "external": false,
-      "deps": [
-        "apps/storefront/components/SpecialOffers.tsx"
       ],
       "rdeps": []
     },
@@ -3119,39 +3051,6 @@
       "external": false,
       "deps": [
         "apps/storefront/components/StorefrontShell.tsx"
-      ],
-      "rdeps": []
-    },
-    {
-      "id": "apps/storefront/components/WhyDermatologists.tsx",
-      "label": "WhyDermatologists.tsx",
-      "source_file": "apps/storefront/components/WhyDermatologists.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "file",
-      "language": "TypeScript",
-      "is_symbol": false,
-      "external": false,
-      "deps": [
-        "apps/storefront/components/SampleBadge.tsx"
-      ],
-      "rdeps": [
-        "apps/storefront/app/page.tsx",
-        "apps/storefront/components/WhyDermatologists.tsx#WhyDermatologists"
-      ]
-    },
-    {
-      "id": "apps/storefront/components/WhyDermatologists.tsx#WhyDermatologists",
-      "label": "WhyDermatologists",
-      "source_file": "apps/storefront/components/WhyDermatologists.tsx",
-      "layer": "frontend",
-      "domain": "B2C Storefront (فروشگاه B2C و تجربه کاربری)",
-      "kind": "function",
-      "language": "TypeScript",
-      "is_symbol": true,
-      "external": false,
-      "deps": [
-        "apps/storefront/components/WhyDermatologists.tsx"
       ],
       "rdeps": []
     },
@@ -3246,7 +3145,6 @@
         "apps/storefront/components/Header.tsx",
         "apps/storefront/components/HomeHero.tsx",
         "apps/storefront/components/SkinConsultationModal.tsx",
-        "apps/storefront/components/SpecialOffers.tsx",
         "apps/storefront/components/cart/AddToCartButton.tsx",
         "apps/storefront/components/cart/CartButton.tsx",
         "apps/storefront/components/cart/CartProvider.tsx#CartProvider",
@@ -3510,6 +3408,7 @@
         "packages/contracts/src/index.ts"
       ],
       "rdeps": [
+        "apps/storefront/app/page.tsx",
         "apps/storefront/app/products/[slug]/page.tsx",
         "apps/storefront/app/products/page.tsx",
         "apps/storefront/lib/api.ts#NotFoundSignal"
@@ -3836,12 +3735,14 @@
         "apps/storefront/app/loyalty/page.tsx",
         "apps/storefront/app/magazine/page.tsx",
         "apps/storefront/app/orders/[id]/page.tsx",
+        "apps/storefront/app/page.tsx",
         "apps/storefront/app/products/[slug]/page.tsx",
         "apps/storefront/app/products/page.tsx",
         "apps/storefront/components/BookCatalog.tsx",
         "apps/storefront/components/CartDrawer.tsx",
         "apps/storefront/components/FloatingDock.tsx",
         "apps/storefront/components/Header.tsx",
+        "apps/storefront/components/HomeHero.tsx",
         "apps/storefront/components/PriceTag.tsx",
         "apps/storefront/components/cart/CartButton.tsx",
         "apps/storefront/components/cart/VariantAddToCart.tsx",
@@ -4153,6 +4054,7 @@
         "apps/storefront/app/cart/page.tsx",
         "apps/storefront/app/checkout/page.tsx",
         "apps/storefront/app/orders/[id]/page.tsx",
+        "apps/storefront/app/page.tsx",
         "apps/storefront/app/products/[slug]/page.tsx",
         "apps/storefront/app/products/page.tsx",
         "apps/storefront/app/support/page.tsx",
@@ -6891,6 +6793,116 @@
       "rdeps": []
     },
     {
+      "id": "packages/domain/src/feature-flags.spec.ts",
+      "label": "feature-flags.spec.ts",
+      "source_file": "packages/domain/src/feature-flags.spec.ts",
+      "layer": "test",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [
+        "packages/domain/src/feature-flags.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/domain/src/feature-flags.ts",
+      "label": "feature-flags.ts",
+      "source_file": "packages/domain/src/feature-flags.ts",
+      "layer": "domain-logic",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "file",
+      "language": "TypeScript",
+      "is_symbol": false,
+      "external": false,
+      "deps": [],
+      "rdeps": [
+        "packages/domain/src/feature-flags.spec.ts",
+        "packages/domain/src/feature-flags.ts#FeatureEvaluationContext",
+        "packages/domain/src/feature-flags.ts#FeatureFlagDefinition",
+        "packages/domain/src/feature-flags.ts#FeatureFlagKey",
+        "packages/domain/src/feature-flags.ts#evaluateAllFeatureFlags",
+        "packages/domain/src/feature-flags.ts#evaluateFeatureFlag"
+      ]
+    },
+    {
+      "id": "packages/domain/src/feature-flags.ts#evaluateFeatureFlag",
+      "label": "evaluateFeatureFlag",
+      "source_file": "packages/domain/src/feature-flags.ts",
+      "layer": "domain-logic",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "function",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/domain/src/feature-flags.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/domain/src/feature-flags.ts#evaluateAllFeatureFlags",
+      "label": "evaluateAllFeatureFlags",
+      "source_file": "packages/domain/src/feature-flags.ts",
+      "layer": "domain-logic",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "function",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/domain/src/feature-flags.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/domain/src/feature-flags.ts#FeatureFlagKey",
+      "label": "FeatureFlagKey",
+      "source_file": "packages/domain/src/feature-flags.ts",
+      "layer": "domain-logic",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "type",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/domain/src/feature-flags.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/domain/src/feature-flags.ts#FeatureEvaluationContext",
+      "label": "FeatureEvaluationContext",
+      "source_file": "packages/domain/src/feature-flags.ts",
+      "layer": "domain-logic",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "type",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/domain/src/feature-flags.ts"
+      ],
+      "rdeps": []
+    },
+    {
+      "id": "packages/domain/src/feature-flags.ts#FeatureFlagDefinition",
+      "label": "FeatureFlagDefinition",
+      "source_file": "packages/domain/src/feature-flags.ts",
+      "layer": "domain-logic",
+      "domain": "Shared Contracts & Logic (قراردادها و منطق دامنه)",
+      "kind": "type",
+      "language": "TypeScript",
+      "is_symbol": true,
+      "external": false,
+      "deps": [
+        "packages/domain/src/feature-flags.ts"
+      ],
+      "rdeps": []
+    },
+    {
       "id": "packages/domain/src/index.spec.ts",
       "label": "index.spec.ts",
       "source_file": "packages/domain/src/index.spec.ts",
@@ -6920,6 +6932,7 @@
         "apps/api/src/modules/b2b/b2b.service.ts",
         "apps/api/src/modules/carts/cart.mapper.ts",
         "apps/api/src/modules/carts/carts.service.ts",
+        "apps/api/src/modules/features/features.controller.ts",
         "apps/api/src/modules/orders/orders.service.ts",
         "apps/api/src/modules/support/support.service.ts",
         "packages/domain/src/index.spec.ts",
@@ -7407,6 +7420,16 @@
       "relation": "member_of"
     },
     {
+      "from": "apps/api/src/modules/features/features.controller.ts#FeaturesController",
+      "to": "apps/api/src/modules/features/features.controller.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "apps/api/src/modules/features/features.module.ts#FeaturesModule",
+      "to": "apps/api/src/modules/features/features.module.ts",
+      "relation": "member_of"
+    },
+    {
       "from": "apps/api/src/modules/health/health.controller.ts#HealthController",
       "to": "apps/api/src/modules/health/health.controller.ts",
       "relation": "member_of"
@@ -7567,11 +7590,6 @@
       "relation": "member_of"
     },
     {
-      "from": "apps/storefront/app/page.tsx#HomePage",
-      "to": "apps/storefront/app/page.tsx",
-      "relation": "member_of"
-    },
-    {
       "from": "apps/storefront/app/about/page.tsx#AboutPage",
       "to": "apps/storefront/app/about/page.tsx",
       "relation": "member_of"
@@ -7667,23 +7685,8 @@
       "relation": "member_of"
     },
     {
-      "from": "apps/storefront/components/CategoryGrid.tsx#CategoryGrid",
-      "to": "apps/storefront/components/CategoryGrid.tsx",
-      "relation": "member_of"
-    },
-    {
       "from": "apps/storefront/components/CreamCanopy.tsx#CreamCanopy",
       "to": "apps/storefront/components/CreamCanopy.tsx",
-      "relation": "member_of"
-    },
-    {
-      "from": "apps/storefront/components/DermaClubBanner.tsx#DermaClubBanner",
-      "to": "apps/storefront/components/DermaClubBanner.tsx",
-      "relation": "member_of"
-    },
-    {
-      "from": "apps/storefront/components/DermalightLogo.tsx#DermalightLogo",
-      "to": "apps/storefront/components/DermalightLogo.tsx",
       "relation": "member_of"
     },
     {
@@ -7737,11 +7740,6 @@
       "relation": "member_of"
     },
     {
-      "from": "apps/storefront/components/SpecialOffers.tsx#SpecialOffers",
-      "to": "apps/storefront/components/SpecialOffers.tsx",
-      "relation": "member_of"
-    },
-    {
       "from": "apps/storefront/components/StardustCanvas.tsx#StardustCanvas",
       "to": "apps/storefront/components/StardustCanvas.tsx",
       "relation": "member_of"
@@ -7749,11 +7747,6 @@
     {
       "from": "apps/storefront/components/StorefrontShell.tsx#StorefrontShell",
       "to": "apps/storefront/components/StorefrontShell.tsx",
-      "relation": "member_of"
-    },
-    {
-      "from": "apps/storefront/components/WhyDermatologists.tsx#WhyDermatologists",
-      "to": "apps/storefront/components/WhyDermatologists.tsx",
       "relation": "member_of"
     },
     {
@@ -8837,6 +8830,31 @@
       "relation": "schema_def"
     },
     {
+      "from": "packages/domain/src/feature-flags.ts#evaluateFeatureFlag",
+      "to": "packages/domain/src/feature-flags.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/domain/src/feature-flags.ts#evaluateAllFeatureFlags",
+      "to": "packages/domain/src/feature-flags.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/domain/src/feature-flags.ts#FeatureFlagKey",
+      "to": "packages/domain/src/feature-flags.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/domain/src/feature-flags.ts#FeatureEvaluationContext",
+      "to": "packages/domain/src/feature-flags.ts",
+      "relation": "member_of"
+    },
+    {
+      "from": "packages/domain/src/feature-flags.ts#FeatureFlagDefinition",
+      "to": "packages/domain/src/feature-flags.ts",
+      "relation": "member_of"
+    },
+    {
       "from": "packages/domain/src/index.ts#checkQuantity",
       "to": "packages/domain/src/index.ts",
       "relation": "member_of"
@@ -9012,6 +9030,11 @@
       "relation": "imports"
     },
     {
+      "from": "apps/api/src/modules/features/features.controller.ts",
+      "to": "packages/domain/src/index.ts",
+      "relation": "imports"
+    },
+    {
       "from": "apps/api/src/modules/health/health.controller.ts",
       "to": "packages/contracts/src/index.ts",
       "relation": "imports"
@@ -9158,27 +9181,32 @@
     },
     {
       "from": "apps/storefront/app/page.tsx",
+      "to": "packages/contracts/src/index.ts",
+      "relation": "imports"
+    },
+    {
+      "from": "apps/storefront/app/page.tsx",
       "to": "apps/storefront/components/HomeHero.tsx",
       "relation": "imports"
     },
     {
       "from": "apps/storefront/app/page.tsx",
-      "to": "apps/storefront/components/CategoryGrid.tsx",
+      "to": "apps/storefront/components/BookCatalog.tsx",
       "relation": "imports"
     },
     {
       "from": "apps/storefront/app/page.tsx",
-      "to": "apps/storefront/components/SpecialOffers.tsx",
+      "to": "apps/storefront/components/ProductCard.tsx",
       "relation": "imports"
     },
     {
       "from": "apps/storefront/app/page.tsx",
-      "to": "apps/storefront/components/WhyDermatologists.tsx",
+      "to": "apps/storefront/lib/api.ts",
       "relation": "imports"
     },
     {
       "from": "apps/storefront/app/page.tsx",
-      "to": "apps/storefront/components/DermaClubBanner.tsx",
+      "to": "apps/storefront/lib/format.ts",
       "relation": "imports"
     },
     {
@@ -9463,7 +9491,7 @@
     },
     {
       "from": "apps/storefront/components/Footer.tsx",
-      "to": "apps/storefront/components/DermalightLogo.tsx",
+      "to": "apps/storefront/components/LeafMark.tsx",
       "relation": "imports"
     },
     {
@@ -9477,8 +9505,8 @@
       "relation": "imports"
     },
     {
-      "from": "apps/storefront/components/Header.tsx",
-      "to": "apps/storefront/components/DermalightLogo.tsx",
+      "from": "apps/storefront/components/HomeHero.tsx",
+      "to": "apps/storefront/lib/format.ts",
       "relation": "imports"
     },
     {
@@ -9527,16 +9555,6 @@
       "relation": "imports"
     },
     {
-      "from": "apps/storefront/components/SpecialOffers.tsx",
-      "to": "apps/storefront/components/cart/CartProvider.tsx",
-      "relation": "imports"
-    },
-    {
-      "from": "apps/storefront/components/SpecialOffers.tsx",
-      "to": "apps/storefront/components/SampleBadge.tsx",
-      "relation": "imports"
-    },
-    {
       "from": "apps/storefront/components/StorefrontShell.tsx",
       "to": "apps/storefront/components/Header.tsx",
       "relation": "imports"
@@ -9564,11 +9582,6 @@
     {
       "from": "apps/storefront/components/StorefrontShell.tsx",
       "to": "apps/storefront/components/SkinConsultationModal.tsx",
-      "relation": "imports"
-    },
-    {
-      "from": "apps/storefront/components/WhyDermatologists.tsx",
-      "to": "apps/storefront/components/SampleBadge.tsx",
       "relation": "imports"
     },
     {
@@ -9682,6 +9695,11 @@
       "relation": "imports"
     },
     {
+      "from": "packages/domain/src/feature-flags.spec.ts",
+      "to": "packages/domain/src/feature-flags.ts",
+      "relation": "imports"
+    },
+    {
       "from": "packages/domain/src/index.spec.ts",
       "to": "packages/domain/src/index.ts",
       "relation": "imports"
@@ -9693,19 +9711,19 @@
     }
   ],
   "layers": {
-    "api-module": 47,
+    "api-module": 49,
     "backend": 7,
-    "api-controller": 20,
+    "api-controller": 22,
     "api-service": 24,
-    "test": 17,
-    "frontend": 139,
+    "test": 19,
+    "frontend": 128,
     "contracts": 145,
     "database": 25,
-    "domain-logic": 21,
+    "domain-logic": 27,
     "other": 1
   },
   "domains": {
-    "Core Platform (هسته پلتفرم)": 26,
+    "Core Platform (هسته پلتفرم)": 31,
     "B2B Wholesale & RFQ (سازمانی، عمده و استعلام قیمت)": 81,
     "Cart & Checkout (سبد خرید و تسویه)": 99,
     "Inventory & Ledger (انبارداری، رزرواسیون و لجر مالی)": 17,
@@ -9713,7 +9731,7 @@
     "Products & Catalog (محصولات، کاتالوگ و فرمول‌ها)": 39,
     "CRM & Support (پشتیبانی و تیکتینگ)": 38,
     "Database & Schema (پایگاه داده و مدل‌ها)": 9,
-    "B2C Storefront (فروشگاه B2C و تجربه کاربری)": 67,
-    "Shared Contracts & Logic (قراردادها و منطق دامنه)": 54
+    "B2C Storefront (فروشگاه B2C و تجربه کاربری)": 56,
+    "Shared Contracts & Logic (قراردادها و منطق دامنه)": 61
   }
 }

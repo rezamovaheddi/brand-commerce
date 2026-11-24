@@ -415,6 +415,7 @@ export default function OrgPortalPage() {
                   <input
                     type="radio"
                     name="portal-item-kind"
+                    aria-label="محصولات کاتالوگ جاری"
                     checked={form.itemKind === "CATALOG"}
                     onChange={() => setForm({ ...form, itemKind: "CATALOG" })}
                   />
@@ -431,6 +432,7 @@ export default function OrgPortalPage() {
                   <input
                     type="radio"
                     name="portal-item-kind"
+                    aria-label="تولید اختصاصی و سفارشی OEM"
                     checked={form.itemKind === "OEM"}
                     onChange={() => setForm({ ...form, itemKind: "OEM" })}
                   />

@@ -46,8 +46,56 @@ jobs:
       - name: WCAG 2.1 AA/AAA Contrast Audit
         run: npm run contrast:check
 
+      - name: Automated Accessibility Audit (TASK-188)
+        run: npm run a11y:audit
+
+      - name: Architectural Fitness Functions (TASK-176)
+        run: npm run arch:fitness
+
+      - name: Architecture Fitness & Import Boundaries (TASK-180)
+        run: npm run arch:boundaries
+
+      - name: Consumer-Driven Contract Verification (TASK-183)
+        run: npm run pact:verify
+
+      - name: Figma Code Connect & Token Mapping (TASK-185)
+        run: npm run figma:verify
+
+      - name: Polyglot Governance & Zero DB Shared Writes (TASK-153/157)
+        run: npm run polyglot:verify
+
+      - name: Strangler Fig Extraction Simulation (TASK-152)
+        run: npm run strangler:simulate
+
+      - name: OpenTelemetry Semantic Conventions (TASK-158)
+        run: npm run telemetry:verify
+
+      - name: Performance Baselines & Budgets (TASK-160)
+        run: npm run budget:check
+
+      - name: Workflow Platform Saga Verification (TASK-151)
+        run: npm run workflow:verify
+
+      - name: PIM Regulatory Content Governance (TASK-113)
+        run: npm run content:verify
+
+      - name: AsyncAPI 3.1 Schema Validation (TASK-181)
+        run: npm run asyncapi:validate
+
+      - name: OpenAPI Spectral Linting (TASK-182)
+        run: npm run openapi:lint
+
+      - name: Visual Regression & Responsive Audit (TASK-186)
+        run: npm run visual:audit
+
+      - name: Agent Performance & Quality Metrics (TASK-187)
+        run: npm run metrics:agent
+
       - name: Security & Secret Audit
         run: npm run security:audit
+
+      - name: Supply Chain License Audit (TASK-190)
+        run: npm run license:audit
 
       - name: Generate Prisma client
         run: npm run prisma:generate
@@ -64,6 +112,9 @@ jobs:
       - name: Unit + e2e tests (DB integration included)
         run: npm run test
 
+      - name: Real-Service Integration Suite (TASK-184)
+        run: npm run integration:real
+
       - name: API smoke (health + products)
         run: |
           node apps/api/dist/main.js &
@@ -71,10 +122,90 @@ jobs:
           curl -sf http://localhost:3001/api/v1/health | tee /dev/stderr | grep -q '"status":"ok"'
           curl -sf "http://localhost:3001/api/v1/products?limit=3" | grep -q '"totalPages"'
 
+      - name: Critical Journey Load Tests (TASK-193)
+        run: npm run load:k6
+
+      - name: Capacity Benchmark & Workload Verification (TASK-140)
+        run: npm run capacity:benchmark
+
+      - name: Regulatory Claim Expiry & Market Rules (TASK-144)
+        run: npm run claim:enforce
+
+      - name: OpenFeature Provider & Flag Governance (TASK-196)
+        run: npm run flags:verify
+
+      - name: Incident Response Tabletop Drill (TASK-138)
+        run: npm run incident:tabletop
+
+      - name: Data Migration Rehearsal & Financial Reconciliation (TASK-104)
+        run: npm run migration:rehearse
+
+      - name: Loyalty Points Ledger & Adverse Event Governance (TASK-092..098/133)
+        run: npm run loyalty:verify
+
+      - name: ERP-lite Inventory & Accounting Governance (TASK-076..132)
+        run: npm run inventory:verify
+
+      - name: Automated 4-Persona User Acceptance Testing (TASK-101, 139)
+        run: npm run uat:personas
+
+      - name: ASVS 5.0 / OWASP Security Penetration Test (TASK-103)
+        run: npm run security:pentest
+
+      - name: Canonical 9-Phase Gate Compliance Audit (GATE-P0..P8)
+        run: npm run gates:verify
+
+      - name: Canonical 40-Scenario High-Risk Regression Suite (QA-004 / TASK-189)
+        run: npm run regression:verify
+
+      - name: Agent Skill Evaluation & 60-Scenario Rubric Audit (TASK-177)
+        run: npm run skills:verify
+
+      - name: Canonical Integration Adapters & Provider Contracts (TASK-185 / GAP-030)
+        run: npm run integrations:verify
+
+      - name: Canonical 20-Risk Mitigation Audit (TASK-199 / GAP-031)
+        run: npm run risks:verify
+
+      - name: Ecosystem Registry & 46-Skill Workforce Audit (TASK-179 / TASK-177)
+        run: npm run ecosystem:verify
+
+      - name: Canonical Enterprise RBAC & Security Permission Audit (TASK-033 / GAP-032 / TASK-200)
+        run: npm run rbac:verify
+
+      - name: Canonical Data Privacy, Consent & Retention Audit (N20 / TASK-134 / TASK-136)
+        run: npm run privacy:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
+      - name: Generate CycloneDX SBOM (TASK-190)
+        run: npm run sbom:generate
+
+      - name: Verify Release Artifact Provenance (TASK-192)
+        run: node scripts/verify-provenance.mjs
+
       - uses: actions/upload-artifact@v4
         with:
-          name: openapi
-          path: apps/api/openapi.json
+          name: release-artifacts
+          path: |
+            apps/api/openapi.json
+            docs/governance/SBOM.cdx.json
+            docs/governance/PROVENANCE_MANIFEST.sha256
+            docs/evidence/CAPACITY_BENCHMARK_REPORT.md
+            docs/evidence/CLAIM_EXPIRY_REPORT.md
+            docs/evidence/FEATURE_FLAG_POC_REPORT.md
+            docs/evidence/INCIDENT_TABLETOP_REPORT.md
+            docs/evidence/MIGRATION_REHEARSAL_REPORT.md
+            docs/evidence/LOYALTY_GOVERNANCE_REPORT.md
+            docs/evidence/INVENTORY_GOVERNANCE_REPORT.md
+            docs/evidence/PERSONA_UAT_REPORT.md
+            docs/evidence/SECURITY_PENETRATION_REPORT.md
+            docs/evidence/MONOREPO_BENCHMARK_REPORT.md
+            docs/governance/PHASE_GATE_COMPLIANCE_DOSSIER.md
+            docs/evidence/HIGH_RISK_REGRESSION_REPORT.md
+            docs/evidence/SKILL_EVALUATION_REPORT.md
+            docs/evidence/INTEGRATION_ADAPTERS_REPORT.md
+            docs/evidence/RISK_MITIGATION_REPORT.md
+            docs/governance/RISK_REGISTER_AND_MITIGATION_DOSSIER.md
+            docs/evidence/ECOSYSTEM_AND_SKILLS_REPORT.md

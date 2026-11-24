@@ -2290,6 +2290,95 @@
           "support"
         ]
       }
+    },
+    "/api/v1/features": {
+      "get": {
+        "description": "Returns active feature flags for clients and cohort rollouts (TASK-196 / OpenFeature abstraction).",
+        "operationId": "FeaturesController_getAllFeatures",
+        "parameters": [
+          {
+            "name": "x-user-role",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-org-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "env",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active feature flags evaluated against context"
+          }
+        },
+        "summary": "Evaluate and return active feature flags",
+        "tags": [
+          "Features"
+        ]
+      }
+    },
+    "/api/v1/features/{key}": {
+      "get": {
+        "operationId": "FeaturesController_getFeatureByKey",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-role",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-org-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "env",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evaluation result and flag metadata"
+          }
+        },
+        "summary": "Evaluate a single feature flag by key",
+        "tags": [
+          "Features"
+        ]
+      }
     }
   },
   "info": {

@@ -1,0 +1,109 @@
+{
+  "consumer": {
+    "name": "BrandCommerceStorefront"
+  },
+  "provider": {
+    "name": "BrandCommerceApi"
+  },
+  "interactions": [
+    {
+      "description": "A request for the active product catalog",
+      "providerState": "products exist in catalog",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/products",
+        "query": "limit=20"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "items": [
+            {
+              "id": { "matcher": "type", "value": "prod_1" },
+              "slug": { "matcher": "type", "value": "sample-clinical-serum" },
+              "title": { "matcher": "type", "value": "سرم ترمیم‌کننده پوست درماویا" },
+              "priceMinor": { "matcher": "integer", "value": 18500000 },
+              "currency": { "matcher": "regex", "regex": "^IRR$", "value": "IRR" },
+              "isSample": { "matcher": "type", "value": true }
+            }
+          ],
+          "total": { "matcher": "integer", "value": 8 }
+        }
+      }
+    },
+    {
+      "description": "A request to create an anonymous shopping cart",
+      "providerState": "cart service is active",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/carts",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {}
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "id": { "matcher": "type", "value": "cart_1001" },
+          "items": { "matcher": "type", "value": [] },
+          "totalAmountMinor": { "matcher": "integer", "value": 0 },
+          "currency": { "matcher": "regex", "regex": "^IRR$", "value": "IRR" }
+        }
+      }
+    },
+    {
+      "description": "A request for B2B portal enterprise account summary",
+      "providerState": "authenticated wholesale clinic account",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/b2b/org/me",
+        "headers": {
+          "Authorization": "Bearer verified-b2b-token"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "companyName": { "matcher": "type", "value": "کلینیک تخصصی رازی" },
+          "tier": { "matcher": "regex", "regex": "^(CLINIC|PHARMACY|DISTRIBUTOR)$", "value": "CLINIC" },
+          "currency": { "matcher": "regex", "regex": "^IRR$", "value": "IRR" }
+        }
+      }
+    },
+    {
+      "description": "An asynchronous domain event OrderPlaced",
+      "providerState": "order created in ACID transaction",
+      "asyncEvent": {
+        "channel": "commerce.order.placed",
+        "eventType": "OrderPlaced",
+        "payload": {
+          "eventType": "OrderPlaced",
+          "orderId": { "matcher": "type", "value": "ord_1001" },
+          "orderNumber": { "matcher": "type", "value": "ORD-2026-001" },
+          "marketId": { "matcher": "type", "value": "IR" },
+          "customerPhone": { "matcher": "type", "value": "09121112233" },
+          "totalAmountMinor": { "matcher": "integer", "value": 18500000 },
+          "currency": { "matcher": "regex", "regex": "^IRR$", "value": "IRR" }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-js": {
+      "version": "12.0.0"
+    }
+  }
+}

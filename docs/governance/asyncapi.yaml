@@ -1,0 +1,317 @@
+asyncapi: 3.1.0
+info:
+  title: Brand Commerce Domain Events
+  version: 1.0.0
+  description: >-
+    Canonical event catalog and asynchronous messaging contract for Brand Commerce Platform.
+    Adheres strictly to AsyncAPI 3.1.0 specification, event envelope invariants,
+    integer minor currency units (IRR), and zero floating-point math.
+  contact:
+    name: API & Architecture Governance
+    email: architecture@brandcommerce.local
+  license:
+    name: Proprietary & Confidential
+servers:
+  localBroker:
+    host: localhost:9092
+    protocol: kafka
+    description: Local Kafka broker for development and integration testing.
+  productionBroker:
+    host: kafka-cluster.prod.internal:9092
+    protocol: kafka-secure
+    description: High-availability production event mesh.
+defaultContentType: application/json
+channels:
+  orderPlaced:
+    address: commerce.order.placed
+    messages:
+      OrderPlaced:
+        $ref: '#/components/messages/OrderPlaced'
+  paymentCaptured:
+    address: commerce.payment.captured
+    messages:
+      PaymentCaptured:
+        $ref: '#/components/messages/PaymentCaptured'
+  inventoryReservationCreated:
+    address: commerce.inventory.reserved
+    messages:
+      InventoryReservationCreated:
+        $ref: '#/components/messages/InventoryReservationCreated'
+  rfqSubmitted:
+    address: commerce.b2b.rfq-submitted
+    messages:
+      RfqSubmitted:
+        $ref: '#/components/messages/RfqSubmitted'
+  sampleRequested:
+    address: commerce.sample.requested
+    messages:
+      SampleRequested:
+        $ref: '#/components/messages/SampleRequested'
+operations:
+  receiveOrderPlaced:
+    action: receive
+    channel:
+      $ref: '#/channels/orderPlaced'
+    messages:
+      - $ref: '#/channels/orderPlaced/messages/OrderPlaced'
+  receivePaymentCaptured:
+    action: receive
+    channel:
+      $ref: '#/channels/paymentCaptured'
+    messages:
+      - $ref: '#/channels/paymentCaptured/messages/PaymentCaptured'
+  receiveInventoryReservationCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/inventoryReservationCreated'
+    messages:
+      - $ref: '#/channels/inventoryReservationCreated/messages/InventoryReservationCreated'
+  receiveRfqSubmitted:
+    action: receive
+    channel:
+      $ref: '#/channels/rfqSubmitted'
+    messages:
+      - $ref: '#/channels/rfqSubmitted/messages/RfqSubmitted'
+  receiveSampleRequested:
+    action: receive
+    channel:
+      $ref: '#/channels/sampleRequested'
+    messages:
+      - $ref: '#/channels/sampleRequested/messages/SampleRequested'
+components:
+  messages:
+    OrderPlaced:
+      name: OrderPlaced
+      title: Order Placed Event
+      summary: Emitted by the Orders bounded context after the order transaction is committed.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/OrderPlacedPayload'
+    PaymentCaptured:
+      name: PaymentCaptured
+      title: Payment Captured Event
+      summary: Emitted by Payments after verified payment provider confirmation and integrity reconciliation.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PaymentCapturedPayload'
+    InventoryReservationCreated:
+      name: InventoryReservationCreated
+      title: Inventory Reservation Created Event
+      summary: Emitted by Inventory context after atomic reservation succeeds.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/InventoryReservationCreatedPayload'
+    RfqSubmitted:
+      name: RfqSubmitted
+      title: B2B RFQ Submitted Event
+      summary: Emitted by B2B portal when an enterprise wholesale RFQ is submitted.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/RfqSubmittedPayload'
+    SampleRequested:
+      name: SampleRequested
+      title: Product Sample Requested Event
+      summary: Emitted when an authorized client or doctor requests a verified dermaceutical sample.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/SampleRequestedPayload'
+  schemas:
+    EventMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - eventId
+        - eventType
+        - schemaVersion
+        - occurredAt
+        - producer
+        - aggregate
+        - correlationId
+      properties:
+        eventId:
+          type: string
+          format: uuid
+          description: Unique UUID v4 for idempotency deduplication.
+        eventType:
+          type: string
+          description: Fully-qualified event name matching domain taxonomy.
+        schemaVersion:
+          type: integer
+          minimum: 1
+          description: Monotonic schema version for forward/backward compatibility.
+        occurredAt:
+          type: string
+          format: date-time
+          description: ISO-8601 UTC timestamp of occurrence.
+        producer:
+          type: string
+          description: Bounded context or service producing the event.
+        aggregate:
+          type: object
+          additionalProperties: false
+          required:
+            - type
+            - id
+            - version
+          properties:
+            type:
+              type: string
+            id:
+              type: string
+            version:
+              type: integer
+              minimum: 1
+        correlationId:
+          type: string
+          format: uuid
+          description: Distributed tracing correlation identifier.
+        causationId:
+          type: [string, "null"]
+          format: uuid
+          description: Parent event or command ID that triggered this event.
+        organizationId:
+          type: [string, "null"]
+          format: uuid
+          description: Multi-tenant organization scope when applicable.
+        marketId:
+          type: [string, "null"]
+          description: Geographical market code (e.g. IR, AE).
+        traceparent:
+          type: [string, "null"]
+          description: W3C Trace Context traceparent header.
+    OrderPlacedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventMetadata'
+        - type: object
+          required:
+            - orderId
+            - orderNumber
+            - marketId
+            - customerPhone
+            - totalAmountMinor
+            - currency
+            - itemsCount
+          properties:
+            orderId:
+              type: string
+              format: uuid
+            orderNumber:
+              type: string
+            marketId:
+              type: string
+            customerPhone:
+              type: string
+            totalAmountMinor:
+              type: integer
+              minimum: 0
+              description: Total amount in integer minor units (IRR).
+            currency:
+              type: string
+              enum: [IRR]
+            itemsCount:
+              type: integer
+              minimum: 1
+    PaymentCapturedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventMetadata'
+        - type: object
+          required:
+            - paymentIntentId
+            - orderId
+            - amountMinor
+            - currency
+            - providerReference
+            - method
+          properties:
+            paymentIntentId:
+              type: string
+              format: uuid
+            orderId:
+              type: string
+              format: uuid
+            amountMinor:
+              type: integer
+              minimum: 0
+              description: Captured minor units (IRR).
+            currency:
+              type: string
+              enum: [IRR]
+            providerReference:
+              type: string
+            method:
+              type: string
+              enum: [ZARINPAL, MELLAT, SAMAN, WALLET, CORPORATE_CREDIT]
+    InventoryReservationCreatedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventMetadata'
+        - type: object
+          required:
+            - reservationId
+            - orderId
+            - variantId
+            - quantity
+            - expiresAt
+          properties:
+            reservationId:
+              type: string
+              format: uuid
+            orderId:
+              type: string
+              format: uuid
+            variantId:
+              type: string
+              format: uuid
+            lotId:
+              type: [string, "null"]
+              format: uuid
+            quantity:
+              type: integer
+              minimum: 1
+            expiresAt:
+              type: string
+              format: date-time
+    RfqSubmittedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventMetadata'
+        - type: object
+          required:
+            - rfqId
+            - companyName
+            - nationalId
+            - targetQuantity
+            - status
+          properties:
+            rfqId:
+              type: string
+              format: uuid
+            companyName:
+              type: string
+            nationalId:
+              type: string
+            targetQuantity:
+              type: integer
+              minimum: 1
+            status:
+              type: string
+              enum: [PENDING, UNDER_REVIEW, APPROVED, REJECTED]
+    SampleRequestedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventMetadata'
+        - type: object
+          required:
+            - sampleRequestId
+            - productId
+            - customerPhone
+            - sampleQuotaRemaining
+          properties:
+            sampleRequestId:
+              type: string
+              format: uuid
+            productId:
+              type: string
+              format: uuid
+            customerPhone:
+              type: string
+            sampleQuotaRemaining:
+              type: integer
+              minimum: 0

@@ -1,0 +1,10 @@
+# Brand Commerce Release Artifact Provenance Manifest
+# Commit: 953aec87536546ebbc891812a9bd323b26984d01
+# Timestamp: 2026-11-24T08:02:21.447Z
+# Format: <sha256>  <relative_path>
+
+502bb59f2ccea7430e3ca610fff34b794a6b6174df74a5e26e3e1ab2791427c1  apps/api/openapi.json
+f92eefa575165c6a55df9a161ca62d4b0e68343ecac0afe6af199c97d2362007  docs/governance/SBOM.cdx.json
+988eef535eee69183e2d2b1ad650554ed7772a41045b60283cc0aa709f15477c  graphify-out/graph.json
+be6f004ab9a079ccb68759b637f6c5437e1c3dff21c79da71c28d952edfb09b0  packages/database/prisma/schema.prisma
+e001eeb223eb59a85ce35de5e42f4248f0503a0db0c48a4e8869c970099d6a5e  tokens/brand.tokens.json

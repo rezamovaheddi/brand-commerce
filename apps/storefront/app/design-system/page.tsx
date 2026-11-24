@@ -236,6 +236,7 @@ export default function DesignSystemPage() {
                 <input
                   type="text"
                   dir="ltr"
+                  aria-label="کد هگزادسیمال رنگ متن"
                   value={fgColor}
                   onChange={(e) => setFgColor(e.target.value.toUpperCase())}
                   style={{ flex: 1, padding: "8px 12px", border: "1px solid var(--dv-line)", borderRadius: 8, fontSize: "0.95rem", fontFamily: "monospace" }}
@@ -258,6 +259,7 @@ export default function DesignSystemPage() {
                 <input
                   type="text"
                   dir="ltr"
+                  aria-label="کد هگزادسیمال رنگ پس‌زمینه"
                   value={bgColor}
                   onChange={(e) => setBgColor(e.target.value.toUpperCase())}
                   style={{ flex: 1, padding: "8px 12px", border: "1px solid var(--dv-line)", borderRadius: 8, fontSize: "0.95rem", fontFamily: "monospace" }}
