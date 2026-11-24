@@ -25,7 +25,11 @@
     "db:backup": "node scripts/backup-db.mjs",
     "db:drill": "node scripts/backup-restore-drill.mjs",
     "monitor": "node scripts/health-monitor.mjs",
-    "verify": "npm run lint && npm run tokens:validate && npm run contrast:check && npm run security:audit && npm run build && npm run test"
+    "sbom:generate": "node scripts/generate-sbom.mjs",
+    "license:audit": "node scripts/license-audit.mjs",
+    "load:test": "node scripts/load-test.mjs",
+    "a11y:audit": "node scripts/accessibility-audit.mjs",
+    "verify": "npm run lint && npm run tokens:validate && npm run contrast:check && npm run a11y:audit && npm run security:audit && npm run license:audit && npm run build && npm run test"
   },
   "engines": {
     "node": ">=20.0.0"

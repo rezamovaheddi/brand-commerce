@@ -23,3 +23,7 @@ S-021,Security audit trail (AuditLog),GAP-031,Backend,P2,DONE,"Immutable AuditLo
 S-022,Customer account & tracking portal,GAP-012,Frontend,P2,DONE,"Customer dashboard and order lookup active at /account and /orders with phone-keyed history and tickets"
 S-023,Product search relevance ranking,GAP-013,Backend,P3,DONE,"Multi-tier deterministic relevance scoring implemented and tested in ProductsService"
 S-024,Synthetic SLA monitor and probes,GAP-033,DevOps,P2,DONE,"scripts/health-monitor.mjs runs synthetic uptime probes; npm run monitor passes"
+S-025,Feature flags and OpenFeature abstraction,TASK-196,Backend,P8,DONE,"Dynamic feature evaluation in domain and GET /api/v1/features with context"
+S-026,CycloneDX SBOM & license compliance audit,TASK-190,DevOps,P7,DONE,"scripts/generate-sbom.mjs produces SBOM.cdx.json; scripts/license-audit.mjs passes"
+S-027,Critical journey load testing suite,TASK-193,DevOps,P7,DONE,"scripts/load-test.mjs benchmarked p95 < 250ms with zero errors; LOAD_TEST_REPORT.md"
+S-028,Automated WCAG 2.1/2.2 accessibility gate,TASK-188,QA,P2,DONE,"scripts/accessibility-audit.mjs audits 42 components; A11Y_AUDIT_REPORT.md"

@@ -240,6 +240,7 @@ export default function RfqPage() {
                   <input
                     type="radio"
                     name="rfq-item-kind"
+                    aria-label="محصول کاتالوگ موجود"
                     checked={form.itemKind === "CATALOG"}
                     onChange={() => setForm({ ...form, itemKind: "CATALOG" })}
                   />
@@ -256,6 +257,7 @@ export default function RfqPage() {
                   <input
                     type="radio"
                     name="rfq-item-kind"
+                    aria-label="تولید سفارشی یا Private Label OEM"
                     checked={form.itemKind === "OEM"}
                     onChange={() => setForm({ ...form, itemKind: "OEM" })}
                   />
@@ -470,6 +472,7 @@ export default function RfqPage() {
                   <input
                     ref={fileInput}
                     type="file"
+                    aria-label="افزودن فرمولاسیون یا مستندات برچسب"
                     className="dv-file-input"
                     accept="application/pdf,image/png,image/jpeg"
                     disabled={attaching}
