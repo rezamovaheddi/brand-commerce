@@ -1,9 +1,9 @@
 # Architecture Fitness & Import Boundary Enforcement Report (TASK-180)
 
-Generated at: 2026-11-24T09:42:27.727Z  
+Generated at: 2026-11-24T09:57:31.433Z  
 Configuration File: `.dependency-cruiser.cjs`  
 Policy Specification: `architecture-fitness-rules-v2.2.json`  
-Audited Source Files: 114 modules  
+Audited Source Files: 116 modules  
 
 ---
 

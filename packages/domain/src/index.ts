@@ -179,4 +179,5 @@ export function canReplyToTicket(status: string): boolean {
 export * from "./feature-flags";
 export * from "./loyalty";
 export * from "./inventory";
+export * from "./rbac";
 

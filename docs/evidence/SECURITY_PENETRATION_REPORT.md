@@ -25,4 +25,4 @@ This report documents the automated penetration testing and adversarial threat e
 - **SSRF Defense:** Private IP & Cloud metadata ranges (169.254.169.254) strictly filtered.
 - **Cryptographic Hygiene:** Timing-safe comparisons enforced across payment webhook callbacks.
 
-*Verified by scripts/run-security-penetration-test.mjs on 2026-11-24T09:42:34.801Z*
+*Verified by scripts/run-security-penetration-test.mjs on 2026-11-24T09:57:39.670Z*

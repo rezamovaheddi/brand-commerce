@@ -2,14 +2,15 @@
 
 جمع‌بندی نهایی: **PRODUCTION & STAGING CERTIFIED (تأیید کامل صلاحیت تولید و استقرار با ۱۰۰٪ انطباق گیت‌ها)**  
 تاریخ آخرین اعتبارسنجی: **2026-11-24**  
-خط لوله ارزیابی کیفیت: **۴۰ گیت خودکار کانونیکال (`npm run verify` خروجی Exit 0)**  
+خط لوله ارزیابی کیفیت: **۴۱ گیت خودکار کانونیکال (`npm run verify` خروجی Exit 0)**  
 مخزن گیت‌هاب: [https://github.com/rezamovaheddi/brand-commerce](https://github.com/rezamovaheddi/brand-commerce) (CI خط لوله گیت‌هاب اکشنز ۱۰۰٪ سبز)  
 پرونده انطباق گیت‌های فاز: [PHASE_GATE_COMPLIANCE_DOSSIER.md](../governance/PHASE_GATE_COMPLIANCE_DOSSIER.md) (پوشش ۱۰۰٪ تمام ۱۹۸ تسک و ۹ فاز)  
 گزارش سوئیت رگرسیون پرریسک: [HIGH_RISK_REGRESSION_REPORT.md](../evidence/HIGH_RISK_REGRESSION_REPORT.md) (تأیید ۱۰۰٪ تمام ۴۰ سناریوی حیاتی در ۱۵ دامنه)  
 گزارش ارزیابی مهارت‌های عامل: [SKILL_EVALUATION_REPORT.md](../evidence/SKILL_EVALUATION_REPORT.md) (تأیید ۱۰۰٪ تمام ۶۰ سناریو در ۷ مهارت اصلی با نمره ۱۰/۱۰)  
 گزارش قراردادها و آداپتورهای یکپارچه‌سازی: [INTEGRATION_ADAPTERS_REPORT.md](../evidence/INTEGRATION_ADAPTERS_REPORT.md) (تأیید ۱۰۰٪ تمام ۷ آداپتور کانونیکال تامین‌کنندگان)  
 پرونده مهار ریسک‌های کانونیکال: [RISK_REGISTER_AND_MITIGATION_DOSSIER.md](../governance/RISK_REGISTER_AND_MITIGATION_DOSSIER.md) (تأیید ۱۰۰٪ مهار و ابطال تمام ۲۰ ریسک پروژه)  
-گزارش حاکمیت اکوسیستم و مهارت‌های عامل: [ECOSYSTEM_AND_SKILLS_REPORT.md](../evidence/ECOSYSTEM_AND_SKILLS_REPORT.md) (تأیید ۱۰۰٪ تمام ۲۳ مخزن اکوسیستم و ۴۶ مهارت عامل)
+گزارش حاکمیت اکوسیستم و مهارت‌های عامل: [ECOSYSTEM_AND_SKILLS_REPORT.md](../evidence/ECOSYSTEM_AND_SKILLS_REPORT.md) (تأیید ۱۰۰٪ تمام ۲۳ مخزن اکوسیستم و ۴۶ مهارت عامل)  
+گزارش انطباق ماتریس مجوزها و RBAC کانونیکال: [RBAC_COMPLIANCE_REPORT.md](../evidence/RBAC_COMPLIANCE_REPORT.md) (تأیید ۱۰۰٪ تمام ۱۸ نقش سازمانی، ۱۰۵ مجوز و ۱۱۹ قانون با Default-Deny)
 
 ---
 
@@ -31,9 +32,9 @@
 
 ## ۲. خلاصه شواهد تست‌های خودکار (Automated Test Summary)
 
-- **مجموع آزمون‌های خودکار پاس‌شده:** **۲۹۰ تست (۱۰۰٪ سبز، ۰ شکست)**
+- **مجموع آزمون‌های خودکار پاس‌شده:** **۳۱۱ تست (۱۰۰٪ سبز، ۰ شکست)**
   - پکیج قراردادها (`@bc/contracts`): ۴۲ تست (انواع سیم، اعتبارسنجی ارقام فارسی، انولوپ رویدادها، مدل رگولاتوری INCI، قراردادهای یکپارچگی و گیت سازگاری)
-  - پکیج دامنه و منطق مالی (`@bc/domain`): ۷۵ تست (فیچرفلگ‌ها، ماشین حالت سفارش، انبارداری FEFO، ردیابی شجره‌نامه بچ، آزادسازی ۲ نفره کلین‌روم ISO 22716، تطبیق ۳ گانه خرید، لجر دوبل متوازن بدون واریانس، قفل دوره‌های بسته، سلامت واحدهای مالی minor unit ریال)
+  - پکیج دامنه و منطق مالی (`@bc/domain`): ۹۶ تست (موتور RBAC با ۲۱ تست جامع، فیچرفلگ‌ها، ماشین حالت سفارش، انبارداری FEFO، ردیابی شجره‌نامه بچ، آزادسازی ۲ نفره کلین‌روم ISO 22716، تطبیق ۳ گانه خرید، لجر دوبل متوازن بدون واریانس، قفل دوره‌های بسته، سلامت واحدهای مالی minor unit ریال)
   - پکیج هسته API سرویس‌ها (`@bc/api` Unit): ۴۶ تست در ۵ سوئیت آزمون (Products, Product Mapper, Carts, Orders, Payments)
   - آزمون‌های انتگرال پایگاه‌داده و E2E (`@bc/api` E2E): ۱۲۷ تست در ۱۳ سوئیت آزمون
 - **آزمون‌های کنتراست رنگ و دسترس‌پذیری:** ۱۷/۱۷ پاس (WCAG 2.1 AA/AAA)
