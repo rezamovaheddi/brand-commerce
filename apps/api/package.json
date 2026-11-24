@@ -15,7 +15,7 @@
     "@bc/domain": "0.1.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
-    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/platform-express": "^12.6.0",
     "@nestjs/config": "^4.0.0",
     "@nestjs/swagger": "^11.4.8",
     "@nestjs/throttler": "^6.3.0",
