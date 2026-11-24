@@ -164,6 +164,9 @@ jobs:
       - name: Canonical Integration Adapters & Provider Contracts (TASK-185 / GAP-030)
         run: npm run integrations:verify
 
+      - name: Canonical 20-Risk Mitigation Audit (TASK-199 / GAP-031)
+        run: npm run risks:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -194,3 +197,5 @@ jobs:
             docs/evidence/HIGH_RISK_REGRESSION_REPORT.md
             docs/evidence/SKILL_EVALUATION_REPORT.md
             docs/evidence/INTEGRATION_ADAPTERS_REPORT.md
+            docs/evidence/RISK_MITIGATION_REPORT.md
+            docs/governance/RISK_REGISTER_AND_MITIGATION_DOSSIER.md

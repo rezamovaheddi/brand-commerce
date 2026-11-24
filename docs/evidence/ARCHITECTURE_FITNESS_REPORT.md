@@ -1,6 +1,6 @@
 # گزارش تابع برازندگی معماری (Architecture Fitness Functions) — TASK-176
 
-تاریخ ارزیابی: 2026-11-24T09:22:48.112Z  
+تاریخ ارزیابی: 2026-11-24T09:34:14.799Z  
 استاندارد مرجع: **Modular Monolith Hexagonal Architecture Boundaries**  
 محیط: **Brand Commerce Monorepo**  
 

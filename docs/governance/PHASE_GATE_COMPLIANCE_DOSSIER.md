@@ -1,6 +1,6 @@
 # پرونده جامع انطباق و تصویب گیت‌های فازهای پروژه (Phase Gate Compliance Dossier)
 
-تاریخ صدور: **2026-11-24T09:22:56.833Z**  
+تاریخ صدور: **2026-11-24T09:34:22.678Z**  
 مرجع مصوب: **Source A (`Brand-Commerce-Platform-v2.2.0/07-roadmap/roadmap-and-phase-gates-fa.md`)**  
 دامنه بررسی: **۹ گیت اجرایی (GATE-P0 تا GATE-P8) و ۱۹۸ تسک کانونیکال**  
 وضعیت تجمیعی: **۱۰۰٪ تصویب و عبور تاییدشده (ALL 9 GATES PASSED & APPROVED)**  
