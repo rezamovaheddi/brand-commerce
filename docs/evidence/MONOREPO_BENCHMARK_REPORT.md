@@ -1,6 +1,6 @@
 # گزارش ارزیابی و بنچ‌مارک ابزارهای مونوریپو (Monorepo Tooling Benchmark) — TASK-195
 
-تاریخ اندازه‌گیری: 2026-11-24T05:59:51.834Z  
+تاریخ اندازه‌گیری: 2026-11-24T08:18:26.687Z  
 محیط اجرایی: **Node.js v22.23.3 روی Windows x64**  
 دامنه ارزیابی: **۴ فضای کاری (`contracts`، `domain`، `database`، `api`، `storefront`)**  
 
@@ -10,13 +10,13 @@
 
 | مرحله و فضای کاری | شرح دستور | زمان اندازه‌گیری‌شده (ms) | وضعیت خروجی |
 |---|---|---:|:---:|
-| **Contracts Build** | `npm run build -w @bc/contracts` | 1971 ms | ✅ بدون خطا |
-| **Domain Build** | `npm run build -w @bc/domain` | 1374 ms | ✅ بدون خطا |
-| **API Build (NestJS)** | `npm run build -w @bc/api` | 4631 ms | ✅ بدون خطا |
-| **Contracts Tests** | `npm run test -w @bc/contracts` (۱۴ تست) | 2667 ms | ✅ ۱۰۰٪ پاس |
-| **Domain Tests** | `npm run test -w @bc/domain` (۴۳ تست) | 3580 ms | ✅ ۱۰۰٪ پاس |
-| **API Unit Tests** | `npm run test -w @bc/api` (۲۰ تست) | 4586 ms | ✅ ۱۰۰٪ پاس |
-| **مجموع زمان کامپایل پکیج‌های هسته** | `contracts + domain + api` | **7976 ms** | ✅ کاملاً بهینه |
+| **Contracts Build** | `npm run build -w @bc/contracts` | 2235 ms | ✅ بدون خطا |
+| **Domain Build** | `npm run build -w @bc/domain` | 1569 ms | ✅ بدون خطا |
+| **API Build (NestJS)** | `npm run build -w @bc/api` | 5108 ms | ✅ بدون خطا |
+| **Contracts Tests** | `npm run test -w @bc/contracts` (۱۴ تست) | 4098 ms | ✅ ۱۰۰٪ پاس |
+| **Domain Tests** | `npm run test -w @bc/domain` (۴۳ تست) | 4790 ms | ✅ ۱۰۰٪ پاس |
+| **API Unit Tests** | `npm run test -w @bc/api` (۲۰ تست) | 6001 ms | ✅ ۱۰۰٪ پاس |
+| **مجموع زمان کامپایل پکیج‌های هسته** | `contracts + domain + api` | **8912 ms** | ✅ کاملاً بهینه |
 
 ---
 

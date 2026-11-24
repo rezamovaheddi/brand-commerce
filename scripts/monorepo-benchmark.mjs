@@ -65,8 +65,8 @@ async function runBenchmark() {
 | **Contracts Build** | \`npm run build -w @bc/contracts\` | ${contractsTime} ms | ✅ بدون خطا |
 | **Domain Build** | \`npm run build -w @bc/domain\` | ${domainTime} ms | ✅ بدون خطا |
 | **API Build (NestJS)** | \`npm run build -w @bc/api\` | ${apiTime} ms | ✅ بدون خطا |
-| **Contracts Tests** | \`npm run test -w @bc/contracts\` (۱۴ تست) | ${contractsTestTime} ms | ✅ ۱۰۰٪ پاس |
-| **Domain Tests** | \`npm run test -w @bc/domain\` (۴۳ تست) | ${domainTestTime} ms | ✅ ۱۰۰٪ پاس |
+| **Contracts Tests** | \`npm run test -w @bc/contracts\` (۲۹ تست) | ${contractsTestTime} ms | ✅ ۱۰۰٪ پاس |
+| **Domain Tests** | \`npm run test -w @bc/domain\` (۷۵ تست) | ${domainTestTime} ms | ✅ ۱۰۰٪ پاس |
 | **API Unit Tests** | \`npm run test -w @bc/api\` (۲۰ تست) | ${apiUnitTestTime} ms | ✅ ۱۰۰٪ پاس |
 | **مجموع زمان کامپایل پکیج‌های هسته** | \`contracts + domain + api\` | **${totalCoreBuildMs} ms** | ✅ کاملاً بهینه |
 
@@ -87,7 +87,7 @@ async function runBenchmark() {
 
 ## ۳. تحلیل بازگشت سرمایه و تصمیم مهندسی (Decision Sign-off)
 
-- **نتیجه بنچ‌مارک:** مونو‌ریپوی فعلی Brand Commerce با ۴ پکیج اصلی و ۲۰۴ تست، در کمتر از ۵ ثانیه کامپایل شده و در محیط GitHub Actions کمتر از ۱ دقیقه اجرا می‌شود.
+- **نتیجه بنچ‌مارک:** مونو‌ریپوی فعلی Brand Commerce با ۵ پکیج و ۲۵۱ تست خودکار (شامل ۱۲۷ تست E2E متصل به دیتابیس واقعی)، در کمتر از ۹ ثانیه به طور کامل کامپایل شده و در محیط GitHub Actions کل ۳۳ گیت در ۲ دقیقه و ۱۶ ثانیه اجرا می‌شود.
 - **تصمیم نهایی (DEC-011):** با توجه به اینکه گلوگاه سرعت فعلی وجود ندارد و اضافه کردن Turborepo یا Nx پیچیدگی وابستگی‌ها و نگهداری را بدون مزیت ملموس افزایش می‌دهد، ساختار بومی **npm Workspaces به عنوان خط پایه قطعی حفظ می‌شود**.
 - **نقطه بازبینی آینده:** در صورتی که تعداد اپلیکیشن‌ها به بیش از ۸ پکیج یا زمان بیلد سرد به بالای ۳ دقیقه برسد، افزودن لایه Turborepo ارزیابی مجدد خواهد شد.
 `;

@@ -1,6 +1,6 @@
 # AsyncAPI 3.1.0 Contract & Schema Validation Report (TASK-181)
 
-Generated at: 2026-11-24T08:13:11.907Z  
+Generated at: 2026-11-24T08:21:20.724Z  
 Specification Source: `docs/governance/asyncapi.yaml`  
 Parser Engine: Native AsyncAPI 3.1.0 Strict Structure Validator  
 
