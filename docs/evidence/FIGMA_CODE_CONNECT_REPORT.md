@@ -1,6 +1,6 @@
 # Figma Code Connect & Token Mapping Verification Report (TASK-185)
 
-Generated at: 2026-11-24T06:38:21.251Z  
+Generated at: 2026-11-24T06:48:23.927Z  
 Configuration File: `.figma/code-connect.json`  
 Governance Policy: `docs/governance/FIGMA_CODE_CONNECT.md`  
 Target Figma File: `https://www.figma.com/design/dermavia-luxury-commerce-v6`  

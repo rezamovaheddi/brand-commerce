@@ -52,6 +52,39 @@ jobs:
       - name: Architectural Fitness Functions (TASK-176)
         run: npm run arch:fitness
 
+      - name: Architecture Fitness & Import Boundaries (TASK-180)
+        run: npm run arch:boundaries
+
+      - name: Consumer-Driven Contract Verification (TASK-183)
+        run: npm run pact:verify
+
+      - name: Figma Code Connect & Token Mapping (TASK-185)
+        run: npm run figma:verify
+
+      - name: Polyglot Governance & Zero DB Shared Writes (TASK-153/157)
+        run: npm run polyglot:verify
+
+      - name: Strangler Fig Extraction Simulation (TASK-152)
+        run: npm run strangler:simulate
+
+      - name: OpenTelemetry Semantic Conventions (TASK-158)
+        run: npm run telemetry:verify
+
+      - name: Performance Baselines & Budgets (TASK-160)
+        run: npm run budget:check
+
+      - name: AsyncAPI 3.1 Schema Validation (TASK-181)
+        run: npm run asyncapi:validate
+
+      - name: OpenAPI Spectral Linting (TASK-182)
+        run: npm run openapi:lint
+
+      - name: Visual Regression & Responsive Audit (TASK-186)
+        run: npm run visual:audit
+
+      - name: Agent Performance & Quality Metrics (TASK-187)
+        run: npm run metrics:agent
+
       - name: Security & Secret Audit
         run: npm run security:audit
 

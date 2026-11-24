@@ -48,3 +48,8 @@ S-046,Consumer-Driven Contract Verification Suite,TASK-183,QA,P1,DONE,"pact/stor
 S-047,Figma Code Connect & DTCG Token Component Mapping,TASK-185,Design System,P2,DONE,".figma/code-connect.json, docs/governance/FIGMA_CODE_CONNECT.md, scripts/verify-code-connect.mjs"
 S-048,CMS Editorial Governance & Recall Management,TASK-170,Frontend,P2,DONE,"apps/storefront/app/admin/governance/page.tsx with 6-state claim and recall workflow"
 S-049,Comprehensive Developer Design Handoff Specification,TASK-173,Frontend,P2,DONE,"docs/governance/DESIGN_HANDOFF_SPEC.md covering 21 routes and component contracts"
+S-050,Polyglot Toolchain Governance & DB Write Isolation,TASK-153,Architecture,P1,DONE,"docs/governance/POLYGLOT_GOVERNANCE.md, scripts/verify-polyglot-governance.mjs"
+S-051,Python Analytics Consumer Worker with Schema & PII Masking,TASK-157,Backend,P1,DONE,"services/analytics-worker/worker.py with AsyncAPI validation and phone masking"
+S-052,Microservice Strangler Fig Extraction Simulator,TASK-152,DevOps,P1,DONE,"docs/governance/STRANGLER_EXTRACTION_SIMULATION.md, scripts/simulate-strangler-extraction.mjs"
+S-053,OpenTelemetry Semantic Conventions & Observability,TASK-158,SRE,P1,DONE,"docs/governance/OPENTELEMETRY_SPEC.md, scripts/verify-telemetry.mjs"
+S-054,Performance Baselines & Engineering Budgets Gate,TASK-160,QA,P1,DONE,"docs/governance/PERFORMANCE_BUDGETS.md, scripts/performance-budget-check.mjs"
