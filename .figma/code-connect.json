@@ -1,0 +1,84 @@
+{
+  "codeConnect": {
+    "version": "1.0.0",
+    "include": [
+      "apps/storefront/components/**/*.tsx",
+      "apps/storefront/app/design-system/workshop/**/*.tsx"
+    ],
+    "figmaFile": "https://www.figma.com/design/dermavia-luxury-commerce-v6",
+    "tokens": "tokens/brand.tokens.json",
+    "mappings": [
+      {
+        "figmaNode": "Dermavia / Primitives / ButtonPrimary",
+        "figmaId": "101:4020",
+        "component": "apps/storefront/app/design-system/workshop/page.tsx",
+        "exportName": "ButtonPrimary",
+        "props": {
+          "variant": "primary-gold",
+          "disabled": "state.disabled",
+          "loading": "state.loading"
+        },
+        "tokens": [
+          "--dtcg-color-primitives-action",
+          "--dtcg-color-primitives-white"
+        ]
+      },
+      {
+        "figmaNode": "Dermavia / Primitives / ButtonCosmic",
+        "figmaId": "101:4035",
+        "component": "apps/storefront/app/design-system/workshop/page.tsx",
+        "exportName": "ButtonCosmic",
+        "props": {
+          "variant": "cosmic-deep",
+          "disabled": "state.disabled"
+        },
+        "tokens": [
+          "--dtcg-color-primitives-darkcanvas",
+          "--dtcg-color-primitives-darkink"
+        ]
+      },
+      {
+        "figmaNode": "Dermavia / Badges / SampleBadge",
+        "figmaId": "102:5110",
+        "component": "apps/storefront/components/SampleBadge.tsx",
+        "exportName": "SampleBadge",
+        "props": {
+          "className": "dv-badge"
+        },
+        "tokens": [
+          "--dtcg-color-primitives-borderbase",
+          "--dtcg-color-primitives-ink"
+        ]
+      },
+      {
+        "figmaNode": "Dermavia / Commerce / PriceTag",
+        "figmaId": "103:6200",
+        "component": "apps/storefront/components/PriceTag.tsx",
+        "exportName": "PriceTag",
+        "props": {
+          "priceMinor": "product.priceMinor",
+          "currency": "product.currency"
+        },
+        "tokens": [
+          "--dtcg-color-primitives-ink",
+          "--dtcg-color-primitives-action"
+        ]
+      },
+      {
+        "figmaNode": "Dermavia / Commerce / ProductCard",
+        "figmaId": "104:7300",
+        "component": "apps/storefront/components/ProductCard.tsx",
+        "exportName": "ProductCard",
+        "props": {
+          "product": "product",
+          "isSample": "product.isSample"
+        },
+        "tokens": [
+          "--dtcg-color-primitives-paper",
+          "--dtcg-color-primitives-canvas",
+          "--dtcg-color-primitives-action"
+        ]
+      }
+    ]
+  }
+}

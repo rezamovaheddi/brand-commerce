@@ -1,7 +1,7 @@
 # Visual Regression & Breakpoint Audit Report (TASK-189)
 
-Generated at: 2026-11-24T06:27:12.487Z  
-Audited Workspaces: `apps/storefront` (46 files scanned)  
+Generated at: 2026-11-24T06:38:23.311Z  
+Audited Workspaces: `apps/storefront` (47 files scanned)  
 Design System Alignment: Warm Clinical Luxury (DTCG 2025.10)  
 Baseline Authority: Lead Product Designer & Visual QA  
 
@@ -12,7 +12,7 @@ Baseline Authority: Lead Product Designer & Visual QA
 |---|---|---|---|
 | VIS-01 | Viewport Horizontal Overflow Safety | **PASS** | `Zero unconstrained fixed widths > 390px detected; all layouts responsive` |
 | VIS-02 | Persian Typography Kerning Safety | **PASS** | `Zero destructive tracking/letter-spacing in Persian text contexts` |
-| VIS-03 | CSS Logical Properties RTL Standard | **PASS** | `62 logical properties used (100% of directional rules)` |
+| VIS-03 | CSS Logical Properties RTL Standard | **PASS** | `78 logical properties used (100% of directional rules)` |
 | VIS-04 | Design-Approved Visual Baseline Snapshots | **PASS** | `5 canonical views baselined and signed off by Design Owner` |
 
 ---

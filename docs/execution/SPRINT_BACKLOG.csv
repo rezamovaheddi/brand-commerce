@@ -43,3 +43,8 @@ S-041,OpenAPI Spectral Lint Governance Suite,TASK-182,Backend,P1,DONE,"docs/gove
 S-042,Component Workshop & Story Inventory,TASK-187,Frontend,P2,DONE,"apps/storefront/app/design-system/workshop/page.tsx, docs/evidence/STORYBOOK_INVENTORY.md"
 S-043,Visual Regression Pipeline & Baseline Snapshot Harness,TASK-189,QA,P2,DONE,"scripts/visual-regression-audit.mjs passing 4 breakpoints; VISUAL_REGRESSION_REPORT.md"
 S-044,Agent Quality & Engineering Metrics Dashboard,TASK-198,DevOps,P8,DONE,"docs/governance/AGENT_QUALITY_METRICS.md, scripts/agent-quality-metrics.mjs; AGENT_METRICS_REPORT.md"
+S-045,Architecture Fitness & Import Boundary Enforcement,TASK-180,Architecture,P1,DONE,".dependency-cruiser.cjs, scripts/enforce-architecture-fitness.mjs passing 12 rules"
+S-046,Consumer-Driven Contract Verification Suite,TASK-183,QA,P1,DONE,"pact/storefront-api-contracts.json, scripts/consumer-contract-test.mjs passing 5 contract checks"
+S-047,Figma Code Connect & DTCG Token Component Mapping,TASK-185,Design System,P2,DONE,".figma/code-connect.json, docs/governance/FIGMA_CODE_CONNECT.md, scripts/verify-code-connect.mjs"
+S-048,CMS Editorial Governance & Recall Management,TASK-170,Frontend,P2,DONE,"apps/storefront/app/admin/governance/page.tsx with 6-state claim and recall workflow"
+S-049,Comprehensive Developer Design Handoff Specification,TASK-173,Frontend,P2,DONE,"docs/governance/DESIGN_HANDOFF_SPEC.md covering 21 routes and component contracts"
