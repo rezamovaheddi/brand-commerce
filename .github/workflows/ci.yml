@@ -73,6 +73,9 @@ jobs:
       - name: Performance Baselines & Budgets (TASK-160)
         run: npm run budget:check
 
+      - name: Workflow Platform Saga Verification (TASK-151)
+        run: npm run workflow:verify
+
       - name: AsyncAPI 3.1 Schema Validation (TASK-181)
         run: npm run asyncapi:validate
 
@@ -105,6 +108,9 @@ jobs:
 
       - name: Unit + e2e tests (DB integration included)
         run: npm run test
+
+      - name: Real-Service Integration Suite (TASK-184)
+        run: npm run integration:real
 
       - name: API smoke (health + products)
         run: |

@@ -53,3 +53,5 @@ S-051,Python Analytics Consumer Worker with Schema & PII Masking,TASK-157,Backen
 S-052,Microservice Strangler Fig Extraction Simulator,TASK-152,DevOps,P1,DONE,"docs/governance/STRANGLER_EXTRACTION_SIMULATION.md, scripts/simulate-strangler-extraction.mjs"
 S-053,OpenTelemetry Semantic Conventions & Observability,TASK-158,SRE,P1,DONE,"docs/governance/OPENTELEMETRY_SPEC.md, scripts/verify-telemetry.mjs"
 S-054,Performance Baselines & Engineering Budgets Gate,TASK-160,QA,P1,DONE,"docs/governance/PERFORMANCE_BUDGETS.md, scripts/performance-budget-check.mjs"
+S-055,Workflow Platform Architecture & Saga Simulation (BullMQ vs. Temporal),TASK-151,Platform Engineering,P1,DONE,"docs/adr/ADR-0007-workflow-orchestration-platform.md, scripts/verify-workflow-platform.mjs, docs/evidence/WORKFLOW_PLATFORM_REPORT.md"
+S-056,Real-Service Integration Suite with PostgreSQL 16 & DLQ,TASK-184,QA / Data Platform,P1,DONE,"scripts/run-real-service-integration.mjs, docs/evidence/REAL_SERVICE_INTEGRATION_REPORT.md"

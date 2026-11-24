@@ -2,7 +2,7 @@
 
 جمع‌بندی نهایی: **PRODUCTION & STAGING READY (آماده استقرار و تولید کامل)**  
 تاریخ آخرین اعتبارسنجی: **2026-11-24**  
-خط لوله ارزیابی کیفیت: **۲۱ گیت خودکار (`npm run verify` خروجی Exit 0)**  
+خط لوله ارزیابی کیفیت: **۲۳ گیت خودکار (`npm run verify` خروجی Exit 0)**  
 مخزن گیت‌هاب: [https://github.com/rezamovaheddi/brand-commerce](https://github.com/rezamovaheddi/brand-commerce) (CI خط لوله گیت‌هاب اکشنز ۱۰۰٪ سبز)
 
 ---
@@ -12,7 +12,7 @@
 | گیت فاز | شرح محدوده | وضعیت | شواهد کلیدی |
 |---|---|---|---|
 | **GATE-P0** | زیرساخت مونوریپو، پایگاه‌داده و محیط اجرا | **PASSED** | Node v22.23.3 روی ویندوز، سرویس PostgreSQL 16 محلی روی پورت 5432، ۱۳ مایگریشن پریزما، شید داده نمونه. |
-| **GATE-P1** | قراردادهای داده، کانسومر Pact، مرزهای چندزبانه و رصدپذیری | **PASSED** | قراردادهای AsyncAPI 3.1، آزمون‌های کانسومر Pact (`pact/storefront-api-contracts.json`)، انطباق ۱۲ مرز معماری با Dependency-Cruiser (`.dependency-cruiser.cjs`)، حاکمیت چندزبانه و منع نوشتن مستقیم پایتون در Core DB (`POLYGLOT_GOVERNANCE.md`)، شبیه‌سازی الگوی Strangler Fig با شادو مود و رول‌بک آنی (`STRANGLER_SIMULATION_REPORT.md`)، استانداردهای OpenTelemetry و ریدکشن PII (`OPENTELEMETRY_REPORT.md`)، و گیت بودجه‌های پرفورمنس (`PERFORMANCE_BUDGET_REPORT.md`). |
+| **GATE-P1** | قراردادهای داده، کانسومر Pact، مرزهای چندزبانه، گردش کار و آزمون یکپارچگی | **PASSED** | قراردادهای AsyncAPI 3.1، آزمون‌های کانسومر Pact (`pact/storefront-api-contracts.json`)، انطباق ۱۲ مرز معماری با Dependency-Cruiser (`.dependency-cruiser.cjs`)، حاکمیت چندزبانه و منع نوشتن مستقیم پایتون در Core DB (`POLYGLOT_GOVERNANCE.md`)، شبیه‌سازی الگوی Strangler Fig با شادو مود و رول‌بک آنی (`STRANGLER_SIMULATION_REPORT.md`)، استانداردهای OpenTelemetry و ریدکشن PII (`OPENTELEMETRY_REPORT.md`)، گیت بودجه‌های پرفورمنس (`PERFORMANCE_BUDGET_REPORT.md`)، ارکستراسیون ساگای زنجیره سرد با جبران‌سازی خودکار و سند تصمیم معماری (`ADR-0007-workflow-orchestration-platform.md` و `WORKFLOW_PLATFORM_REPORT.md`)، و سوئیت آزمون یکپارچگی با سرویس واقعی PostgreSQL 16 و قفل ردیفی بدبینانه (`REAL_SERVICE_INTEGRATION_REPORT.md`). |
 | **GATE-P2** | فروشگاه B2C، کارگاه کامپوننت، فیگما Code Connect و حاکمیت CMS | **PASSED** | پوسته لوکس Dermavia V6 در استورفرانت (۲۱ روت کامپایل‌شده)، کارگاه کامپوننت‌ها (`/design-system/workshop`)، نگاشت فیگما Code Connect (`.figma/code-connect.json`)، حاکمیت ادعاهای بالینی و فراخوان دارویی (`/admin/governance`)، سند هندآف توسعه‌دهندگان (`DESIGN_HANDOFF_SPEC.md`). |
 | **GATE-P3** | درگاه پرداخت امن Sandbox و رهگیری چرخه سفارش | **PASSED** | آداپتور پرداخت سندباکس با امضای HMAC-SHA256 (`timingSafeEqual`)، ماشین حالت سفارشات، و استپر ۵ مرحله‌ای رهگیری در `/orders/:id`. |
 | **GATE-P4** | پورتال نمایندگان و استعلام تجاری B2B / RFQ | **PASSED** | فرم درخواست نمایندگی (`/b2b/apply`)، استعلام فرمولاسیون و کاتالوگ OEM (`/b2b/rfq`)، پورتال سازمانی با ایزولاسیون Cross-Org و کلیدهای پرآنتراپی (`/b2b/portal`). |
@@ -38,6 +38,8 @@
 - **انطباق فیگما Code Connect:** ۵/۵ کامپوننت نگاشت‌شده با توکن‌های DTCG تاییدشده
 - **حاکمیت چندزبانه و پایتون:** ۰ نوشتن مستقیم به Core DB + ورکر پردازش رویداد با ماسک PII
 - **بودجه‌های عملکرد و پرفورمنس:** ۱۰۰٪ منطبق با حد نصاب‌ها (باندل فرانت ۱۰۳ کیلوبایت در برابر سقف ۱۵۰ کیلوبایت، تاخیر p95 زیر ۸۰ میلی‌ثانیه در برابر سقف ۲۵۰ میلی‌ثانیه)
+- **ارکستراسیون فرآیندهای کسب‌وکار (Workflow Platform):** تصویب معماری هیبرید BullMQ (MVP) و Temporal (Phase 3+) با سناریوی ساگای ۴ مرحله‌ای، تلاش مجدد نمایی با جیتر، و جبران‌سازی معکوس بدون خطای پسماند قفل
+- **آزمون‌های یکپارچگی با سرویس‌های واقعی:** ۵ گیت ارزیابی با PostgreSQL 16 واقعی، قفل ردیفی بدبینانه `SELECT ... FOR UPDATE` (صفر بیش‌فروشی تحت بار همزمان ۱۲ کارگر)، رول‌بک اتمیک تراکنش و پاکسازی قطعی ۱۰۰٪ فیکسچرها
 
 ---
 
@@ -45,7 +47,7 @@
 
 - [x] ریپو پایدار و معماری Modular Monolith با ۴ پکیج استاندارد (`@bc/contracts`, `@bc/domain`, `@bc/api`, `@bc/storefront`)
 - [x] پایگاه داده فعال و مایگریشن‌های همگام با PostgreSQL 16
-- [x] خط فرمان یکپارچه ۲۱ گیت ارزیابی کیفیت (`npm run verify`) با خروجی Exit 0
+- [x] خط فرمان یکپارچه ۲۳ گیت ارزیابی کیفیت (`npm run verify`) با خروجی Exit 0
 - [x] کامپایل موفق تمام ۲۱ مسیر استورفرانت در Next.js 15 App Router
 - [x] کارگاه تعاملی کامپوننت‌ها (`/design-system/workshop`)، نگاشت Code Connect و ممیزی رگرسیون بصری ۴ برک‌پوینت
 - [x] چرخه ۶ مرحله‌ای حاکمیت ادعاهای علمی و فراخوان دارویی (`/admin/governance`)
