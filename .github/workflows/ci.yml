@@ -155,6 +155,9 @@ jobs:
       - name: Canonical 9-Phase Gate Compliance Audit (GATE-P0..P8)
         run: npm run gates:verify
 
+      - name: Canonical 40-Scenario High-Risk Regression Suite (QA-004 / TASK-189)
+        run: npm run regression:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -182,3 +185,4 @@ jobs:
             docs/evidence/SECURITY_PENETRATION_REPORT.md
             docs/evidence/MONOREPO_BENCHMARK_REPORT.md
             docs/governance/PHASE_GATE_COMPLIANCE_DOSSIER.md
+            docs/evidence/HIGH_RISK_REGRESSION_REPORT.md

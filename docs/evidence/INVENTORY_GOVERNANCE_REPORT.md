@@ -26,4 +26,4 @@ This report documents the verification of the Brand Commerce Platform ERP-lite d
 - **ISO 22716 Conformance:** 100% Segregation of duties enforced
 - **Zero Floating-Point Violations:** Verified
 
-*Verified by scripts/verify-inventory-governance.mjs on 2026-11-24T08:31:28.942Z*
+*Verified by scripts/verify-inventory-governance.mjs on 2026-11-24T08:43:06.268Z*
