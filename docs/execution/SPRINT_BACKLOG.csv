@@ -32,3 +32,6 @@ S-030,MCP and tool permission matrix,TASK-197,Security,P1,DONE,"docs/governance/
 S-031,Dependency update policy & Dependabot config,TASK-194,DevOps,P8,DONE,".github/dependabot.yml and docs/governance/DEPENDENCY_UPDATE_POLICY.md"
 S-032,OpenSSF security policy & baseline,TASK-191,Security,P7,DONE,"SECURITY.md and docs/governance/OPENSSF_BASELINE.md checklist"
 S-033,Repository and skill registry,TASK-175,DevEx,P1,DONE,"docs/governance/REPOSITORY_AND_SKILL_REGISTRY.csv tracking sources, licenses, and reviews"
+S-034,Build provenance and artifact attestation,TASK-192,DevSecOps,P7,DONE,"scripts/verify-provenance.mjs produces and verifies SHA-256 PROVENANCE_MANIFEST"
+S-035,Monorepo tooling benchmark & cache analysis,TASK-195,DevEx,P8,DONE,"scripts/monorepo-benchmark.mjs benchmarks build/test times; MONOREPO_BENCHMARK_REPORT.md"
+S-036,Skill evaluation harness and 60-scenario rubric,TASK-177,AI Engineering,P1,DONE,"docs/governance/SKILL_EVALUATION_HARNESS.md with 10-point scoring model and critical guardrails"
