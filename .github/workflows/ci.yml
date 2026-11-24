@@ -152,6 +152,9 @@ jobs:
       - name: ASVS 5.0 / OWASP Security Penetration Test (TASK-103)
         run: npm run security:pentest
 
+      - name: Canonical 9-Phase Gate Compliance Audit (GATE-P0..P8)
+        run: npm run gates:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -178,3 +181,4 @@ jobs:
             docs/evidence/PERSONA_UAT_REPORT.md
             docs/evidence/SECURITY_PENETRATION_REPORT.md
             docs/evidence/MONOREPO_BENCHMARK_REPORT.md
+            docs/governance/PHASE_GATE_COMPLIANCE_DOSSIER.md
