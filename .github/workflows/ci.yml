@@ -140,6 +140,9 @@ jobs:
       - name: Data Migration Rehearsal & Financial Reconciliation (TASK-104)
         run: npm run migration:rehearse
 
+      - name: Loyalty Points Ledger & Adverse Event Governance (TASK-092..098/133)
+        run: npm run loyalty:verify
+
       - name: Export OpenAPI artifact (GAP-004)
         run: npm run openapi:export
 
@@ -161,3 +164,4 @@ jobs:
             docs/evidence/FEATURE_FLAG_POC_REPORT.md
             docs/evidence/INCIDENT_TABLETOP_REPORT.md
             docs/evidence/MIGRATION_REHEARSAL_REPORT.md
+            docs/evidence/LOYALTY_GOVERNANCE_REPORT.md

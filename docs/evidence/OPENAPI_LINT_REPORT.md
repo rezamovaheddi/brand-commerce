@@ -1,6 +1,6 @@
 # OpenAPI Spectral Governance & Linter Report (TASK-182)
 
-Generated at: 2026-11-24T07:54:26.638Z  
+Generated at: 2026-11-24T08:02:42.043Z  
 Specification Source: `apps/api/openapi.json`  
 Governance Ruleset: `docs/governance/.spectral.yaml`  
 Total URL Routes: 66  
