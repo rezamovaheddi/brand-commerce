@@ -9,11 +9,73 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ProductContentModelSchema } from '@bc/contracts';
+import { z } from 'zod';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = resolve(__dirname, '..');
+
+let ProductContentModelSchema;
+try {
+  const contracts = await import('@bc/contracts');
+  ProductContentModelSchema = contracts.ProductContentModelSchema;
+} catch {
+  // Graceful fallback if @bc/contracts dist has not been generated yet
+  const ContentLocaleSchema = z.enum(['fa-IR', 'en-US']);
+  const ContentSourceSchema = z.enum(['REGULATORY_DOSSIER', 'LABORATORY_COA', 'FORMULATOR_SPEC', 'CLINICAL_TRIAL']);
+  const ApprovalStateSchema = z.enum(['DRAFT', 'REGULATORY_REVIEW', 'APPROVED', 'PUBLISHED', 'ARCHIVED']);
+  const ConcentrationTierSchema = z.enum(['BAND_A_OVER_50', 'BAND_B_10_TO_50', 'BAND_C_1_TO_10', 'BAND_D_UNDER_1']);
+  const WarningTypeSchema = z.enum(['ALLERGEN', 'PRECAUTION', 'CONTRAINDICATION', 'SUN_EXPOSURE']);
+  const WarningSeveritySchema = z.enum(['MILD', 'MODERATE', 'CRITICAL']);
+  const TimeOfDaySchema = z.enum(['MORNING', 'EVENING', 'BOTH']);
+
+  const InciIngredientSchema = z.object({
+    inciName: z.string().min(2),
+    persianName: z.string().min(2),
+    casNumber: z.string().regex(/^\d{2,7}-\d{2}-\d$/, 'Invalid CAS registry format'),
+    concentrationTier: ConcentrationTierSchema,
+    purposeFa: z.string().min(3),
+    ewgRating: z.number().int().min(1).max(10),
+    isAllergen: z.boolean().default(false),
+  });
+
+  const SafetyWarningSchema = z.object({
+    warningType: WarningTypeSchema,
+    severity: WarningSeveritySchema,
+    textFa: z.string().min(5),
+    textEn: z.string().min(5),
+  });
+
+  const UsageDirectionSchema = z.object({
+    stepNumber: z.number().int().positive(),
+    instructionFa: z.string().min(5),
+    instructionEn: z.string().min(5),
+    timeOfDay: TimeOfDaySchema,
+    dosageUnits: z.string().min(2),
+  });
+
+  const ProductOriginSchema = z.object({
+    countryCode: z.string().length(2),
+    manufacturingFacility: z.string().min(3),
+    iso22716Certification: z.string().min(3),
+    batchCoaHash: z.string().regex(/^[a-f0-9]{64}$/, 'Must be a 64-character SHA-256 hex digest'),
+  });
+
+  ProductContentModelSchema = z.object({
+    productId: z.string().min(3),
+    sku: z.string().min(3),
+    locale: ContentLocaleSchema,
+    source: ContentSourceSchema,
+    version: z.string().regex(/^\d+\.\d+\.\d+$/, 'Version must follow SemVer format (x.y.z)'),
+    approvalState: ApprovalStateSchema,
+    approvedBy: z.string().nullable(),
+    approvedAt: z.string().datetime().nullable(),
+    ingredients: z.array(InciIngredientSchema).min(1),
+    warnings: z.array(SafetyWarningSchema),
+    usage: z.array(UsageDirectionSchema).min(1),
+    origin: ProductOriginSchema,
+  });
+}
 
 const SAMPLE_REGULATORY_PRODUCTS = [
   {
