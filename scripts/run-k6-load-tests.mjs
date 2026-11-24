@@ -45,16 +45,22 @@ const JOURNEYS = [
   },
   {
     name: 'B2B RFQ Formulation Submission',
-    path: '/api/v1/b2b/rfq',
+    path: '/api/v1/b2b/rfqs',
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      companyName: 'شرکت دارویی بارگذاری نمونه',
+      contactName: 'شرکت دارویی بارگذاری نمونه',
       contactPhone: '09123334455',
-      brief: 'فرمولاسیون کرم ضدچروک با طلای ۲۴ عیار',
-      targetUnits: 5000,
+      items: [
+        {
+          itemKind: 'OEM',
+          quantity: 5000,
+          specNote: 'فرمولاسیون سفارشی کرم ضدچروک با طلای ۲۴ عیار و پپتید مس',
+        },
+      ],
+      note: 'درخواست استعلام قیمت تولید OEM',
     }),
-    expectedStatus: [200, 201, 400],
+    expectedStatus: [200, 201],
   },
   {
     name: 'High-Concurrency Health Probe',
