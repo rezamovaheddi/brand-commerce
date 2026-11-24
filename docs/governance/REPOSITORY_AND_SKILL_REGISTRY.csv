@@ -1,0 +1,18 @@
+ID,NAME,TYPE,URL_OR_PATH,VERSION_OR_COMMIT,LICENSE,OWNER,ADOPTION_DECISION,STATUS,REVISIT_DATE,EVIDENCE_NOTES
+SRC-001,brand-commerce (Core),Monorepo,https://github.com/rezamovaheddi/brand-commerce,7be291c,UNLICENSED,Orchestrator,CORE_PLATFORM,APPROVED,2027-02-24,Modular monolith repository with 4 workspaces and CI wired
+SRC-002,@bc/contracts,Internal Workspace,packages/contracts,0.1.0,UNLICENSED,Backend Lead,CORE_PACKAGE,APPROVED,2027-02-24,Zod schemas and wire normalization with 14 unit tests
+SRC-003,@bc/domain,Internal Workspace,packages/domain,0.1.0,UNLICENSED,Domain Architect,CORE_PACKAGE,APPROVED,2027-02-24,Pure business domain rules with 43 tests and zero runtime deps
+SRC-004,@bc/database,Internal Workspace,packages/database,0.1.0,UNLICENSED,DevOps / DBA,CORE_PACKAGE,APPROVED,2027-02-24,Prisma schema with 13 applied migrations on PostgreSQL 16
+SRC-005,@bc/api,Internal Workspace,apps/api,0.1.0,UNLICENSED,Backend Lead,CORE_APP,APPROVED,2027-02-24,NestJS modular monolith REST API listening on port 3001
+SRC-006,@bc/storefront,Internal Workspace,apps/storefront,0.1.0,UNLICENSED,Frontend Lead,CORE_APP,APPROVED,2027-02-24,Next.js 15 App Router luxury brand storefront on port 3000
+SRC-007,NestJS Framework,External Runtime,https://github.com/nestjs/nest,v10.4.15,MIT,Backend Lead,APPROVED_RUNTIME,APPROVED,2027-05-24,Modular service container with strong dependency injection
+SRC-008,Next.js Framework,External Runtime,https://github.com/vercel/next.js,v15.5.29,MIT,Frontend Lead,APPROVED_RUNTIME,APPROVED,2027-05-24,App Router with React Server Components and SSR
+SRC-009,Prisma ORM,External Runtime,https://github.com/prisma/prisma,v6.4.1,Apache-2.0,DevOps,APPROVED_RUNTIME,APPROVED,2027-05-24,Type-safe database ORM and migration manager
+SRC-010,Zod Schema Validator,External Runtime,https://github.com/colinhacks/zod,v3.24.2,MIT,Backend Lead,APPROVED_RUNTIME,APPROVED,2027-05-24,Runtime type inference and wire contract validation
+SKL-001,accessibility-audit,Agent Skill,.agents/skills/accessibility-audit,v1.0.0,Apache-2.0,QA Lead,APPROVED_SKILL,APPROVED,2027-03-24,Keyboard focus semantics contrast and RTL audit instructions
+SKL-002,contrast-and-color-audit,Agent Skill,.agents/skills/contrast-and-color-audit,v1.0.0,Apache-2.0,Design Lead,APPROVED_SKILL,APPROVED,2027-03-24,WCAG 2.1 AA/AAA contrast check guidelines
+SKL-003,design-token-engineering,Agent Skill,.agents/skills/design-token-engineering,v1.0.0,Apache-2.0,Design Lead,APPROVED_SKILL,APPROVED,2027-03-24,DTCG 2025.10 design token governance and validation
+SKL-004,architecture-graph-navigator,Agent Skill,.agents/skills/architecture-graph-navigator,v1.0.0,Apache-2.0,Domain Architect,APPROVED_SKILL,APPROVED,2027-03-24,Vis.js dependency graph analysis and blast radius calculation
+SKL-005,b2c-commerce-flow,Agent Skill,.agents/skills/b2c-commerce-flow,v1.0.0,Apache-2.0,Product Owner,APPROVED_SKILL,APPROVED,2027-03-24,End-to-end catalog cart checkout and order verification
+SKL-006,brand-ux-design,Agent Skill,.agents/skills/brand-ux-design,v1.0.0,Apache-2.0,Design Lead,APPROVED_SKILL,APPROVED,2027-03-24,Warm Clinical Luxury design system rules and guidelines
+SKL-007,uiux-master-design,Agent Skill,.agents/skills/uiux-master-design,v1.0.0,Apache-2.0,Design Lead,APPROVED_SKILL,APPROVED,2027-03-24,Master UX review and layout orchestration

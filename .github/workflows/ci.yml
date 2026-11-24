@@ -49,6 +49,9 @@ jobs:
       - name: Automated Accessibility Audit (TASK-188)
         run: npm run a11y:audit
 
+      - name: Architectural Fitness Functions (TASK-176)
+        run: npm run arch:fitness
+
       - name: Security & Secret Audit
         run: npm run security:audit
 

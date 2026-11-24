@@ -27,3 +27,8 @@ S-025,Feature flags and OpenFeature abstraction,TASK-196,Backend,P8,DONE,"Dynami
 S-026,CycloneDX SBOM & license compliance audit,TASK-190,DevOps,P7,DONE,"scripts/generate-sbom.mjs produces SBOM.cdx.json; scripts/license-audit.mjs passes"
 S-027,Critical journey load testing suite,TASK-193,DevOps,P7,DONE,"scripts/load-test.mjs benchmarked p95 < 250ms with zero errors; LOAD_TEST_REPORT.md"
 S-028,Automated WCAG 2.1/2.2 accessibility gate,TASK-188,QA,P2,DONE,"scripts/accessibility-audit.mjs audits 42 components; A11Y_AUDIT_REPORT.md"
+S-029,Architecture fitness functions gate,TASK-176,Tech Lead,P1,DONE,"scripts/architecture-fitness.mjs passes all 5 modular boundary rules"
+S-030,MCP and tool permission matrix,TASK-197,Security,P1,DONE,"docs/governance/MCP_PERMISSION_MATRIX.md defining least-privilege scopes and approvals"
+S-031,Dependency update policy & Dependabot config,TASK-194,DevOps,P8,DONE,".github/dependabot.yml and docs/governance/DEPENDENCY_UPDATE_POLICY.md"
+S-032,OpenSSF security policy & baseline,TASK-191,Security,P7,DONE,"SECURITY.md and docs/governance/OPENSSF_BASELINE.md checklist"
+S-033,Repository and skill registry,TASK-175,DevEx,P1,DONE,"docs/governance/REPOSITORY_AND_SKILL_REGISTRY.csv tracking sources, licenses, and reviews"
