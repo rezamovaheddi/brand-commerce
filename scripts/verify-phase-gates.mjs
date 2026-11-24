@@ -110,13 +110,15 @@ verifyGate(
     "docs/evidence/REAL_SERVICE_INTEGRATION_REPORT.md",
     "docs/evidence/ASYNCAPI_VALIDATION_REPORT.md",
     "docs/evidence/OPENAPI_LINT_REPORT.md",
+    "docs/evidence/INTEGRATION_ADAPTERS_REPORT.md",
   ],
   () => {
     const contractsTest = checkFileExists("packages/contracts/src/index.spec.ts");
     const domainTest = checkFileExists("packages/domain/src/index.spec.ts");
+    const integrationsTest = checkFileExists("packages/contracts/src/integrations.spec.ts");
     return {
-      passed: contractsTest && domainTest,
-      details: "Pure domain zero-IO rules, 12 dependency cruiser boundaries, and real DB integration verified",
+      passed: contractsTest && domainTest && integrationsTest,
+      details: "Pure domain zero-IO rules, 12 dependency cruiser boundaries, canonical provider capability contracts, and real DB integration verified",
     };
   }
 );
@@ -135,6 +137,7 @@ verifyGate(
     "docs/evidence/FIGMA_CODE_CONNECT_REPORT.md",
     "docs/evidence/CONTENT_GOVERNANCE_REPORT.md",
     "docs/evidence/VISUAL_REGRESSION_REPORT.md",
+    "docs/evidence/SKILL_EVALUATION_REPORT.md",
     "docs/governance/DESIGN_HANDOFF_SPEC.md",
   ],
   () => {
@@ -250,6 +253,8 @@ verifyGate(
     "docs/evidence/MIGRATION_REHEARSAL_REPORT.md",
     "docs/governance/COUNTRY_LAUNCH_EVIDENCE_PACK.md",
     "docs/governance/PROVENANCE_MANIFEST.sha256",
+    "docs/evidence/HIGH_RISK_REGRESSION_REPORT.md",
+    "docs/governance/DRILL_EVIDENCE.md",
   ],
   () => {
     return {
@@ -333,6 +338,7 @@ ${gateResults
 - ساگای گردش کار: [\`docs/evidence/WORKFLOW_PLATFORM_REPORT.md\`](../evidence/WORKFLOW_PLATFORM_REPORT.md)
 - آزمون سرویس واقعی DB: [\`docs/evidence/REAL_SERVICE_INTEGRATION_REPORT.md\`](../evidence/REAL_SERVICE_INTEGRATION_REPORT.md)
 - اعتبارسنجی AsyncAPI 3.1 و OpenAPI: [\`docs/evidence/ASYNCAPI_VALIDATION_REPORT.md\`](../evidence/ASYNCAPI_VALIDATION_REPORT.md) و [\`docs/evidence/OPENAPI_LINT_REPORT.md\`](../evidence/OPENAPI_LINT_REPORT.md)
+- قراردادها و آداپتورهای یکپارچه‌سازی تأمین‌کنندگان: [\`docs/evidence/INTEGRATION_ADAPTERS_REPORT.md\`](../evidence/INTEGRATION_ADAPTERS_REPORT.md)
 
 ### فاز P2 (Brand UX & CMS):
 - توکن‌های طراحی: ۱۰۶ توکن در [\`tokens/brand.tokens.json\`](../../tokens/brand.tokens.json) با ولیدیتور DTCG 2025.10.
@@ -340,6 +346,7 @@ ${gateResults
 - فیگما Code Connect: [\`docs/evidence/FIGMA_CODE_CONNECT_REPORT.md\`](../evidence/FIGMA_CODE_CONNECT_REPORT.md)
 - حاکمیت محتوای رگولاتوری INCI: [\`docs/evidence/CONTENT_GOVERNANCE_REPORT.md\`](../evidence/CONTENT_GOVERNANCE_REPORT.md)
 - رگرسیون بصری ۴ برک‌پوینت: [\`docs/evidence/VISUAL_REGRESSION_REPORT.md\`](../evidence/VISUAL_REGRESSION_REPORT.md)
+- ارزیابی مهارت‌های هوش مصنوعی (۶۰ سناریو): [\`docs/evidence/SKILL_EVALUATION_REPORT.md\`](../evidence/SKILL_EVALUATION_REPORT.md)
 - سند هندآف توسعه‌دهندگان: [\`docs/governance/DESIGN_HANDOFF_SPEC.md\`](DESIGN_HANDOFF_SPEC.md)
 
 ### فاز P3 (Catalog & B2C):
@@ -366,6 +373,8 @@ ${gateResults
 - تمرین مهاجرت داده با واریانس ۰ ریال: [\`docs/evidence/MIGRATION_REHEARSAL_REPORT.md\`](../evidence/MIGRATION_REHEARSAL_REPORT.md)
 - پکیج شواهد راه‌اندازی و امضای ۹ ذینفع: [\`docs/governance/COUNTRY_LAUNCH_EVIDENCE_PACK.md\`](COUNTRY_LAUNCH_EVIDENCE_PACK.md)
 - گواهی اصالت انتشار کریپتوگرافیک: [\`docs/governance/PROVENANCE_MANIFEST.sha256\`](PROVENANCE_MANIFEST.sha256)
+- سوئیت رگرسیون پرریسک (۴۰ سناریو در ۱۵ دامنه): [\`docs/evidence/HIGH_RISK_REGRESSION_REPORT.md\`](../evidence/HIGH_RISK_REGRESSION_REPORT.md)
+- شواهد مانور بازیابی اضطراری و پشتیبان‌گیری دیتابیس: [\`docs/governance/DRILL_EVIDENCE.md\`](DRILL_EVIDENCE.md)
 
 ### فاز P8 (Scale & Platform Governance):
 - مدل ظرفیت و قانون لیتل: [\`docs/evidence/CAPACITY_BENCHMARK_REPORT.md\`](../evidence/CAPACITY_BENCHMARK_REPORT.md)
@@ -380,7 +389,7 @@ ${gateResults
 ---
 
 ## ۳. بیانیه رسمی تصویب نهایی (Sign-off Declaration)
-بدین‌وسیله تایید می‌گردد که کلیه نیازمندی‌ها، تست‌های خودکار (۲۵۱ تست)، و خط لوله‌های بازبینی کیفیت (۳۴ گیت خودکار) به صورت ۱۰۰٪ سبز اجرا شده و کلیه ۹ گیت فازهای پروژه بر اساس معیارهای پذیرش Source A با موفقیت تصویب گردیدند. سیستم رسماً آماده استقرار مرحله‌ای (Staging) و راه‌اندازی تجاری (Production Launch) می‌باشد.
+بدین‌وسیله تایید می‌گردد که کلیه نیازمندی‌ها، تست‌های خودکار (۲۹۰ تست)، و خط لوله‌های بازبینی کیفیت (۳۸ گیت خودکار) به صورت ۱۰۰٪ سبز اجرا شده و کلیه ۹ گیت فازهای پروژه بر اساس معیارهای پذیرش Source A با موفقیت تصویب گردیدند. سیستم رسماً آماده استقرار مرحله‌ای (Staging) و راه‌اندازی تجاری (Production Launch) می‌باشد.
 `;
 
 fs.writeFileSync(dossierPath, dossierContent, "utf8");

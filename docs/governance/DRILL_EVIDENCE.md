@@ -1,14 +1,14 @@
 # پایگاه داده و بازیابی اطلاعات — شواهد مانور بازیابی اضطراری (Disaster Recovery Drill Evidence)
 
-- **شناسه مانور:** `DRILL-1795509425230`
-- **تاریخ و زمان:** `2026-11-24T08:37:05.230Z`
+- **شناسه مانور:** `DRILL-1795511626688`
+- **تاریخ و زمان:** `2026-11-24T09:13:46.688Z`
 - **وضعیت کل:** **تأیید شد (SUCCESS / PASSED)**
 - **سرویس دیتابیس:** PostgreSQL 16.16 (بومی روی پورت ۵۴۳۲)
 - **ابزار پشتیبان‌گیری:** `C:\Program Files\PostgreSQL\16\bin\pg_dump.exe`
-- **مدت زمان بکاپ:** `345ms`
-- **مدت زمان بازیابی:** `576ms`
+- **مدت زمان بکاپ:** `223ms`
+- **مدت زمان بازیابی:** `572ms`
 - **اندازه فایل دامپ:** `80.75 KB`
-- **مسیر فایل بکاپ:** `C:\Users\talas\OneDrive\Desktop\new_dragon_shop\brand-commerce\backups\brand_commerce_backup_2026-11-24_08-37-02.sql`
+- **مسیر فایل بکاپ:** `C:\Users\talas\OneDrive\Desktop\new_dragon_shop\brand-commerce\backups\brand_commerce_backup_2026-11-24_09-13-44.sql`
 
 ## جدول مقایسه و صحه‌گذاری یکپارچگی ردیف‌ها (Row Count Integrity Table)
 

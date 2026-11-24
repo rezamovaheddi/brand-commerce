@@ -1,6 +1,6 @@
 # پرونده جامع انطباق و تصویب گیت‌های فازهای پروژه (Phase Gate Compliance Dossier)
 
-تاریخ صدور: **2026-11-24T09:07:53.715Z**  
+تاریخ صدور: **2026-11-24T09:22:56.833Z**  
 مرجع مصوب: **Source A (`Brand-Commerce-Platform-v2.2.0/07-roadmap/roadmap-and-phase-gates-fa.md`)**  
 دامنه بررسی: **۹ گیت اجرایی (GATE-P0 تا GATE-P8) و ۱۹۸ تسک کانونیکال**  
 وضعیت تجمیعی: **۱۰۰٪ تصویب و عبور تاییدشده (ALL 9 GATES PASSED & APPROVED)**  
@@ -12,7 +12,7 @@
 | شناسه گیت | فاز مرجع | عنوان گیت و محدوده | تسک‌های پوشش‌داده‌شده | وضعیت تایید | شواهد کلیدی و متدولوژی اعتبارسنجی |
 |---|---|---|---|:---:|---|
 | **GATE-P0** | P0 Discovery & Audit | Repository Baseline, PostgreSQL 16 Runtime & Migration Seed | TASK-001..017 | **PASSED (APPROVED)** | PostgreSQL 16 native runtime verified with 13 applied migrations and seed models |
-| **GATE-P1** | P1 Foundation | Architecture Fitness, Contracts, Hexagonal Boundaries & Integration | TASK-018..035, TASK-145..160, TASK-175..184, TASK-197 | **PASSED (APPROVED)** | Pure domain zero-IO rules, 12 dependency cruiser boundaries, and real DB integration verified |
+| **GATE-P1** | P1 Foundation | Architecture Fitness, Contracts, Hexagonal Boundaries & Integration | TASK-018..035, TASK-145..160, TASK-175..184, TASK-197 | **PASSED (APPROVED)** | Pure domain zero-IO rules, 12 dependency cruiser boundaries, canonical provider capability contracts, and real DB integration verified |
 | **GATE-P2** | P2 Brand UX & CMS | DTCG Design Tokens, WCAG 2.1 AA/AAA, Code Connect & INCI Governance | TASK-036..048, TASK-110..113, TASK-161..174, TASK-185..189 | **PASSED (APPROVED)** | 106 DTCG 2025.10 tokens, 17/17 WCAG contrast checks, and INCI CAS regulatory profiles verified |
 | **GATE-P3** | P3 Catalog & B2C | Server-Side Pricing, Cart Clamping, HMAC Sandbox Checkout & Stepper | TASK-049..062, TASK-114..120 | **PASSED (APPROVED)** | Integer minor unit pricing, zero client price trust, HMAC-SHA256 signatures, and 5-stage order tracking verified |
 | **GATE-P4** | P4 B2B & RFQ | Cross-Org Isolation, B2B Quick Order, OEM Formulation RFQ & Quotes | TASK-063..075, TASK-121..125 | **PASSED (APPROVED)** | Clinic credential intake, multi-tier wholesale pricing, OEM RFQ intake, and atomic quote-to-order conversion verified |
@@ -41,6 +41,7 @@
 - ساگای گردش کار: [`docs/evidence/WORKFLOW_PLATFORM_REPORT.md`](../evidence/WORKFLOW_PLATFORM_REPORT.md)
 - آزمون سرویس واقعی DB: [`docs/evidence/REAL_SERVICE_INTEGRATION_REPORT.md`](../evidence/REAL_SERVICE_INTEGRATION_REPORT.md)
 - اعتبارسنجی AsyncAPI 3.1 و OpenAPI: [`docs/evidence/ASYNCAPI_VALIDATION_REPORT.md`](../evidence/ASYNCAPI_VALIDATION_REPORT.md) و [`docs/evidence/OPENAPI_LINT_REPORT.md`](../evidence/OPENAPI_LINT_REPORT.md)
+- قراردادها و آداپتورهای یکپارچه‌سازی تأمین‌کنندگان: [`docs/evidence/INTEGRATION_ADAPTERS_REPORT.md`](../evidence/INTEGRATION_ADAPTERS_REPORT.md)
 
 ### فاز P2 (Brand UX & CMS):
 - توکن‌های طراحی: ۱۰۶ توکن در [`tokens/brand.tokens.json`](../../tokens/brand.tokens.json) با ولیدیتور DTCG 2025.10.
@@ -48,6 +49,7 @@
 - فیگما Code Connect: [`docs/evidence/FIGMA_CODE_CONNECT_REPORT.md`](../evidence/FIGMA_CODE_CONNECT_REPORT.md)
 - حاکمیت محتوای رگولاتوری INCI: [`docs/evidence/CONTENT_GOVERNANCE_REPORT.md`](../evidence/CONTENT_GOVERNANCE_REPORT.md)
 - رگرسیون بصری ۴ برک‌پوینت: [`docs/evidence/VISUAL_REGRESSION_REPORT.md`](../evidence/VISUAL_REGRESSION_REPORT.md)
+- ارزیابی مهارت‌های هوش مصنوعی (۶۰ سناریو): [`docs/evidence/SKILL_EVALUATION_REPORT.md`](../evidence/SKILL_EVALUATION_REPORT.md)
 - سند هندآف توسعه‌دهندگان: [`docs/governance/DESIGN_HANDOFF_SPEC.md`](DESIGN_HANDOFF_SPEC.md)
 
 ### فاز P3 (Catalog & B2C):
@@ -74,6 +76,8 @@
 - تمرین مهاجرت داده با واریانس ۰ ریال: [`docs/evidence/MIGRATION_REHEARSAL_REPORT.md`](../evidence/MIGRATION_REHEARSAL_REPORT.md)
 - پکیج شواهد راه‌اندازی و امضای ۹ ذینفع: [`docs/governance/COUNTRY_LAUNCH_EVIDENCE_PACK.md`](COUNTRY_LAUNCH_EVIDENCE_PACK.md)
 - گواهی اصالت انتشار کریپتوگرافیک: [`docs/governance/PROVENANCE_MANIFEST.sha256`](PROVENANCE_MANIFEST.sha256)
+- سوئیت رگرسیون پرریسک (۴۰ سناریو در ۱۵ دامنه): [`docs/evidence/HIGH_RISK_REGRESSION_REPORT.md`](../evidence/HIGH_RISK_REGRESSION_REPORT.md)
+- شواهد مانور بازیابی اضطراری و پشتیبان‌گیری دیتابیس: [`docs/governance/DRILL_EVIDENCE.md`](DRILL_EVIDENCE.md)
 
 ### فاز P8 (Scale & Platform Governance):
 - مدل ظرفیت و قانون لیتل: [`docs/evidence/CAPACITY_BENCHMARK_REPORT.md`](../evidence/CAPACITY_BENCHMARK_REPORT.md)
@@ -88,4 +92,4 @@
 ---
 
 ## ۳. بیانیه رسمی تصویب نهایی (Sign-off Declaration)
-بدین‌وسیله تایید می‌گردد که کلیه نیازمندی‌ها، تست‌های خودکار (۲۵۱ تست)، و خط لوله‌های بازبینی کیفیت (۳۴ گیت خودکار) به صورت ۱۰۰٪ سبز اجرا شده و کلیه ۹ گیت فازهای پروژه بر اساس معیارهای پذیرش Source A با موفقیت تصویب گردیدند. سیستم رسماً آماده استقرار مرحله‌ای (Staging) و راه‌اندازی تجاری (Production Launch) می‌باشد.
+بدین‌وسیله تایید می‌گردد که کلیه نیازمندی‌ها، تست‌های خودکار (۲۹۰ تست)، و خط لوله‌های بازبینی کیفیت (۳۸ گیت خودکار) به صورت ۱۰۰٪ سبز اجرا شده و کلیه ۹ گیت فازهای پروژه بر اساس معیارهای پذیرش Source A با موفقیت تصویب گردیدند. سیستم رسماً آماده استقرار مرحله‌ای (Staging) و راه‌اندازی تجاری (Production Launch) می‌باشد.

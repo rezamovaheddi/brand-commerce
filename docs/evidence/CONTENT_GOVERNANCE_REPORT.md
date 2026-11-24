@@ -1,6 +1,6 @@
 # گزارش حاکمیت محتوای رگولاتوری، فرمولاسیون و کاتالوگ INCI (TASK-113 / PIM-01)
 
-تاریخ ارزیابی: 2026-11-24T09:07:48.924Z  
+تاریخ ارزیابی: 2026-11-24T09:22:52.469Z  
 وضعیت ارزیابی: **ALL CONTENT GOVERNANCE CHECKS PASSED (100% SUCCESS)**  
 قرارداد تایپ‌اسکریپت: [packages/contracts/src/content-governance.ts](../../packages/contracts/src/content-governance.ts)
 

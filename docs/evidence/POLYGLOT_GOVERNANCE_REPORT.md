@@ -1,6 +1,6 @@
 # Polyglot Governance & Python Service Boundary Report (TASK-153 / TASK-157)
 
-Generated at: 2026-11-24T09:07:46.433Z  
+Generated at: 2026-11-24T09:22:50.061Z  
 Governance Standard: `docs/governance/POLYGLOT_GOVERNANCE.md`  
 Python Analytics Service: `services/analytics-worker/worker.py`  
 Audited Polyglot Files: 3 files  
