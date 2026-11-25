@@ -35,6 +35,40 @@ interface ThreeBookCanvasProps {
   onTurnPage: (delta: number) => void;
 }
 
+function createRoundedRectShape(w: number, h: number, r: number): THREE.Shape {
+  const shape = new THREE.Shape();
+  const x = -w / 2;
+  const y = -h / 2;
+  shape.moveTo(x + r, y);
+  shape.lineTo(x + w - r, y);
+  shape.quadraticCurveTo(x + w, y, x + w, y + r);
+  shape.lineTo(x + w, y + h - r);
+  shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  shape.lineTo(x + r, y + h);
+  shape.quadraticCurveTo(x, y + h, x, y + h - r);
+  shape.lineTo(x, y + r);
+  shape.quadraticCurveTo(x, y, x + r, y);
+  return shape;
+}
+
+function drawImageContain(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  boxX: number,
+  boxY: number,
+  boxW: number,
+  boxH: number,
+) {
+  const iw = img.naturalWidth || img.width || 1;
+  const ih = img.naturalHeight || img.height || 1;
+  const scale = Math.min(boxW / iw, boxH / ih);
+  const dw = iw * scale;
+  const dh = ih * scale;
+  const dx = boxX + (boxW - dw) / 2;
+  const dy = boxY + (boxH - dh) / 2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+}
+
 function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -88,68 +122,97 @@ function drawRoundedRect(
   ctx.closePath();
 }
 
+function createPageEdgeTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 64;
+  c.height = 256;
+  const ctx = c.getContext("2d")!;
+  ctx.fillStyle = "#FAF8FF";
+  ctx.fillRect(0, 0, 64, 256);
+  for (let y = 0; y < 256; y += 4) {
+    ctx.fillStyle = y % 8 === 0 ? "rgba(82, 39, 155, 0.12)" : "rgba(26, 34, 84, 0.05)";
+    ctx.fillRect(0, y, 64, 1);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(1, 3);
+  return tex;
+}
+
+function applyPageArch(geo: THREE.PlaneGeometry, side: "right" | "left") {
+  const pos = geo.attributes.position;
+  const w = 4.12;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    // Normalized distance from spine (0 at spine, 1 at outer edge)
+    const u = side === "right" ? (x + w / 2) / w : (w / 2 - x) / w;
+    // Gentle paper arch rising from spine and settling toward outer edge
+    const arch = Math.sin(u * Math.PI) * 0.14 - (1 - u) * 0.05;
+    pos.setZ(i, arch);
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+}
+
 function createPageTexture(
   spread: BookSpreadData,
   side: "right" | "left",
   loadedImages: Record<string, HTMLImageElement>,
 ): THREE.CanvasTexture {
-  const W = 1024;
-  const H = 1240;
+  const W = 1200;
+  const H = 1460;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d")!;
   ctx.direction = "rtl";
 
-  // Paper gradient background
+  // Crisp bright ivory-white paper background
   const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, "#FCFAFF");
-  bg.addColorStop(1, "#FFFFFF");
+  bg.addColorStop(0, "#FFFFFF");
+  bg.addColorStop(1, "#FBF9FF");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle spine shading
+  // Delicate outer paper frame line
+  drawRoundedRect(ctx, 26, 26, W - 52, H - 52, 22);
+  ctx.strokeStyle = "rgba(82, 39, 155, 0.09)";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Gentle spine gutter shading
   const spineGrad =
     side === "right"
-      ? ctx.createLinearGradient(0, 0, 90, 0)
-      : ctx.createLinearGradient(W - 90, 0, W, 0);
+      ? ctx.createLinearGradient(0, 0, 110, 0)
+      : ctx.createLinearGradient(W - 110, 0, W, 0);
   if (side === "right") {
-    spineGrad.addColorStop(0, "rgba(26, 34, 84, 0.12)");
+    spineGrad.addColorStop(0, "rgba(26, 34, 84, 0.11)");
     spineGrad.addColorStop(1, "rgba(26, 34, 84, 0)");
     ctx.fillStyle = spineGrad;
-    ctx.fillRect(0, 0, 90, H);
+    ctx.fillRect(0, 0, 110, H);
   } else {
     spineGrad.addColorStop(0, "rgba(26, 34, 84, 0)");
-    spineGrad.addColorStop(1, "rgba(26, 34, 84, 0.12)");
+    spineGrad.addColorStop(1, "rgba(26, 34, 84, 0.11)");
     ctx.fillStyle = spineGrad;
-    ctx.fillRect(W - 90, 0, 90, H);
+    ctx.fillRect(W - 110, 0, 110, H);
   }
 
-  // Corner ornaments
-  ctx.strokeStyle = "rgba(82, 39, 155, 0.28)";
-  ctx.lineWidth = 3;
-  const m = 36;
-  const cLen = 34;
-  // Top-right
+  // Subtle gold corner flourishes
+  ctx.strokeStyle = "rgba(226, 190, 116, 0.72)";
+  ctx.lineWidth = 3.5;
+  const m = 48;
+  const cLen = 36;
   ctx.beginPath();
   ctx.moveTo(W - m - cLen, m);
   ctx.lineTo(W - m, m);
   ctx.lineTo(W - m, m + cLen);
-  ctx.stroke();
-  // Top-left
-  ctx.beginPath();
   ctx.moveTo(m + cLen, m);
   ctx.lineTo(m, m);
   ctx.lineTo(m, m + cLen);
-  ctx.stroke();
-  // Bottom-right
-  ctx.beginPath();
   ctx.moveTo(W - m - cLen, H - m);
   ctx.lineTo(W - m, H - m);
   ctx.lineTo(W - m, H - m - cLen);
-  ctx.stroke();
-  // Bottom-left
-  ctx.beginPath();
   ctx.moveTo(m + cLen, H - m);
   ctx.lineTo(m, H - m);
   ctx.lineTo(m, H - m - cLen);
@@ -158,143 +221,193 @@ function createPageTexture(
   const fontName = "'Vazirmatn RD UI FD', 'Vazirmatn', Tahoma, sans-serif";
 
   if (side === "right") {
+    // Purple Bookmark Ribbon on top-right of right page
+    ctx.fillStyle = "#52279B";
+    ctx.beginPath();
+    ctx.moveTo(W - 210, 0);
+    ctx.lineTo(W - 150, 0);
+    ctx.lineTo(W - 150, 100);
+    ctx.lineTo(W - 180, 76);
+    ctx.lineTo(W - 210, 100);
+    ctx.closePath();
+    ctx.fill();
+
+    // Chapter pill badge
+    drawRoundedRect(ctx, W - 360, 76, 270, 44, 22);
+    ctx.fillStyle = "#F1ECFA";
+    ctx.fill();
+    ctx.fillStyle = "#52279B";
+    ctx.font = `700 22px ${fontName}`;
+    ctx.textAlign = "center";
+    ctx.fillText(spread.chapter, W - 225, 105);
+
     // Heading
     ctx.fillStyle = "#1A2254";
-    ctx.font = `800 44px ${fontName}`;
+    ctx.font = `800 50px ${fontName}`;
     ctx.textAlign = "right";
-    ctx.fillText(spread.rightTitle, W - 76, 128);
+    ctx.fillText(spread.rightTitle, W - 88, 192);
 
     // Lead
     ctx.fillStyle = "#5A6A85";
-    ctx.font = `400 25px ${fontName}`;
-    let curY = wrapText(ctx, spread.rightLead, W - 76, 188, W - 152, 42, "right");
+    ctx.font = `400 28px ${fontName}`;
+    let curY = wrapText(ctx, spread.rightLead, W - 88, 258, W - 176, 48, "right");
 
-    // Bullet points
-    curY += 32;
-    spread.rightBullets.forEach((b) => {
+    // Numbered Step Badges
+    curY += 40;
+    const faNums = ["۱", "۲", "۳", "۴"];
+    spread.rightBullets.forEach((b, idx) => {
       ctx.fillStyle = "#52279B";
       ctx.beginPath();
-      ctx.arc(W - 86, curY - 9, 7, 0, Math.PI * 2);
+      ctx.arc(W - 108, curY - 10, 20, 0, Math.PI * 2);
       ctx.fill();
 
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = `800 22px ${fontName}`;
+      ctx.textAlign = "center";
+      ctx.fillText(faNums[idx] || String(idx + 1), W - 108, curY - 2);
+
       ctx.fillStyle = "#1A2254";
-      ctx.font = `500 25px ${fontName}`;
-      curY = wrapText(ctx, b, W - 110, curY, W - 200, 40, "right");
-      curY += 16;
+      ctx.font = `500 28px ${fontName}`;
+      curY = wrapText(ctx, b, W - 144, curY, W - 250, 46, "right");
+      curY += 22;
     });
 
     // Bottom Highlight Card
-    const cardY = H - 360;
-    drawRoundedRect(ctx, 72, cardY, W - 144, 230, 28);
-    ctx.fillStyle = "#F8F7FB";
+    const cardY = H - 425;
+    ctx.save();
+    ctx.shadowColor = "rgba(26, 34, 84, 0.07)";
+    ctx.shadowBlur = 22;
+    ctx.shadowOffsetY = 8;
+    drawRoundedRect(ctx, 84, cardY, W - 168, 275, 30);
+    ctx.fillStyle = "#F8F7FC";
     ctx.fill();
-    ctx.strokeStyle = "#EAE5F3";
-    ctx.lineWidth = 2;
+    ctx.restore();
+
+    drawRoundedRect(ctx, 84, cardY, W - 168, 275, 30);
+    ctx.strokeStyle = "#E4DDF2";
+    ctx.lineWidth = 2.5;
     ctx.stroke();
+
+    // Soft circle behind product image
+    ctx.fillStyle = "#EFEAF8";
+    ctx.beginPath();
+    ctx.arc(216, cardY + 138, 100, 0, Math.PI * 2);
+    ctx.fill();
 
     const img = loadedImages[spread.rightImage];
     if (img) {
-      ctx.drawImage(img, 100, cardY + 24, 170, 180);
+      drawImageContain(ctx, img, 122, cardY + 30, 188, 214);
     }
 
     ctx.fillStyle = "#1A2254";
-    ctx.font = `800 30px ${fontName}`;
+    ctx.font = `800 35px ${fontName}`;
     ctx.textAlign = "right";
-    ctx.fillText(spread.rightHighlightTitle, W - 104, cardY + 68);
+    ctx.fillText(spread.rightHighlightTitle, W - 120, cardY + 86);
 
     ctx.fillStyle = "#5A6A85";
-    ctx.font = `400 23px ${fontName}`;
-    wrapText(ctx, spread.rightHighlightDesc, W - 104, cardY + 116, W - 380, 36, "right");
+    ctx.font = `400 26px ${fontName}`;
+    wrapText(ctx, spread.rightHighlightDesc, W - 120, cardY + 142, W - 450, 42, "right");
 
     // Footer
     ctx.strokeStyle = "#EFEBF6";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(72, H - 96);
-    ctx.lineTo(W - 72, H - 96);
+    ctx.moveTo(84, H - 108);
+    ctx.lineTo(W - 84, H - 108);
     ctx.stroke();
 
     ctx.fillStyle = "#64748B";
-    ctx.font = `600 22px ${fontName}`;
+    ctx.font = `600 24px ${fontName}`;
     ctx.textAlign = "right";
-    ctx.fillText(spread.chapter, W - 76, H - 54);
+    ctx.fillText(spread.chapter, W - 88, H - 58);
     ctx.textAlign = "left";
-    ctx.fillText(spread.rightPageNum, 76, H - 54);
+    ctx.fillText(spread.rightPageNum, 88, H - 58);
   } else {
     // Left Page (centered heading)
     ctx.fillStyle = "#1A2254";
-    ctx.font = `800 42px ${fontName}`;
+    ctx.font = `800 48px ${fontName}`;
     ctx.textAlign = "center";
-    ctx.fillText(spread.leftTitle, W / 2, 128);
+    ctx.fillText(spread.leftTitle, W / 2, 160);
 
     ctx.fillStyle = "#5A6A85";
-    ctx.font = `400 24px ${fontName}`;
-    wrapText(ctx, spread.leftLead, W / 2, 186, W - 160, 40, "center");
+    ctx.font = `400 27px ${fontName}`;
+    wrapText(ctx, spread.leftLead, W / 2, 226, W - 190, 46, "center");
 
     // Stage Banner
-    drawRoundedRect(ctx, 72, 300, W - 144, 340, 28);
-    const stageGrad = ctx.createRadialGradient(W / 2, 470, 20, W / 2, 470, 340);
-    stageGrad.addColorStop(0, "#F4F1FA");
-    stageGrad.addColorStop(1, "#EAE5F3");
+    drawRoundedRect(ctx, 84, 355, W - 168, 395, 30);
+    const stageGrad = ctx.createRadialGradient(W / 2, 552, 24, W / 2, 552, 420);
+    stageGrad.addColorStop(0, "#FAF8FF");
+    stageGrad.addColorStop(1, "#ECE6F6");
     ctx.fillStyle = stageGrad;
     ctx.fill();
+    ctx.strokeStyle = "#E4DDF2";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
 
-    // Draw two product images on stage
+    // Draw two product images with proper aspect ratio (contain)
     const p1 = spread.leftProducts[0];
     const p2 = spread.leftProducts[1];
     if (p1 && loadedImages[p1.image]) {
-      ctx.drawImage(loadedImages[p1.image], W / 2 + 40, 330, 220, 280);
+      drawImageContain(ctx, loadedImages[p1.image], W / 2 + 28, 382, 280, 340);
     }
     if (p2 && loadedImages[p2.image]) {
-      ctx.drawImage(loadedImages[p2.image], W / 2 - 260, 335, 220, 270);
+      drawImageContain(ctx, loadedImages[p2.image], W / 2 - 308, 386, 280, 332);
     }
 
     // Two Product Cards at bottom
-    const cardW = (W - 144 - 28) / 2;
+    const cardW = (W - 168 - 32) / 2;
     spread.leftProducts.forEach((prod, idx) => {
-      const cx = idx === 0 ? 72 + cardW + 28 : 72;
-      const cy = 684;
-      drawRoundedRect(ctx, cx, cy, cardW, 380, 26);
-      ctx.fillStyle = "#F8F7FB";
+      const cx = idx === 0 ? 84 + cardW + 32 : 84;
+      const cy = 795;
+
+      ctx.save();
+      ctx.shadowColor = "rgba(26, 34, 84, 0.06)";
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 6;
+      drawRoundedRect(ctx, cx, cy, cardW, 450, 28);
+      ctx.fillStyle = "#FFFFFF";
       ctx.fill();
-      ctx.strokeStyle = "#EAE5F3";
-      ctx.lineWidth = 2;
+      ctx.restore();
+
+      drawRoundedRect(ctx, cx, cy, cardW, 450, 28);
+      ctx.strokeStyle = "#E4DDF2";
+      ctx.lineWidth = 2.5;
       ctx.stroke();
 
       ctx.fillStyle = "#1A2254";
-      ctx.font = `800 28px ${fontName}`;
+      ctx.font = `800 32px ${fontName}`;
       ctx.textAlign = "right";
-      ctx.fillText(prod.name, cx + cardW - 32, cy + 68);
+      ctx.fillText(prod.name, cx + cardW - 36, cy + 80);
 
       ctx.fillStyle = "#5A6A85";
-      ctx.font = `400 22px ${fontName}`;
-      wrapText(ctx, prod.desc, cx + cardW - 32, cy + 120, cardW - 64, 36, "right");
+      ctx.font = `400 25px ${fontName}`;
+      wrapText(ctx, prod.desc, cx + cardW - 36, cy + 142, cardW - 72, 42, "right");
 
       // CTA pill inside page
-      drawRoundedRect(ctx, cx + cardW - 230, cy + 288, 198, 56, 28);
+      drawRoundedRect(ctx, cx + cardW - 266, cy + 344, 230, 64, 32);
       ctx.fillStyle = prod.btnColor;
       ctx.fill();
 
       ctx.fillStyle = "#FFFFFF";
-      ctx.font = `700 22px ${fontName}`;
+      ctx.font = `700 25px ${fontName}`;
       ctx.textAlign = "center";
-      ctx.fillText(prod.btnLabel, cx + cardW - 131, cy + 324);
+      ctx.fillText(prod.btnLabel, cx + cardW - 151, cy + 385);
     });
 
     // Footer
     ctx.strokeStyle = "#EFEBF6";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(72, H - 96);
-    ctx.lineTo(W - 72, H - 96);
+    ctx.moveTo(84, H - 108);
+    ctx.lineTo(W - 84, H - 108);
     ctx.stroke();
 
     ctx.fillStyle = "#64748B";
-    ctx.font = `600 22px ${fontName}`;
+    ctx.font = `600 24px ${fontName}`;
     ctx.textAlign = "right";
-    ctx.fillText(spread.leftFooter, W - 76, H - 54);
+    ctx.fillText(spread.leftFooter, W - 88, H - 58);
     ctx.textAlign = "left";
-    ctx.fillText(spread.leftPageNum, 76, H - 54);
+    ctx.fillText(spread.leftPageNum, 88, H - 58);
   }
 
   const tex = new THREE.CanvasTexture(canvas);
@@ -305,8 +418,8 @@ function createPageTexture(
 }
 
 /**
- * Pure Three.js 3D Open-Book with real CanvasTexture pages,
- * stacked 3D paper blocks, navy hardcover, purple spine, gold trim,
+ * Pure Three.js 3D Open-Book with rounded hardcover boards, crisp ivory-white
+ * CanvasTexture pages, tucked purple spine with gold bands, soft shadow,
  * and genuine 3D two-sided page-turning animation via GSAP.
  */
 export default function ThreeBookCanvas({
@@ -330,7 +443,7 @@ export default function ThreeBookCanvas({
   const isFlippingRef = useRef<boolean>(false);
 
   useEffect(() => {
-    targetZoomRef.current = isZoomed ? 1.12 : 1;
+    targetZoomRef.current = isZoomed ? 1.1 : 1;
   }, [isZoomed]);
 
   useEffect(() => {
@@ -349,7 +462,7 @@ export default function ThreeBookCanvas({
     }
 
     const width = container.clientWidth || 1040;
-    const height = container.clientHeight || 580;
+    const height = container.clientHeight || 600;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     renderer.shadowMap.enabled = true;
@@ -357,114 +470,135 @@ export default function ThreeBookCanvas({
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
-    camera.position.set(0, 1.35, 9.4);
+    const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 100);
+    camera.position.set(0, 0.75, 10.2);
     camera.lookAt(0, -0.05, 0);
 
-    // Lighting matching Dermalight clinical luxury palette
-    const ambient = new THREE.AmbientLight(0xffffff, 1.05);
+    // Bright studio lighting so white pages stay crisp and luminous
+    const ambient = new THREE.AmbientLight(0xffffff, 1.85);
     scene.add(ambient);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.25);
-    dirLight.position.set(3.5, 7.5, 6);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    scene.add(dirLight);
+    const frontFill = new THREE.DirectionalLight(0xffffff, 0.85);
+    frontFill.position.set(0, 1.5, 9);
+    scene.add(frontFill);
 
-    const purpleRim = new THREE.PointLight(0x52279b, 1.8, 18);
-    purpleRim.position.set(-5, 2.5, 4);
+    const topKey = new THREE.DirectionalLight(0xffffff, 0.65);
+    topKey.position.set(3.5, 8, 5);
+    topKey.castShadow = true;
+    topKey.shadow.mapSize.width = 1024;
+    topKey.shadow.mapSize.height = 1024;
+    scene.add(topKey);
+
+    const purpleRim = new THREE.PointLight(0x52279b, 1.1, 18);
+    purpleRim.position.set(-5.5, 2.5, 4);
     scene.add(purpleRim);
 
-    const goldAccent = new THREE.PointLight(0xe2be74, 1.2, 16);
-    goldAccent.position.set(5, -1.5, 4);
+    const goldAccent = new THREE.PointLight(0xe2be74, 0.8, 16);
+    goldAccent.position.set(5.5, -1.5, 4);
     scene.add(goldAccent);
 
     // Soft shadow receiver plane under the 3D book
-    const shadowGeo = new THREE.PlaneGeometry(14, 9);
-    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.16 });
+    const shadowGeo = new THREE.PlaneGeometry(15, 9);
+    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.12 });
     const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
     shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.y = -2.85;
+    shadowPlane.position.y = -2.95;
     shadowPlane.receiveShadow = true;
     scene.add(shadowPlane);
 
     // 3D Open Book Group
     const bookGroup = new THREE.Group();
-    bookGroup.rotation.x = 0.12;
+    bookGroup.rotation.x = 0.06;
     scene.add(bookGroup);
     bookGroupRef.current = bookGroup;
 
     const coverMat = new THREE.MeshStandardMaterial({
       color: 0x1a2254,
-      roughness: 0.38,
-      metalness: 0.25,
+      roughness: 0.36,
+      metalness: 0.24,
     });
     const spineMat = new THREE.MeshStandardMaterial({
       color: 0x52279b,
-      roughness: 0.32,
-      metalness: 0.35,
+      roughness: 0.34,
+      metalness: 0.3,
     });
+    const pageEdgeTex = createPageEdgeTexture();
     const edgeMat = new THREE.MeshStandardMaterial({
-      color: 0xefeaf8,
-      roughness: 0.8,
+      map: pageEdgeTex,
+      color: 0xffffff,
+      roughness: 0.85,
       metalness: 0.02,
     });
     const goldMat = new THREE.MeshStandardMaterial({
       color: 0xe2be74,
-      roughness: 0.25,
+      roughness: 0.24,
       metalness: 0.8,
     });
 
-    // Left & Right Hardcover Boards (angled slightly open)
-    const coverGeo = new THREE.BoxGeometry(4.4, 5.25, 0.14);
+    // Rounded Hardcover Boards
+    const coverShape = createRoundedRectShape(4.42, 5.28, 0.22);
+    const coverGeo = new THREE.ExtrudeGeometry(coverShape, {
+      depth: 0.12,
+      bevelEnabled: true,
+      bevelThickness: 0.02,
+      bevelSize: 0.02,
+      bevelSegments: 3,
+    });
+    coverGeo.center();
+
     const leftCover = new THREE.Mesh(coverGeo, coverMat);
-    leftCover.position.set(-2.22, 0, -0.18);
-    leftCover.rotation.y = 0.09;
+    leftCover.position.set(-2.22, 0, -0.2);
+    leftCover.rotation.y = 0.07;
     leftCover.castShadow = true;
     bookGroup.add(leftCover);
 
     const rightCover = new THREE.Mesh(coverGeo, coverMat);
-    rightCover.position.set(2.22, 0, -0.18);
-    rightCover.rotation.y = -0.09;
+    rightCover.position.set(2.22, 0, -0.2);
+    rightCover.rotation.y = -0.07;
     rightCover.castShadow = true;
     bookGroup.add(rightCover);
 
-    // 3D Spine + Gold Bands
-    const spineGeo = new THREE.CylinderGeometry(0.18, 0.18, 5.28, 24);
+    // Tucked 3D Spine + Delicate Gold Bands
+    const spineGeo = new THREE.CylinderGeometry(0.13, 0.13, 5.26, 24);
     const spine = new THREE.Mesh(spineGeo, spineMat);
-    spine.position.set(0, 0, -0.16);
+    spine.position.set(0, 0, -0.2);
     spine.castShadow = true;
     bookGroup.add(spine);
 
-    const bandGeo = new THREE.CylinderGeometry(0.195, 0.195, 0.11, 24);
-    [-2.2, 0, 2.2].forEach((yPos) => {
+    const bandGeo = new THREE.CylinderGeometry(0.142, 0.142, 0.08, 24);
+    [-2.15, 0, 2.15].forEach((yPos) => {
       const band = new THREE.Mesh(bandGeo, goldMat);
-      band.position.set(0, yPos, -0.16);
+      band.position.set(0, yPos, -0.2);
       bookGroup.add(band);
     });
 
-    // Gold Ribbon Bookmark hanging out at bottom
-    const ribbonGeo = new THREE.BoxGeometry(0.24, 0.55, 0.03);
+    // Gold Ribbon Bookmark at bottom
+    const ribbonGeo = new THREE.BoxGeometry(0.22, 0.48, 0.025);
     const ribbonMesh = new THREE.Mesh(ribbonGeo, goldMat);
-    ribbonMesh.position.set(0, -2.72, -0.02);
+    ribbonMesh.position.set(0, -2.74, -0.06);
     bookGroup.add(ribbonMesh);
 
-    // Left & Right 3D Stacked Paper Thickness Blocks
-    const stackGeo = new THREE.BoxGeometry(4.15, 4.98, 0.24);
+    // Rounded Stacked Paper Thickness Blocks
+    const stackShape = createRoundedRectShape(4.16, 4.98, 0.14);
+    const stackGeo = new THREE.ExtrudeGeometry(stackShape, {
+      depth: 0.2,
+      bevelEnabled: false,
+    });
+    stackGeo.center();
+
     const leftStack = new THREE.Mesh(stackGeo, edgeMat);
-    leftStack.position.set(-2.12, 0, 0.02);
-    leftStack.rotation.y = 0.09;
+    leftStack.position.set(-2.12, 0, -0.01);
+    leftStack.rotation.y = 0.07;
     leftStack.castShadow = true;
     bookGroup.add(leftStack);
 
     const rightStack = new THREE.Mesh(stackGeo, edgeMat);
-    rightStack.position.set(2.12, 0, 0.02);
-    rightStack.rotation.y = -0.09;
+    rightStack.position.set(2.12, 0, -0.01);
+    rightStack.rotation.y = -0.07;
     rightStack.castShadow = true;
     bookGroup.add(rightStack);
 
-    // Build initial page textures
+    // Build page textures
     const loadedImgs: Record<string, HTMLImageElement> = {};
     const buildAllTextures = () => {
       texturesRef.current.forEach((t) => {
@@ -486,34 +620,38 @@ export default function ThreeBookCanvas({
       }
     };
 
-    // Static textured page planes sitting cleanly on top of the stacked blocks
-    const pagePlaneGeo = new THREE.PlaneGeometry(4.12, 4.94);
+    // Crisp arched paper planes curving naturally into the spine
+    const rightPageGeo = new THREE.PlaneGeometry(4.12, 4.94, 24, 1);
+    applyPageArch(rightPageGeo, "right");
+    const leftPageGeo = new THREE.PlaneGeometry(4.12, 4.94, 24, 1);
+    applyPageArch(leftPageGeo, "left");
+
     const rightMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.72,
-      metalness: 0.02,
+      roughness: 0.9,
+      metalness: 0.0,
     });
     const leftMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.72,
-      metalness: 0.02,
+      roughness: 0.9,
+      metalness: 0.0,
     });
     rightMatRef.current = rightMat;
     leftMatRef.current = leftMat;
 
-    const rightPageMesh = new THREE.Mesh(pagePlaneGeo, rightMat);
-    rightPageMesh.position.set(2.11, 0, 0.145);
-    rightPageMesh.rotation.y = -0.09;
+    const rightPageMesh = new THREE.Mesh(rightPageGeo, rightMat);
+    rightPageMesh.position.set(2.1, 0, 0.11);
+    rightPageMesh.rotation.y = -0.07;
     bookGroup.add(rightPageMesh);
 
-    const leftPageMesh = new THREE.Mesh(pagePlaneGeo, leftMat);
-    leftPageMesh.position.set(-2.11, 0, 0.145);
-    leftPageMesh.rotation.y = 0.09;
+    const leftPageMesh = new THREE.Mesh(leftPageGeo, leftMat);
+    leftPageMesh.position.set(-2.1, 0, 0.11);
+    leftPageMesh.rotation.y = 0.07;
     bookGroup.add(leftPageMesh);
 
     // Real 3D Two-Sided Turning Page Pivot at Spine (x = 0)
     const flipPivot = new THREE.Group();
-    flipPivot.position.set(0, 0, 0.17);
+    flipPivot.position.set(0, 0, 0.13);
     flipPivot.visible = false;
     bookGroup.add(flipPivot);
     flipPivotRef.current = flipPivot;
@@ -521,15 +659,15 @@ export default function ThreeBookCanvas({
     const flipGeo = new THREE.PlaneGeometry(4.12, 4.94, 16, 1);
     const flipFrontMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.68,
-      metalness: 0.03,
+      roughness: 0.85,
+      metalness: 0.0,
       side: THREE.FrontSide,
     });
     const flipBackMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.68,
-      metalness: 0.03,
-      side: THREE.BackSide,
+      roughness: 0.85,
+      metalness: 0.0,
+      side: THREE.FrontSide,
     });
     flipFrontMatRef.current = flipFrontMat;
     flipBackMatRef.current = flipBackMat;
@@ -541,11 +679,12 @@ export default function ThreeBookCanvas({
 
     const flipBackMesh = new THREE.Mesh(flipGeo, flipBackMat);
     flipBackMesh.position.set(2.06, 0, -0.002);
+    flipBackMesh.rotation.y = Math.PI;
     flipBackMesh.castShadow = true;
     flipPivot.add(flipBackMesh);
 
-    // Floating ambient particles
-    const particleCount = 40;
+    // Subtle floating ambient particles
+    const particleCount = 32;
     const positions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 12;
@@ -556,14 +695,13 @@ export default function ThreeBookCanvas({
     particleGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     const particleMat = new THREE.PointsMaterial({
       color: 0x52279b,
-      size: 0.055,
+      size: 0.05,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.25,
     });
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
 
-    // Draw initial textures immediately, then refresh once product images finish loading
     buildAllTextures();
     const imgUrls = Array.from(
       new Set(
@@ -593,18 +731,18 @@ export default function ThreeBookCanvas({
       const t = clock.getElapsedTime();
 
       if (bookGroupRef.current) {
-        const targetX = 0.14 + targetTiltRef.current.x * 0.14;
-        const targetY = targetTiltRef.current.y * 0.18;
+        const targetX = 0.06 + targetTiltRef.current.x * 0.11;
+        const targetY = targetTiltRef.current.y * 0.14;
         bookGroupRef.current.rotation.x += (targetX - bookGroupRef.current.rotation.x) * 0.08;
         bookGroupRef.current.rotation.y += (targetY - bookGroupRef.current.rotation.y) * 0.08;
-        bookGroupRef.current.position.y = Math.sin(t * 1.3) * 0.04;
+        bookGroupRef.current.position.y = Math.sin(t * 1.25) * 0.035;
 
         const curScale = bookGroupRef.current.scale.x;
         const nextScale = curScale + (targetZoomRef.current - curScale) * 0.1;
         bookGroupRef.current.scale.set(nextScale, nextScale, nextScale);
       }
 
-      particles.rotation.y = t * 0.035;
+      particles.rotation.y = t * 0.03;
       renderer.render(scene, camera);
     };
     animate();
@@ -612,7 +750,7 @@ export default function ThreeBookCanvas({
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth || 1040;
-      const h = container.clientHeight || 580;
+      const h = container.clientHeight || 600;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -626,12 +764,14 @@ export default function ThreeBookCanvas({
         t.right.dispose();
         t.left.dispose();
       });
+      pageEdgeTex.dispose();
       coverGeo.dispose();
       spineGeo.dispose();
       bandGeo.dispose();
       ribbonGeo.dispose();
       stackGeo.dispose();
-      pagePlaneGeo.dispose();
+      rightPageGeo.dispose();
+      leftPageGeo.dispose();
       flipGeo.dispose();
       shadowGeo.dispose();
       particleGeo.dispose();
@@ -686,7 +826,31 @@ export default function ThreeBookCanvas({
     gsap.killTweensOf(pivot.rotation);
 
     if (forward) {
-      // RTL Forward: Right page flips over the spine to the Left
+      // Persian (RTL) Forward: Left page flips from LEFT (-PI) to RIGHT (0)
+      backMat.map = prevTex.left;
+      frontMat.map = nextTex.right;
+      backMat.needsUpdate = true;
+      frontMat.needsUpdate = true;
+
+      leftMat.map = nextTex.left;
+      leftMat.needsUpdate = true;
+
+      pivot.visible = true;
+      pivot.rotation.y = -Math.PI + 0.07;
+
+      gsap.to(pivot.rotation, {
+        y: -0.07,
+        duration: 0.78,
+        ease: "power2.inOut",
+        onComplete: () => {
+          rightMat.map = nextTex.right;
+          rightMat.needsUpdate = true;
+          pivot.visible = false;
+          isFlippingRef.current = false;
+        },
+      });
+    } else {
+      // Persian (RTL) Backward: Right page flips from RIGHT (0) to LEFT (-PI)
       frontMat.map = prevTex.right;
       backMat.map = nextTex.left;
       frontMat.needsUpdate = true;
@@ -696,39 +860,15 @@ export default function ThreeBookCanvas({
       rightMat.needsUpdate = true;
 
       pivot.visible = true;
-      pivot.rotation.y = -0.09;
+      pivot.rotation.y = -0.07;
 
       gsap.to(pivot.rotation, {
-        y: -Math.PI + 0.09,
+        y: -Math.PI + 0.07,
         duration: 0.78,
         ease: "power2.inOut",
         onComplete: () => {
           leftMat.map = nextTex.left;
           leftMat.needsUpdate = true;
-          pivot.visible = false;
-          isFlippingRef.current = false;
-        },
-      });
-    } else {
-      // RTL Backward: Left page flips back over the spine to the Right
-      frontMat.map = nextTex.right;
-      backMat.map = prevTex.left;
-      frontMat.needsUpdate = true;
-      backMat.needsUpdate = true;
-
-      leftMat.map = nextTex.left;
-      leftMat.needsUpdate = true;
-
-      pivot.visible = true;
-      pivot.rotation.y = -Math.PI + 0.09;
-
-      gsap.to(pivot.rotation, {
-        y: -0.09,
-        duration: 0.78,
-        ease: "power2.inOut",
-        onComplete: () => {
-          rightMat.map = nextTex.right;
-          rightMat.needsUpdate = true;
           pivot.visible = false;
           isFlippingRef.current = false;
         },
@@ -752,13 +892,12 @@ export default function ThreeBookCanvas({
         if (isFlippingRef.current) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const isLeftHalf = e.clientX - rect.left < rect.width / 2;
-        // In RTL, clicking left half goes next, clicking right half goes prev
         onTurnPage(isLeftHalf ? 1 : -1);
       }}
       title="برای ورق‌زدن سه‌بعدی روی صفحه کلیک کنید"
       style={{
         width: "100%",
-        height: "clamp(420px, 54vw, 620px)",
+        height: "clamp(460px, 56vw, 640px)",
         cursor: "pointer",
       }}
     />
