@@ -300,10 +300,6 @@ export default function OrgPortalPage() {
               هنوز عضو شبکه سازمانی نشده‌اید؟{" "}
               <Link href="/b2b/apply" className="dv-link" style={{ fontWeight: 700 }}>
                 ثبت درخواست همکاری
-              </Link>{" "}
-              یا{" "}
-              <Link href="/b2b/rfq" className="dv-link" style={{ fontWeight: 700 }}>
-                استعلام قیمت کاتالوگ و OEM
               </Link>
             </p>
           </div>

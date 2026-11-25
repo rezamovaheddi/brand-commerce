@@ -75,7 +75,6 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
     { href: "/products", label: "کاتالوگ محصولات" },
     { href: "/products?category=serums", label: "سرم‌های درمانی" },
     { href: "/products?category=moisturizers", label: "کرم و مرطوب‌کننده" },
-    { href: "/b2b/rfq", label: "سفارش عمده و B2B" },
     { href: "/magazine", label: "مجله سلامت و پوست" },
     { href: "/about", label: "درباره درماویا" },
   ];

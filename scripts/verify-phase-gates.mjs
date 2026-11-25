@@ -184,7 +184,7 @@ verifyGate(
     "apps/api/src/modules/b2b/b2b.service.ts",
     "apps/api/src/modules/b2b/org-portal.controller.ts",
     "apps/storefront/app/b2b/portal/page.tsx",
-    "apps/storefront/app/b2b/rfq/page.tsx",
+    "apps/storefront/app/b2b/apply/page.tsx",
   ],
   () => {
     return {

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCart } from "./cart/CartProvider";
 import { useCanopy } from "./CanopyContext";
 
@@ -108,46 +109,94 @@ const HERO_VARIANTS: HeroProductVariant[] = [
 
 export default function HomeHero() {
   const [activeVariantIndex, setActiveVariantIndex] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { add, openDrawer } = useCart();
   const { setCanopyIndex } = useCanopy();
+  const heroSectionRef = useRef<HTMLElement | null>(null);
   const visualBoxRef = useRef<HTMLDivElement | null>(null);
+  const activeIndexRef = useRef<number>(0);
   const spinDirRef = useRef<number>(1);
   const isFirstMountRef = useRef<boolean>(true);
 
   const currentVariant = HERO_VARIANTS[activeVariantIndex];
 
-  // Synchronize top canopy with current active product & trigger GSAP rotational transition
-  const handleSelectVariant = (index: number) => {
-    if (index === activeVariantIndex) return;
+  // Trigger GSAP rotational transition when switching to a different variant
+  const switchVariantWithSpin = useCallback(
+    (index: number) => {
+      if (index === activeIndexRef.current) return;
 
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const prevIndex = activeIndexRef.current;
+      activeIndexRef.current = index;
 
-    if (prefersReduced || !visualBoxRef.current) {
-      setActiveVariantIndex(index);
-      setCanopyIndex(index);
-      return;
-    }
+      const prefersReduced =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    spinDirRef.current = index > activeVariantIndex ? 1 : -1;
-    gsap.killTweensOf(visualBoxRef.current);
-    gsap.to(visualBoxRef.current, {
-      rotation: spinDirRef.current * -90,
-      scale: 0.72,
-      opacity: 0,
-      duration: 0.26,
-      ease: "power2.in",
-      onComplete: () => {
+      if (prefersReduced || !visualBoxRef.current) {
         setActiveVariantIndex(index);
         setCanopyIndex(index);
-      },
-    });
+        return;
+      }
+
+      spinDirRef.current = index > prevIndex ? 1 : -1;
+      gsap.killTweensOf(visualBoxRef.current);
+      gsap.to(visualBoxRef.current, {
+        rotation: spinDirRef.current * -90,
+        scale: 0.72,
+        opacity: 0,
+        duration: 0.24,
+        ease: "power2.in",
+        onComplete: () => {
+          setActiveVariantIndex(index);
+          setCanopyIndex(index);
+        },
+      });
+    },
+    [setCanopyIndex],
+  );
+
+  // Manual click on thumbnail
+  const handleSelectVariant = (index: number) => {
+    switchVariantWithSpin(index);
   };
 
   useEffect(() => {
     setCanopyIndex(0);
   }, [setCanopyIndex]);
+
+  // GSAP ScrollTrigger: pin hero section & cycle through all 4 products on scroll,
+  // then unpin naturally into the next catalog section (CategoryGrid).
+  useEffect(() => {
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced || !heroSectionRef.current) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: heroSectionRef.current,
+        start: "top top",
+        end: () => `+=${Math.round(window.innerHeight * 2.4)}`,
+        pin: true,
+        anticipatePin: 1,
+        scrub: 0.4,
+        onUpdate: (self) => {
+          setScrollProgress(self.progress);
+          const nextIdx = Math.min(
+            HERO_VARIANTS.length - 1,
+            Math.floor(self.progress * HERO_VARIANTS.length),
+          );
+          if (nextIdx !== activeIndexRef.current) {
+            switchVariantWithSpin(nextIdx);
+          }
+        },
+      });
+    }, heroSectionRef);
+
+    return () => ctx.revert();
+  }, [switchVariantWithSpin]);
 
   useEffect(() => {
     if (isFirstMountRef.current) {
@@ -193,18 +242,19 @@ export default function HomeHero() {
 
   return (
     <section
+      ref={heroSectionRef}
       className="dermalight-hero-section"
       style={{
         position: "relative",
-        minHeight: "clamp(580px, 68vw, 800px)",
+        minHeight: "100vh",
         width: "100%",
         overflow: "hidden",
         backgroundColor: "#FFFFFF",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        paddingTop: "clamp(90px, 12vw, 140px)",
-        paddingBottom: "clamp(40px, 5vw, 70px)",
+        paddingTop: "clamp(90px, 11vw, 130px)",
+        paddingBottom: "clamp(36px, 4vw, 60px)",
       }}
     >
       <div
@@ -505,6 +555,56 @@ export default function HomeHero() {
             >
               مشاهده کاتالوگ
             </Link>
+          </div>
+          {/* Scroll-driven Catalog Progress Indicator */}
+          <div
+            style={{
+              marginTop: 18,
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              maxWidth: 340,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                color: "#52279B",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {(activeVariantIndex + 1).toLocaleString("fa-IR")} /{" "}
+              {HERO_VARIANTS.length.toLocaleString("fa-IR")}
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 4,
+                borderRadius: 99,
+                background: "#EAE6F3",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${Math.max(25, Math.round(((activeVariantIndex + 1) / HERO_VARIANTS.length) * 100))}%`,
+                  height: "100%",
+                  borderRadius: 99,
+                  background: "linear-gradient(90deg, #52279B 0%, #0284C7 100%)",
+                  transition: "width 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+                }}
+              />
+            </div>
+            <span
+              style={{
+                fontSize: "0.75rem",
+                color: "#64748B",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {scrollProgress > 0.85 ? "ورود به کاتالوگ ↓" : "اسکرول برای محصول بعدی ↓"}
+            </span>
           </div>
         </div>
       </div>

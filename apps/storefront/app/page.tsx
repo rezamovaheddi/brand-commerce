@@ -1,4 +1,5 @@
 import HomeHero from "../components/HomeHero";
+import CatalogBookSection from "../components/CatalogBookSection";
 import CategoryGrid from "../components/CategoryGrid";
 import SpecialOffers from "../components/SpecialOffers";
 import WhyDermatologists from "../components/WhyDermatologists";
@@ -9,6 +10,9 @@ export default function HomePage() {
     <>
       {/* 1. Cinematic Dermalight Hero Section */}
       <HomeHero />
+
+      {/* 1.5. GSAP 3D Open-Book Catalog Section */}
+      <CatalogBookSection />
 
       {/* 2. Product Categories Grid */}
       <CategoryGrid />
