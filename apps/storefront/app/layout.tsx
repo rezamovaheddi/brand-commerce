@@ -3,8 +3,10 @@ import type { ReactNode } from "react";
 import Footer from "../components/Footer";
 import CartProvider from "../components/cart/CartProvider";
 import StorefrontShell from "../components/StorefrontShell";
+import "vazirmatn/Round-Dots/misc/UI-Farsi-Digits/Vazirmatn-RD-UI-FD-font-face.css";
 import "../styles/tokens.css";
 import "../styles/globals.css";
+import "../styles/catalog.css";
 
 export const metadata: Metadata = {
   title: "درمالایت | مرجع تخصصی نقد، بررسی و تامین محصولات درموکازمتیک",

@@ -10,9 +10,16 @@
   },
   "dependencies": {
     "@bc/contracts": "0.1.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.6.0",
+    "@mui/material": "^9.6.0",
+    "framer-motion": "^14.14.0",
+    "gsap": "^3.15.1",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "vazirmatn": "^33.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

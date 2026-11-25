@@ -1,18 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import gsap from "gsap";
 import { useCart } from "./cart/CartProvider";
+import { useCanopy } from "./CanopyContext";
 
 interface HeroProductVariant {
   id: string;
   name: string;
   subtitle: string;
-  heroImage: string;
-  thumbImage: string;
+  description: string;
   sku: string;
   slug: string;
+  productImage: string;
+  swatchImage: string;
+  thumbImage: string;
+  productTransform: string;
+  productWidth: string;
+  productHeight: string;
+  productOffset: { top?: string; bottom?: string; left?: string; right?: string };
+  swatchTransform: string;
+  swatchWidth: string;
+  swatchHeight: string;
+  swatchOffset: { top?: string; bottom?: string; left?: string; right?: string };
 }
 
 const HERO_VARIANTS: HeroProductVariant[] = [
@@ -20,44 +32,155 @@ const HERO_VARIANTS: HeroProductVariant[] = [
     id: "tube",
     name: "کرم مرطوب‌کننده و بازسازی‌کننده سلولی",
     subtitle: "فرمولاسیون غنی از سرامیدهای خالص و شی‌باتر ارگانیک",
-    heroImage: "/images/hero_tube_swirl.png",
-    thumbImage: "/images/hero_thumb_tube.png",
+    description: "ترمیم عمیق و پایدار سد دفاعی پوست با بافت کرمی غنی و آبرسانی مداوم ۲۴ ساعته.",
     sku: "DMV-MST-50",
     slug: "ethereal-barrier-cream",
+    productImage: "/images/hero/item_tube.png",
+    swatchImage: "/images/hero/swatch_cream.png",
+    thumbImage: "/images/hero/item_tube.png",
+    productTransform: "translate(-50%, -50%) rotate(-28deg)",
+    productWidth: "clamp(210px, 24vw, 300px)",
+    productHeight: "clamp(330px, 37vw, 470px)",
+    productOffset: { top: "45%", left: "47%" },
+    swatchTransform: "translate(-50%, -50%) rotate(-20deg)",
+    swatchWidth: "clamp(180px, 21vw, 270px)",
+    swatchHeight: "clamp(250px, 29vw, 370px)",
+    swatchOffset: { top: "66%", left: "56%" },
   },
   {
     id: "pump",
-    name: "لوسیون بدن عمیقاً هیدراته‌کننده",
-    subtitle: "تغذیه ۲۴ ساعته سد دفاعی پوست با بافت ابریشمی و بدون چربی",
-    heroImage: "/images/hero_pump.png",
-    thumbImage: "/images/hero_thumb_pump.png",
-    sku: "DMV-MST-100",
-    slug: "ethereal-light-moisturizer",
+    name: "ژل و فوم شست‌وشوی ملایم صورت با pH متعادل",
+    subtitle: "پاک‌کننده ملایم با فوم ابریشمی و بدون چربی",
+    description: "فرمولاسیون اکسیژن‌رسان و پاک‌کننده منافذ با کف متراکم بدون ایجاد حس خشکی و کشیدگی.",
+    sku: "DMV-CLN-150",
+    slug: "ethereal-gentle-cleanser",
+    productImage: "/images/hero/item_pump.png",
+    swatchImage: "/images/hero/swatch_foam.png",
+    thumbImage: "/images/hero/item_pump.png",
+    productTransform: "translate(-50%, -50%) rotate(-26deg)",
+    productWidth: "clamp(220px, 25vw, 310px)",
+    productHeight: "clamp(340px, 38vw, 480px)",
+    productOffset: { top: "44%", left: "48%" },
+    swatchTransform: "translate(-50%, -50%) rotate(5deg)",
+    swatchWidth: "clamp(220px, 25vw, 320px)",
+    swatchHeight: "clamp(220px, 25vw, 320px)",
+    swatchOffset: { top: "67%", left: "56%" },
   },
   {
     id: "jar",
     name: "کرم جوانساز و ضدچروک اکسیر شب",
     subtitle: "تحریک بیوسنتز کلاژن با ریزپپتیدها و نیاسینامید خالص",
-    heroImage: "/images/hero_jar.png",
-    thumbImage: "/images/hero_thumb_jar.png",
+    description: "بافت مخملی غنی از آنتی‌اکسیدان‌های فعال برای ترمیم بافت خسته و بازیابی شفافیت پوست در طول شب.",
     sku: "DMV-MST-50",
     slug: "ethereal-barrier-cream",
+    productImage: "/images/hero/item_jar.png",
+    swatchImage: "/images/hero/swatch_cream.png",
+    thumbImage: "/images/hero/item_jar.png",
+    productTransform: "translate(-50%, -50%) rotate(-18deg)",
+    productWidth: "clamp(240px, 28vw, 350px)",
+    productHeight: "clamp(240px, 28vw, 350px)",
+    productOffset: { top: "45%", left: "47%" },
+    swatchTransform: "translate(-50%, -50%) rotate(-25deg)",
+    swatchWidth: "clamp(190px, 22vw, 280px)",
+    swatchHeight: "clamp(260px, 30vw, 380px)",
+    swatchOffset: { top: "66%", left: "56%" },
   },
   {
     id: "dropper",
     name: "سرم تغذیه‌کننده ویتامینه و اسید هیالورونیک",
     subtitle: "روشن‌کننده قوی و آنتی‌اکسیدان محافظت‌کننده در برابر آلودگی",
-    heroImage: "/images/hero_dropper.png",
-    thumbImage: "/images/hero_thumb_dropper.png",
+    description: "فرمولاسیون کنسانتره با جذب سلولی فوری برای شفاف‌سازی تن پوست و درخشش طبیعی روزانه.",
     sku: "DMV-SRM-30H",
     slug: "ethereal-hyaluronic-serum",
+    productImage: "/images/hero/item_dropper.png",
+    swatchImage: "/images/hero/swatch_gold.png",
+    thumbImage: "/images/hero/item_dropper.png",
+    productTransform: "translate(-50%, -50%) rotate(-28deg)",
+    productWidth: "clamp(190px, 22vw, 280px)",
+    productHeight: "clamp(340px, 39vw, 490px)",
+    productOffset: { top: "44%", left: "48%" },
+    swatchTransform: "translate(-50%, -50%) rotate(15deg)",
+    swatchWidth: "clamp(230px, 26vw, 330px)",
+    swatchHeight: "clamp(260px, 30vw, 380px)",
+    swatchOffset: { top: "67%", left: "56%" },
   },
 ];
 
 export default function HomeHero() {
   const [activeVariantIndex, setActiveVariantIndex] = useState(0);
   const { add, openDrawer } = useCart();
+  const { setCanopyIndex } = useCanopy();
+  const visualBoxRef = useRef<HTMLDivElement | null>(null);
+  const spinDirRef = useRef<number>(1);
+  const isFirstMountRef = useRef<boolean>(true);
+
   const currentVariant = HERO_VARIANTS[activeVariantIndex];
+
+  // Synchronize top canopy with current active product & trigger GSAP rotational transition
+  const handleSelectVariant = (index: number) => {
+    if (index === activeVariantIndex) return;
+
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReduced || !visualBoxRef.current) {
+      setActiveVariantIndex(index);
+      setCanopyIndex(index);
+      return;
+    }
+
+    spinDirRef.current = index > activeVariantIndex ? 1 : -1;
+    gsap.killTweensOf(visualBoxRef.current);
+    gsap.to(visualBoxRef.current, {
+      rotation: spinDirRef.current * -90,
+      scale: 0.72,
+      opacity: 0,
+      duration: 0.26,
+      ease: "power2.in",
+      onComplete: () => {
+        setActiveVariantIndex(index);
+        setCanopyIndex(index);
+      },
+    });
+  };
+
+  useEffect(() => {
+    setCanopyIndex(0);
+  }, [setCanopyIndex]);
+
+  useEffect(() => {
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      return;
+    }
+    if (!visualBoxRef.current) return;
+
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        visualBoxRef.current,
+        {
+          rotation: spinDirRef.current * 90,
+          scale: 0.72,
+          opacity: 0,
+        },
+        {
+          rotation: 0,
+          scale: 1,
+          opacity: 1,
+          duration: 0.56,
+          ease: "back.out(1.4)",
+        },
+      );
+    });
+
+    return () => ctx.revert();
+  }, [activeVariantIndex]);
 
   const handleQuickAdd = async () => {
     try {
@@ -73,15 +196,15 @@ export default function HomeHero() {
       className="dermalight-hero-section"
       style={{
         position: "relative",
-        minHeight: "clamp(540px, 62vw, 760px)",
+        minHeight: "clamp(580px, 68vw, 800px)",
         width: "100%",
         overflow: "hidden",
-        background: "radial-gradient(ellipse 90% 80% at 75% 45%, rgba(246, 230, 240, 0.45) 0%, rgba(255, 255, 255, 1) 75%)",
+        backgroundColor: "#FFFFFF",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        paddingTop: "clamp(80px, 12vw, 140px)",
-        paddingBottom: "clamp(24px, 4vw, 48px)",
+        justifyContent: "center",
+        paddingTop: "clamp(90px, 12vw, 140px)",
+        paddingBottom: "clamp(40px, 5vw, 70px)",
       }}
     >
       <div
@@ -92,100 +215,120 @@ export default function HomeHero() {
           padding: "0 24px",
           width: "100%",
           position: "relative",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
+          zIndex: 2,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: "clamp(28px, 4vw, 56px)",
+          alignItems: "center",
         }}
       >
-        {/* Right-aligned Main Hero Product Visual */}
+        {/* Column 1 in RTL: Right side -> Dual-layer Floating Visual centered directly inside the circle */}
         <div
           style={{
-            position: "absolute",
-            top: "clamp(10px, 3vw, 40px)",
-            left: "clamp(20px, 6vw, 80px)",
-            width: "clamp(280px, 36vw, 540px)",
-            height: "clamp(340px, 44vw, 620px)",
+            position: "relative",
+            width: "100%",
+            height: "clamp(420px, 50vw, 620px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 10,
           }}
         >
-          {/* Soft Circular Amethyst/Rose Glow behind Product */}
+          {/* Background Soft Subtle Circle centered right behind the product */}
           <div
+            aria-hidden="true"
             style={{
               position: "absolute",
-              width: "clamp(260px, 32vw, 480px)",
-              height: "clamp(260px, 32vw, 480px)",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "clamp(400px, 46vw, 600px)",
+              height: "clamp(400px, 46vw, 600px)",
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(229, 200, 213, 0.75) 0%, rgba(242, 222, 232, 0.35) 55%, transparent 75%)",
-              filter: "blur(40px)",
+              backgroundColor: "#F4F4F6",
               zIndex: 1,
               pointerEvents: "none",
             }}
           />
 
-          {/* Product Image with smooth transition */}
+          {/* Animated Container holding Product Bottle + Swatch */}
           <div
-            key={currentVariant.id}
+            ref={visualBoxRef}
+            key={`visual-box-${currentVariant.id}`}
             style={{
               position: "relative",
               width: "100%",
               height: "100%",
               zIndex: 2,
-              animation: "fadeInScale 0.45s ease-out forwards",
+              transformOrigin: "50% 50%",
+              willChange: "transform, opacity",
             }}
           >
-            <Image
-              src={currentVariant.heroImage}
-              alt={currentVariant.name}
-              fill
-              priority
-              sizes="(max-width: 768px) 80vw, 45vw"
+            {/* Swatch Layer underneath */}
+            <div
               style={{
-                objectFit: "contain",
-                filter: "drop-shadow(0 20px 35px rgba(110, 80, 100, 0.18))",
+                position: "absolute",
+                width: currentVariant.swatchWidth,
+                height: currentVariant.swatchHeight,
+                transform: currentVariant.swatchTransform,
+                ...currentVariant.swatchOffset,
+                zIndex: 1,
+                filter: "drop-shadow(0 14px 24px rgba(0, 0, 0, 0.08))",
+                pointerEvents: "none",
               }}
-            />
+            >
+              <Image
+                src={currentVariant.swatchImage}
+                alt={`${currentVariant.name} بافت`}
+                fill
+                priority
+                sizes="(max-width: 768px) 70vw, 35vw"
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+
+            {/* Product Bottle Layer on top */}
+            <div
+              style={{
+                position: "absolute",
+                width: currentVariant.productWidth,
+                height: currentVariant.productHeight,
+                transform: currentVariant.productTransform,
+                ...currentVariant.productOffset,
+                zIndex: 2,
+                filter: "drop-shadow(0 22px 38px rgba(0, 0, 0, 0.15))",
+              }}
+            >
+              <Image
+                src={currentVariant.productImage}
+                alt={currentVariant.name}
+                fill
+                priority
+                sizes="(max-width: 768px) 80vw, 40vw"
+                style={{ objectFit: "contain" }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Hero Branding / Headline Area (Subtle Clinical Elegance) */}
+        {/* Column 2 in RTL: Left side -> Texts, 4 Thumbnails, and Actions */}
         <div
           style={{
-            maxWidth: "600px",
-            marginRight: 0,
-            zIndex: 12,
-            paddingTop: "clamp(20px, 4vw, 60px)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            maxWidth: "580px",
+            zIndex: 10,
           }}
         >
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 14px",
-              borderRadius: 9999,
-              background: "rgba(82, 39, 155, 0.08)",
-              border: "1px solid rgba(82, 39, 155, 0.18)",
-              color: "#52279B",
-              fontSize: "0.85rem",
-              fontWeight: 600,
-              marginBottom: 16,
-            }}
-          >
-            <span>✨</span>
-            <span>نوآوری درموکازمتیک با پشتوانه بالینی</span>
-          </div>
-
+          {/* Main Headline */}
           <h1
             style={{
-              fontSize: "clamp(1.8rem, 3.2vw, 2.7rem)",
+              fontSize: "clamp(1.7rem, 3vw, 2.5rem)",
               fontWeight: 800,
               color: "#1A2254",
               lineHeight: 1.35,
-              marginBottom: 14,
+              marginBottom: 12,
               letterSpacing: "-0.02em",
             }}
           >
@@ -202,41 +345,137 @@ export default function HomeHero() {
             </span>
           </h1>
 
-          <p
+          {/* Dynamic Variant Subtitle & Description */}
+          <div
+            key={`desc-${currentVariant.id}`}
             style={{
-              fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
-              color: "#5A6A85",
-              lineHeight: 1.8,
-              maxWidth: "500px",
-              marginBottom: 24,
+              animation: "fadeInScale 0.35s ease-out forwards",
+              minHeight: 88,
             }}
           >
-            {currentVariant.subtitle}. ترکیبی هم‌افزا از فناوری نانوپپتیدها و عصاره‌های ناب برای احیای سلامت و شادابی درخشان پوست شما.
-          </p>
+            <p
+              style={{
+                fontSize: "clamp(0.98rem, 1.2vw, 1.1rem)",
+                fontWeight: 700,
+                color: "#2C3E50",
+                lineHeight: 1.5,
+                marginBottom: 6,
+              }}
+            >
+              {currentVariant.name}
+            </p>
+            <p
+              style={{
+                fontSize: "clamp(0.88rem, 1vw, 0.96rem)",
+                color: "#5A6A85",
+                lineHeight: 1.7,
+                maxWidth: "520px",
+                margin: 0,
+              }}
+            >
+              {currentVariant.subtitle}. {currentVariant.description}
+            </p>
+          </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* 4 Thumbnails Strip placed directly under text matching Figma */}
+          <div
+            style={{
+              direction: "ltr",
+              marginBlock: "20px 24px",
+              display: "inline-flex",
+              alignItems: "flex-end",
+              gap: "clamp(16px, 2.5vw, 30px)",
+              padding: "10px 16px",
+              background: "rgba(255, 255, 255, 0.85)",
+              backdropFilter: "blur(12px)",
+              borderRadius: 20,
+              border: "1px solid rgba(226, 232, 240, 0.85)",
+              boxShadow: "0 6px 20px rgba(0, 0, 0, 0.04)",
+              width: "fit-content",
+            }}
+          >
+            {HERO_VARIANTS.map((item, idx) => {
+              const isSelected = idx === activeVariantIndex;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleSelectVariant(idx)}
+                  aria-label={`انتخاب فرمولاسیون ${item.name}`}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 8,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "4px 6px 2px",
+                    position: "relative",
+                    transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                    transform: isSelected ? "scale(1.15)" : "scale(0.96)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "clamp(42px, 4.5vw, 60px)",
+                      height: "clamp(52px, 5.5vw, 76px)",
+                      position: "relative",
+                      filter: isSelected
+                        ? "drop-shadow(0 6px 14px rgba(82, 39, 155, 0.28))"
+                        : "grayscale(20%) opacity(0.7)",
+                      transition: "filter 0.25s ease",
+                    }}
+                  >
+                    <Image
+                      src={item.thumbImage}
+                      alt={item.name}
+                      fill
+                      sizes="65px"
+                      style={{ objectFit: "contain" }}
+                    />
+                  </div>
+
+                  {/* Active Indicator Bar matching Figma node_11_35 */}
+                  <div
+                    style={{
+                      width: "clamp(34px, 3.8vw, 46px)",
+                      height: 4,
+                      borderRadius: 2,
+                      backgroundColor: isSelected ? "#B0A992" : "transparent",
+                      boxShadow: isSelected ? "0 2px 5px rgba(176, 169, 146, 0.35)" : "none",
+                      transition: "background-color 0.25s ease, box-shadow 0.25s ease",
+                    }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Action Buttons */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
             <button
               type="button"
               onClick={handleQuickAdd}
               style={{
-                padding: "12px 26px",
+                padding: "11px 26px",
                 borderRadius: 14,
                 background: "linear-gradient(135deg, #52279B 0%, #431E82 100%)",
                 color: "#FFFFFF",
-                fontSize: "0.98rem",
+                fontSize: "0.95rem",
                 fontWeight: 700,
                 border: "none",
                 cursor: "pointer",
-                boxShadow: "0 8px 22px rgba(82, 39, 155, 0.28)",
+                boxShadow: "0 8px 20px rgba(82, 39, 155, 0.25)",
                 transition: "all 0.2s ease",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 12px 28px rgba(82, 39, 155, 0.38)";
+                e.currentTarget.style.boxShadow = "0 12px 26px rgba(82, 39, 155, 0.35)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 8px 22px rgba(82, 39, 155, 0.28)";
+                e.currentTarget.style.boxShadow = "0 8px 20px rgba(82, 39, 155, 0.25)";
               }}
             >
               ثبت سفارش مستقیم
@@ -245,12 +484,12 @@ export default function HomeHero() {
             <Link
               href="/products"
               style={{
-                padding: "12px 22px",
+                padding: "11px 20px",
                 borderRadius: 14,
                 background: "rgba(255, 255, 255, 0.9)",
                 border: "1.5px solid #CBD5E1",
                 color: "#1A2254",
-                fontSize: "0.95rem",
+                fontSize: "0.92rem",
                 fontWeight: 600,
                 textDecoration: "none",
                 transition: "all 0.2s ease",
@@ -266,85 +505,6 @@ export default function HomeHero() {
             >
               مشاهده کاتالوگ
             </Link>
-          </div>
-        </div>
-
-        {/* Bottom Interactive 4-Product Thumbnail Selector */}
-        <div
-          style={{
-            zIndex: 15,
-            paddingTop: "clamp(30px, 5vw, 60px)",
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "flex-start",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "clamp(18px, 3.5vw, 42px)",
-              padding: "10px 16px",
-              background: "rgba(255, 255, 255, 0.75)",
-              backdropFilter: "blur(12px)",
-              borderRadius: 22,
-              border: "1px solid rgba(226, 232, 240, 0.8)",
-              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
-            }}
-          >
-            {HERO_VARIANTS.map((item, idx) => {
-              const isSelected = idx === activeVariantIndex;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveVariantIndex(idx)}
-                  aria-label={`انتخاب محصول ${item.name}`}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 8,
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "4px 8px",
-                    position: "relative",
-                    transition: "transform 0.2s ease",
-                    transform: isSelected ? "scale(1.08)" : "scale(1)",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "clamp(46px, 5vw, 64px)",
-                      height: "clamp(58px, 6.5vw, 84px)",
-                      position: "relative",
-                      filter: isSelected ? "drop-shadow(0 6px 14px rgba(82, 39, 155, 0.25))" : "grayscale(25%) opacity(0.8)",
-                      transition: "filter 0.2s ease",
-                    }}
-                  >
-                    <Image
-                      src={item.thumbImage}
-                      alt={item.name}
-                      fill
-                      sizes="64px"
-                      style={{ objectFit: "contain" }}
-                    />
-                  </div>
-
-                  {/* Active Indicator Bar matching node_11_35.svg */}
-                  <div
-                    style={{
-                      width: "clamp(40px, 4vw, 54px)",
-                      height: 5,
-                      borderRadius: 3,
-                      backgroundColor: isSelected ? "#52279B" : "transparent",
-                      transition: "background-color 0.25s ease",
-                    }}
-                  />
-                </button>
-              );
-            })}
           </div>
         </div>
       </div>

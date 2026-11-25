@@ -2,7 +2,7 @@
    All values come from styles/tokens.css (the --dv-* variables). */
 
 :root {
-  --font-vazir: 'Vazirmatn', Tahoma, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-vazir: 'Vazirmatn RD UI FD', 'Vazirmatn', Tahoma, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ---------------------------------------------------------------- reset */
@@ -23,7 +23,7 @@ body {
   min-height: 100dvh;
   background: var(--dv-bg-gradient) fixed;
   color: var(--dv-ink);
-  font-family: var(--font-vazir), Vazirmatn, Tahoma, system-ui, sans-serif;
+  font-family: var(--font-vazir);
   line-height: 1.75;
 }
 
@@ -4784,5 +4784,147 @@ button[aria-disabled="true"],
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* ========================================================
+   DERMAVIA Luxury Liquid Glass Navbar (Ultra Glassmorphism)
+   ======================================================== */
+.dermalight-header-floating-wrap {
+  position: fixed;
+  top: clamp(14px, 2vw, 22px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  padding: 0 clamp(16px, 3vw, 36px);
+  pointer-events: none;
+}
+
+.dermalight-liquid-navbar {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 1240px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px clamp(12px, 2vw, 22px);
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.58) 0%, rgba(253, 248, 255, 0.38) 50%, rgba(255, 255, 255, 0.48) 100%);
+  backdrop-filter: blur(28px) saturate(210%);
+  -webkit-backdrop-filter: blur(28px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 
+    0 18px 45px rgba(118, 62, 117, 0.09),
+    0 2px 10px rgba(0, 0, 0, 0.02),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 2px 0 rgba(118, 62, 117, 0.05);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dermalight-liquid-navbar.is-scrolled {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(253, 248, 255, 0.55) 50%, rgba(255, 255, 255, 0.68) 100%);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 22px 50px rgba(118, 62, 117, 0.15),
+    0 4px 14px rgba(0, 0, 0, 0.04),
+    inset 0 1.5px 1.5px 0 #FFFFFF,
+    inset 0 -1.5px 2px 0 rgba(118, 62, 117, 0.05);
+}
+
+/* Glassy Links Pill Track */
+.dermalight-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.35);
+  padding: 4px 6px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 0 1.5px 3px rgba(118, 62, 117, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.dermalight-nav-link {
+  position: relative;
+  font-size: 0.91rem;
+  font-weight: 600;
+  color: #34254D;
+  text-decoration: none;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.dermalight-nav-link:hover {
+  color: #763E75;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 8px rgba(118, 62, 117, 0.08);
+}
+
+.dermalight-nav-link.is-active {
+  background: #FFFFFF;
+  color: #763E75;
+  font-weight: 800;
+  box-shadow: 
+    0 4px 18px rgba(118, 62, 117, 0.18),
+    inset 0 1px 0 #FFFFFF;
+}
+
+/* Glassy Circle Buttons (Search, Profile, Wishlist) */
+.dermalight-glass-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #34254D;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), inset 0 1.5px 1px rgba(255, 255, 255, 0.9);
+  transition: all 0.22s ease;
+  text-decoration: none;
+}
+
+.dermalight-glass-btn:hover {
+  background: #FFFFFF;
+  color: #763E75;
+  border-color: #FFFFFF;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(118, 62, 117, 0.16), inset 0 1px 0 #FFFFFF;
+}
+
+/* Luxury Cart Capsule */
+.dermalight-cart-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #763E75 0%, #572870 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 
+    0 8px 24px rgba(118, 62, 117, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dermalight-cart-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 30px rgba(118, 62, 117, 0.45),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.7);
+  background: linear-gradient(135deg, #874686 0%, #5E2777 100%);
 }
 

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "./cart/CartProvider";
-import SampleBadge from "./SampleBadge";
 
 interface SpecialProduct {
   id: string;
@@ -12,9 +11,9 @@ interface SpecialProduct {
   sku: string;
   brand: string;
   title: string;
-  volumeHint: string;
   image: string;
   isSpecial?: boolean;
+  hasWishlist?: boolean;
 }
 
 const SPECIAL_PRODUCTS: SpecialProduct[] = [
@@ -22,18 +21,17 @@ const SPECIAL_PRODUCTS: SpecialProduct[] = [
     id: "sp-1",
     slug: "ethereal-hyaluronic-serum",
     sku: "DMV-SRM-30H",
-    brand: "فرمولاسیون DERMAVIA",
-    title: "سرم آبرسان سه‌وزنی هیالورونیک اسید",
-    volumeHint: "حجم ۳۰ میلی‌لیتر • بدون بو",
+    brand: "برند لاروش پوزی",
+    title: "سرم آبرسان هیالورونیک اسید B5",
     image: "/images/product_serum_b5.png",
+    hasWishlist: true,
   },
   {
     id: "sp-2",
     slug: "ethereal-fluid-sunscreen-spf50",
     sku: "DMV-SUN-50F",
-    brand: "فرمولاسیون DERMAVIA",
-    title: "فلوئید ضدآفتاب SPF 50+ بی‌رنگ و سبک",
-    volumeHint: "حجم ۵۰ میلی‌لیتر • فاقد چربی",
+    brand: "برند ویشی",
+    title: "کرم ضد آفتاب فاقد چربی مدال اس",
     image: "/images/product_sunscreen.png",
     isSpecial: true,
   },
@@ -41,24 +39,22 @@ const SPECIAL_PRODUCTS: SpecialProduct[] = [
     id: "sp-3",
     slug: "ethereal-gentle-cleanser",
     sku: "DMV-CLN-150",
-    brand: "فرمولاسیون DERMAVIA",
-    title: "ژل شست‌وشوی ملایم صورت با pH متعادل",
-    volumeHint: "حجم ۱۵۰ میلی‌لیتر • بدون سولفات",
+    brand: "برند بایودرما",
+    title: "ژل شستشوی صورت پوست چرب",
     image: "/images/product_cleanser.png",
   },
   {
     id: "sp-4",
     slug: "ethereal-barrier-cream",
     sku: "DMV-MST-50",
-    brand: "فرمولاسیون DERMAVIA",
-    title: "کرم ترمیم‌کننده و تقویت سد دفاعی پوست",
-    volumeHint: "حجم ۵۰ میلی‌لیتر • غنی از سرامید",
+    brand: "برند اوردینری",
+    title: "لایه بردار شیمیایی قوی AHA/BHA",
     image: "/images/product_aha_bha.png",
   },
 ];
 
 export default function SpecialOffers() {
-  const { add } = useCart();
+  const { add, openDrawer } = useCart();
   const [addingId, setAddingId] = useState<string | null>(null);
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
 
@@ -66,15 +62,17 @@ export default function SpecialOffers() {
     setAddingId(product.id);
     try {
       await add(product.sku, 1);
+      openDrawer();
     } catch {
       window.location.href = `/products/${product.slug}`;
     } finally {
-      setTimeout(() => setAddingId(null), 600);
+      setTimeout(() => setAddingId(null), 500);
     }
   };
 
   const toggleWishlist = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setWishlist((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
@@ -82,119 +80,131 @@ export default function SpecialOffers() {
     <section
       className="dermalight-special-offers-section"
       style={{
-        paddingBlock: "clamp(36px, 5vw, 64px)",
+        position: "relative",
+        zIndex: 10,
+        backgroundColor: "#FFFFFF",
+        paddingBlock: "clamp(60px, 8vw, 96px)",
         width: "100%",
       }}
     >
-      <div className="container" style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
-        {/* Soft Parchment Card Container */}
-        <div
-          style={{
-            background: "#FAF7F3",
-            borderRadius: 36,
-            padding: "clamp(32px, 5vw, 56px) clamp(20px, 4vw, 44px)",
-            border: "1px solid rgba(216, 200, 188, 0.7)",
-            boxShadow: "0 20px 50px rgba(73, 46, 34, 0.05)",
-          }}
-        >
-          {/* Section Header */}
-          <div style={{ textAlign: "center", marginBottom: "clamp(28px, 4vw, 44px)" }}>
-            <h2
-              style={{
-                fontSize: "clamp(1.5rem, 2.5vw, 2.1rem)",
-                fontWeight: 800,
-                color: "#172343",
-                marginBottom: 8,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              فرمولاسیون‌های منتخب بالینی DERMAVIA
-            </h2>
-            <p
-              style={{
-                fontSize: "0.95rem",
-                color: "#705649",
-                maxWidth: "640px",
-                margin: "0 auto",
-                lineHeight: 1.6,
-              }}
-            >
-              مؤثرترین ترکیبات مراقبتی با درصد غلظت اثبات‌شده بالینی و شفافیت کامل در اجزای تشکیل‌دهنده
-            </p>
-          </div>
-
-          {/* 4 Product Cards Grid */}
-          <div
+      <div
+        className="container"
+        style={{
+          maxWidth: "1440px",
+          margin: "0 auto",
+          padding: "0 clamp(20px, 4vw, 48px)",
+          width: "100%",
+        }}
+      >
+        {/* Section Header: Centered */}
+        <div style={{ textAlign: "center", marginBottom: "clamp(36px, 5vw, 56px)" }}>
+          <h2
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "clamp(20px, 2.5vw, 28px)",
-              marginBottom: 36,
+              fontSize: "clamp(1.7rem, 2.7vw, 2.3rem)",
+              fontWeight: 800,
+              color: "#1A2254",
+              marginBottom: 10,
+              letterSpacing: "-0.02em",
             }}
           >
-            {SPECIAL_PRODUCTS.map((item) => {
-              const isWished = wishlist[item.id];
-              const isAdding = addingId === item.id;
-              return (
+            پیشنهادات ویژه درمالایت
+          </h2>
+          <p
+            style={{
+              fontSize: "clamp(0.92rem, 1.1vw, 1.02rem)",
+              color: "#64748B",
+              maxWidth: "680px",
+              margin: "0 auto",
+              lineHeight: 1.6,
+            }}
+          >
+            محبوب‌ترین و موثرترین محصولات مراقبتی برگزیده توسط کاربران ما در ماه گذشته
+          </p>
+        </div>
+
+        {/* Full-width 4 Product Cards Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: "clamp(24px, 3vw, 36px)",
+            marginBottom: "clamp(36px, 5vw, 52px)",
+          }}
+        >
+          {SPECIAL_PRODUCTS.map((item) => {
+            const isWished = wishlist[item.id];
+            const isAdding = addingId === item.id;
+            return (
+              <div
+                key={item.id}
+                style={{
+                  position: "relative",
+                }}
+              >
+                {/* Soft Lavender Layered Backdrop matching design */}
                 <div
-                  key={item.id}
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: 26,
+                    backgroundColor: "#D3C8E4",
+                    transform: "translate(-8px, 10px)",
+                    zIndex: 1,
+                    opacity: 0.9,
+                    transition: "transform 0.25s ease",
+                  }}
+                />
+
+                {/* Main White Product Card */}
+                <div
                   style={{
                     position: "relative",
+                    zIndex: 2,
+                    background: "#FFFFFF",
+                    borderRadius: 26,
+                    padding: "16px 16px 20px",
+                    border: "1px solid rgba(226, 232, 240, 0.9)",
+                    boxShadow: "0 10px 28px rgba(0, 0, 0, 0.04)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: "100%",
+                    transition: "all 0.25s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-4px)";
+                    e.currentTarget.style.boxShadow = "0 18px 40px rgba(82, 39, 155, 0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 10px 28px rgba(0, 0, 0, 0.04)";
                   }}
                 >
-                  {/* Subtle layered backdrop under card matching warm aesthetic */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      borderRadius: 24,
-                      backgroundColor: "#EFE5DE",
-                      transform: "translate(-6px, 8px)",
-                      zIndex: 1,
-                      opacity: 0.7,
-                      transition: "transform 0.25s ease",
-                    }}
-                  />
-
-                  {/* Main Product Card */}
+                  {/* Top Image Box */}
                   <div
                     style={{
                       position: "relative",
-                      zIndex: 2,
-                      background: "#FFFFFF",
-                      borderRadius: 24,
-                      padding: 16,
-                      border: "1px solid rgba(216, 200, 188, 0.8)",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      height: "100%",
-                      transition: "all 0.25s ease",
+                      width: "100%",
+                      height: 240,
+                      borderRadius: 20,
+                      overflow: "hidden",
+                      backgroundColor: "#F8FAFC",
+                      marginBottom: 16,
                     }}
                   >
-                    {/* Top Image Box with Wishlist & Badge */}
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "100%",
-                        height: 220,
-                        borderRadius: 18,
-                        overflow: "hidden",
-                        backgroundColor: "#F7F0E9",
-                        marginBottom: 16,
-                      }}
-                    >
-                      <Link href={`/products/${item.slug}`}>
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 25vw"
-                          style={{ objectFit: "cover" }}
-                        />
-                      </Link>
+                    <Link href={`/products/${item.slug}`}>
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 25vw"
+                        style={{ objectFit: "cover" }}
+                      />
+                    </Link>
 
-                      {/* Wishlist Heart Button */}
+                    {/* Wishlist Heart Button for item 1 */}
+                    {item.hasWishlist && (
                       <button
                         type="button"
                         onClick={(e) => toggleWishlist(item.id, e)}
@@ -202,18 +212,19 @@ export default function SpecialOffers() {
                         style={{
                           position: "absolute",
                           top: 12,
-                          right: 12,
-                          width: 34,
-                          height: 34,
+                          left: 12,
+                          width: 36,
+                          height: 36,
                           borderRadius: "50%",
-                          background: "rgba(255, 255, 255, 0.88)",
+                          background: "rgba(255, 255, 255, 0.92)",
                           backdropFilter: "blur(6px)",
                           border: "none",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           cursor: "pointer",
-                          color: isWished ? "#A12B2B" : "#705649",
+                          color: isWished ? "#DC2626" : "#64748B",
+                          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.08)",
                           transition: "color 0.2s, transform 0.2s",
                           zIndex: 3,
                         }}
@@ -222,156 +233,166 @@ export default function SpecialOffers() {
                           width="18"
                           height="18"
                           viewBox="0 0 24 24"
-                          fill={isWished ? "#A12B2B" : "none"}
+                          fill={isWished ? "#DC2626" : "none"}
                           stroke="currentColor"
-                          strokeWidth="2"
+                          strokeWidth="2.2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
                           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                         </svg>
                       </button>
+                    )}
 
-                      {/* Sample Badge */}
+                    {/* Special Coral Badge for item 2 */}
+                    {item.isSpecial && (
                       <div
                         style={{
                           position: "absolute",
                           top: 12,
-                          left: 12,
+                          right: 12,
+                          padding: "4px 12px",
+                          borderRadius: 9999,
+                          backgroundColor: "#EF4444",
+                          color: "#FFFFFF",
+                          fontSize: "0.78rem",
+                          fontWeight: 800,
                           zIndex: 3,
+                          boxShadow: "0 4px 10px rgba(239, 68, 68, 0.3)",
                         }}
                       >
-                        <SampleBadge />
+                        ویژه
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    {/* Content Details */}
-                    <div>
-                      {/* Brand Tag */}
-                      <span
-                        style={{
-                          display: "inline-block",
-                          fontSize: "0.82rem",
-                          fontWeight: 700,
-                          color: "#7A4B60",
-                          marginBottom: 6,
-                        }}
-                      >
-                        {item.brand}
-                      </span>
-
-                      {/* Product Title */}
-                      <h3
-                        style={{
-                          fontSize: "1rem",
-                          fontWeight: 700,
-                          color: "#231a15",
-                          lineHeight: 1.5,
-                          marginBottom: 8,
-                          minHeight: "3rem",
-                        }}
-                      >
-                        <Link href={`/products/${item.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-                          {item.title}
-                        </Link>
-                      </h3>
-
-                      {/* Volume Hint */}
-                      <p
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#705649",
-                          margin: "0 0 14px",
-                        }}
-                      >
-                        {item.volumeHint}
-                      </p>
-                    </div>
-
-                    {/* Bottom Action: "مشاهده و ثبت سفارش" */}
-                    <div
+                  {/* Content Details */}
+                  <div>
+                    {/* Brand Tag */}
+                    <span
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingTop: 12,
-                        borderTop: "1px solid rgba(216, 200, 188, 0.4)",
+                        display: "block",
+                        fontSize: "0.84rem",
+                        fontWeight: 700,
+                        color: "#2563EB",
+                        marginBottom: 6,
+                        textAlign: "right",
                       }}
                     >
-                      <button
-                        type="button"
-                        onClick={() => handleAddToCart(item)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          width: "100%",
-                          padding: "8px 12px",
-                          borderRadius: 12,
-                          background: isAdding ? "#276749" : "transparent",
-                          color: isAdding ? "#FFFFFF" : "#172343",
-                          border: "none",
-                          fontWeight: 700,
-                          fontSize: "0.92rem",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isAdding) e.currentTarget.style.color = "#7A4B60";
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isAdding) e.currentTarget.style.color = "#172343";
-                        }}
-                      >
-                        <span>{isAdding ? "در حال انتقال به محصول..." : "مشاهده و ثبت سفارش"}</span>
+                      {item.brand}
+                    </span>
 
-                        {/* Arrow Icon */}
-                        <div
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: "50%",
-                            background: isAdding ? "rgba(255,255,255,0.3)" : "rgba(122, 75, 96, 0.1)",
-                            color: isAdding ? "#FFFFFF" : "#7A4B60",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "1rem",
-                            fontWeight: 600,
-                          }}
-                        >
-                          ‹
-                        </div>
-                      </button>
-                    </div>
+                    {/* Product Title */}
+                    <h3
+                      style={{
+                        fontSize: "1.05rem",
+                        fontWeight: 800,
+                        color: "#1A2254",
+                        lineHeight: 1.5,
+                        marginBottom: 18,
+                        minHeight: "3rem",
+                        textAlign: "right",
+                      }}
+                    >
+                      <Link href={`/products/${item.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
+                        {item.title}
+                      </Link>
+                    </h3>
+                  </div>
+
+                  {/* Bottom Action Bar: Text on Right, Plus button on Left */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingTop: 12,
+                      borderTop: "1px solid #F1F5F9",
+                    }}
+                  >
+                    {/* Plus Icon Button on left in RTL */}
+                    <button
+                      type="button"
+                      onClick={() => handleAddToCart(item)}
+                      aria-label={`افزودن ${item.title} به سبد خرید`}
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 10,
+                        backgroundColor: isAdding ? "#16A34A" : "#EFF6FF",
+                        color: isAdding ? "#FFFFFF" : "#2563EB",
+                        border: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        fontSize: "1.3rem",
+                        fontWeight: 700,
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isAdding) {
+                          e.currentTarget.style.backgroundColor = "#2563EB";
+                          e.currentTarget.style.color = "#FFFFFF";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isAdding) {
+                          e.currentTarget.style.backgroundColor = "#EFF6FF";
+                          e.currentTarget.style.color = "#2563EB";
+                        }
+                      }}
+                    >
+                      {isAdding ? "✓" : "+"}
+                    </button>
+
+                    {/* Order Link / Action on right in RTL */}
+                    <button
+                      type="button"
+                      onClick={() => handleAddToCart(item)}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        fontSize: "0.95rem",
+                        fontWeight: 800,
+                        color: "#1A2254",
+                        cursor: "pointer",
+                        padding: 0,
+                        transition: "color 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "#2563EB")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "#1A2254")}
+                    >
+                      {isAdding ? "در حال افزودن..." : "ثبت سفارش"}
+                    </button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
+        </div>
 
-          {/* Bottom Catalog Link */}
-          <div style={{ textAlign: "center" }}>
-            <Link
-              href="/products"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: "0.95rem",
-                fontWeight: 700,
-                color: "#172343",
-                textDecoration: "underline",
-                textUnderlineOffset: 6,
-                transition: "color 0.2s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#7A4B60")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#172343")}
-            >
-              <span>مشاهده تمامی فرمولاسیون‌های کاتالوگ درماویا</span>
-              <span>‹</span>
-            </Link>
-          </div>
+        {/* Bottom Catalog Link */}
+        <div style={{ textAlign: "center" }}>
+          <Link
+            href="/products"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: "0.98rem",
+              fontWeight: 800,
+              color: "#1A2254",
+              textDecoration: "underline",
+              textUnderlineOffset: 8,
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#2563EB")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#1A2254")}
+          >
+            <span>مشاهده تمامی محصولات کاتالوگ</span>
+            <span style={{ fontSize: "1.1rem" }}>‹</span>
+          </Link>
         </div>
       </div>
     </section>

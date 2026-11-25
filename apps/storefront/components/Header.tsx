@@ -19,7 +19,18 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
   const [searchResults, setSearchResults] = useState<Array<{ id: string; nameFa: string; slug: string; categoryName?: string }>>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll listener for dynamic liquid blur & shadow elevation
+  useEffect(() => {
+    function handleScroll() {
+      setIsScrolled(window.scrollY > 15);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Close search dropdown on click outside
   useEffect(() => {
@@ -71,47 +82,33 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
 
   return (
     <>
+      {/* Floating Outer Wrapper (Centered detached navigation bar) */}
       <header
-        className="dermalight-header"
+        className="dermalight-header-floating-wrap"
         id="top"
         style={{
-          position: "sticky",
-          top: 0,
+          position: "fixed",
+          top: "clamp(12px, 2vw, 22px)",
+          left: 0,
+          right: 0,
           zIndex: 100,
-          background: "rgba(255, 255, 255, 0.88)",
-          backdropFilter: "blur(18px)",
-          WebkitBackdropFilter: "blur(18px)",
-          borderBottom: "1px solid rgba(226, 232, 240, 0.7)",
-          transition: "all 0.25s ease",
+          display: "flex",
+          justifyContent: "center",
+          padding: "0 clamp(16px, 3vw, 36px)",
+          pointerEvents: "none",
         }}
       >
-        <div
-          className="container"
-          style={{
-            maxWidth: "1280px",
-            margin: "0 auto",
-            padding: "14px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          {/* 1. Right: Brand Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        {/* Floating Liquid Glassmorphism Capsule Navbar */}
+        <div className={`dermalight-liquid-navbar ${isScrolled ? "is-scrolled" : ""}`}>
+          {/* 1. Right side in RTL: Brand Logo & Mobile Toggle */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button
               type="button"
-              className="mobile-menu-toggle"
+              className="dermalight-mobile-toggle"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="باز کردن منوی موبایل"
-              style={{
-                display: "none",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                padding: 6,
-              }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A2254" strokeWidth="2.2" strokeLinecap="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34254D" strokeWidth="2.2" strokeLinecap="round">
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="18" x2="21" y2="18" />
@@ -120,15 +117,10 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
             <DermalightLogo size="md" />
           </div>
 
-          {/* 2. Center: Navigation Links */}
+          {/* 2. Center: Navigation Links with Liquid Pill Indicator (Desktop only) */}
           <nav
             className="dermalight-nav-links"
             aria-label="منوی اصلی"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "32px",
-            }}
           >
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
@@ -136,60 +128,25 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
                 <Link
                   key={link.href}
                   href={link.href}
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "#52279B" : "#1A2254",
-                    textDecoration: "none",
-                    transition: "color 0.2s ease",
-                    position: "relative",
-                    paddingBlock: "4px",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#52279B")}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.color = "#1A2254";
-                  }}
+                  className={`dermalight-nav-link ${isActive ? "is-active" : ""}`}
                 >
                   {link.label}
-                  {isActive && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        bottom: -4,
-                        right: 0,
-                        left: 0,
-                        height: 2,
-                        backgroundColor: "#52279B",
-                        borderRadius: 2,
-                      }}
-                    />
-                  )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* 3. Left: Action Icons (Search, Profile, Wishlist, Cart) */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* 3. Left side in RTL: Action Icons (Search, Profile, Wishlist, Cart) */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {/* Live Search Icon Button */}
             <div ref={searchBoxRef} style={{ position: "relative" }}>
               <button
                 type="button"
+                className="dermalight-glass-btn"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 aria-label="جستجوی محصولات"
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#1A2254",
-                  background: isSearchOpen ? "rgba(82, 39, 155, 0.08)" : "transparent",
-                  transition: "background 0.2s",
-                }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" />
                   <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
@@ -200,14 +157,16 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
                 <div
                   style={{
                     position: "absolute",
-                    top: "calc(100% + 10px)",
+                    top: "calc(100% + 14px)",
                     left: 0,
                     width: 320,
-                    background: "#FFFFFF",
-                    borderRadius: 16,
-                    boxShadow: "0 18px 45px rgba(26, 34, 84, 0.16)",
-                    border: "1px solid #E2E8F0",
-                    padding: 12,
+                    background: "rgba(255, 255, 255, 0.88)",
+                    backdropFilter: "blur(24px)",
+                    WebkitBackdropFilter: "blur(24px)",
+                    borderRadius: 20,
+                    boxShadow: "0 20px 48px rgba(118, 62, 117, 0.16)",
+                    border: "1px solid rgba(255, 255, 255, 0.8)",
+                    padding: 14,
                     zIndex: 200,
                   }}
                 >
@@ -221,11 +180,12 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
                       style={{
                         width: "100%",
                         padding: "10px 14px",
-                        borderRadius: 10,
+                        borderRadius: 12,
                         border: "1px solid #CBD5E1",
                         fontSize: "0.88rem",
                         outline: "none",
                         fontFamily: "inherit",
+                        background: "#FFFFFF",
                       }}
                     />
                   </div>
@@ -235,7 +195,7 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
                     </div>
                   )}
                   {searchResults.length > 0 && (
-                    <ul style={{ listStyle: "none", margin: "8px 0 0", padding: 0 }}>
+                    <ul style={{ listStyle: "none", margin: "10px 0 0", padding: 0 }}>
                       {searchResults.map((item) => (
                         <li key={item.id}>
                           <Link
@@ -243,8 +203,8 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
                             onClick={() => setIsSearchOpen(false)}
                             style={{
                               display: "block",
-                              padding: "8px 10px",
-                              borderRadius: 8,
+                              padding: "9px 12px",
+                              borderRadius: 10,
                               fontSize: "0.88rem",
                               color: "#1E293B",
                               textDecoration: "none",
@@ -266,19 +226,10 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
             {/* Profile / Account Icon */}
             <Link
               href="/account"
+              className="dermalight-glass-btn dermalight-hide-mobile"
               aria-label="حساب کاربری"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#1A2254",
-                textDecoration: "none",
-              }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
@@ -287,23 +238,13 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
             {/* Wishlist / Heart Icon with active indicator */}
             <Link
               href="/account#wishlist"
+              className="dermalight-glass-btn dermalight-hide-mobile"
               aria-label="لیست علاقه‌مندی‌ها"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#1A2254",
-                position: "relative",
-                textDecoration: "none",
-              }}
+              style={{ position: "relative" }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
-              {/* Cyan active dot matching Figma */}
               <span
                 style={{
                   position: "absolute",
@@ -312,40 +253,19 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
                   width: 6,
                   height: 6,
                   borderRadius: "50%",
-                  backgroundColor: "#0284C7",
+                  backgroundColor: "#763E75",
                 }}
               />
             </Link>
 
-            {/* Luxury Cart Drawer Trigger Button */}
+            {/* Luxury Cart Drawer Trigger Button Capsule */}
             <button
               type="button"
               onClick={openDrawer}
+              className="dermalight-cart-pill"
               aria-label={`مشاهده سبد خرید (${formatFaNumber(count)} مورد)`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 14px",
-                borderRadius: 9999,
-                background: "linear-gradient(135deg, #F3EEFB 0%, #EDE5FA 100%)",
-                border: "1px solid #D8C5F2",
-                color: "#52279B",
-                fontWeight: 700,
-                fontSize: "0.9rem",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#52279B";
-                e.currentTarget.style.color = "#FFFFFF";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "linear-gradient(135deg, #F3EEFB 0%, #EDE5FA 100%)";
-                e.currentTarget.style.color = "#52279B";
-              }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="9" cy="21" r="1" />
                 <circle cx="20" cy="21" r="1" />
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -361,12 +281,21 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
         {isMobileMenuOpen && (
           <div
             style={{
-              padding: "16px 24px 24px",
-              background: "#FFFFFF",
-              borderTop: "1px solid #E2E8F0",
+              pointerEvents: "auto",
+              position: "fixed",
+              top: 76,
+              left: 20,
+              right: 20,
+              padding: "20px 24px",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(24px)",
+              borderRadius: 24,
+              boxShadow: "0 24px 60px rgba(26, 34, 84, 0.18)",
+              border: "1px solid rgba(226, 232, 240, 0.8)",
               display: "flex",
               flexDirection: "column",
               gap: 12,
+              zIndex: 101,
             }}
           >
             {navLinks.map((link) => (
@@ -378,9 +307,13 @@ export default function Header({ onOpenConsultation: _onOpenConsultation }: Head
                   fontSize: "1rem",
                   fontWeight: 600,
                   color: "#1A2254",
-                  padding: "8px 0",
+                  padding: "10px 14px",
+                  borderRadius: 12,
                   textDecoration: "none",
+                  transition: "background 0.2s",
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#F1F5F9")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
                 {link.label}
               </Link>

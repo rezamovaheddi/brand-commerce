@@ -1,6 +1,6 @@
 # Periodic Claim Evidence Expiry & Market Rule Compliance Report
 **Canonical Tracking:** `TASK-144` / `S-060` (`Regulatory / Content / P8 Scale & Governance`)  
-**Audit Timestamp:** 2026-11-24T10:20:59.739Z  
+**Audit Timestamp:** 2026-11-24T10:48:00.444Z  
 **System Status:** ALL VERIFIED GREEN  
 **Auditor:** Automated Regulatory Compliance Guard (`scripts/enforce-claim-expiry.mjs`)  
 
@@ -21,13 +21,13 @@
 
 Total Renewal Alerts Dispatched: **3**
 
-- **ALERT-1795515659740-CLM-001** -> Sent to `regulatory-lead@brandcommerce.local` for Claim `CLM-001` (Expired on: `2026-02-15`)
+- **ALERT-1795517280445-CLM-001** -> Sent to `regulatory-lead@brandcommerce.local` for Claim `CLM-001` (Expired on: `2026-02-15`)
   - *Message:* "هشدار انقضای شواهد بالینی: ادعای CLM-001 به علت انقضای تاریخ اعتبار گواهی (2026-02-15) به صورت خودکار از دید عموم خارج و تعلیق گردید. لطفاً جهت تمدید با آزمایشگاه آکرودیته هماهنگ نمایید."
 
-- **ALERT-1795515659740-CLM-002** -> Sent to `qa-officer@brandcommerce.local` for Claim `CLM-002` (Expired on: `2025-11-01`)
+- **ALERT-1795517280445-CLM-002** -> Sent to `qa-officer@brandcommerce.local` for Claim `CLM-002` (Expired on: `2025-11-01`)
   - *Message:* "هشدار انقضای شواهد بالینی: ادعای CLM-002 به علت انقضای تاریخ اعتبار گواهی (2025-11-01) به صورت خودکار از دید عموم خارج و تعلیق گردید. لطفاً جهت تمدید با آزمایشگاه آکرودیته هماهنگ نمایید."
 
-- **ALERT-1795515659740-CLM-004** -> Sent to `regulatory-lead@brandcommerce.local` for Claim `CLM-004` (Expired on: `2025-06-01`)
+- **ALERT-1795517280445-CLM-004** -> Sent to `regulatory-lead@brandcommerce.local` for Claim `CLM-004` (Expired on: `2025-06-01`)
   - *Message:* "هشدار انقضای شواهد بالینی: ادعای CLM-004 به علت انقضای تاریخ اعتبار گواهی (2025-06-01) به صورت خودکار از دید عموم خارج و تعلیق گردید. لطفاً جهت تمدید با آزمایشگاه آکرودیته هماهنگ نمایید."
 
 ---

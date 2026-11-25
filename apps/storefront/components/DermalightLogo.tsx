@@ -33,11 +33,11 @@ export default function DermalightLogo({
           width: iconSize,
           height: iconSize,
           borderRadius: "50%",
-          background: "linear-gradient(135deg, #6533B8 0%, #4D2196 100%)",
+          background: "linear-gradient(135deg, #763E75 0%, #572870 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: "0 4px 12px rgba(82, 39, 155, 0.28)",
+          boxShadow: "0 4px 14px rgba(118, 62, 117, 0.32)",
           flexShrink: 0,
           position: "relative",
         }}

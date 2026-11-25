@@ -6,56 +6,55 @@ import Link from "next/link";
 interface CategoryItem {
   id: string;
   name: string;
-  countHint: string;
   href: string;
   icon: React.ReactNode;
 }
 
 const CATEGORIES: CategoryItem[] = [
   {
-    id: "serums",
-    name: "سرم‌های درمانی و اسیدها",
-    countHint: "ویتامین C، نیاسینامید، هیالورونیک",
-    href: "/products?category=serums",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A4B60" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-      </svg>
-    ),
-  },
-  {
-    id: "cleansers",
-    name: "پاک‌کننده‌های ملایم",
-    countHint: "ژل و شیر پاک‌کننده با pH فیزیولوژیک",
+    id: "face",
+    name: "مراقبت صورت",
     href: "/products?category=cleansers",
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A4B60" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
         <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-        <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" />
-        <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" />
+        <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.6" />
+        <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.6" />
       </svg>
     ),
   },
   {
-    id: "moisturizers",
-    name: "مرطوب‌کننده‌ها و کرم‌ها",
-    countHint: "ترمیم سد دفاعی و آبرسانی ۲۴ ساعته",
+    id: "hair",
+    name: "مراقبت مو",
+    href: "/products?category=hair",
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="6" cy="6" r="3" />
+        <circle cx="6" cy="18" r="3" />
+        <line x1="20" y1="4" x2="8.12" y2="15.88" />
+        <line x1="14.47" y1="14.48" x2="20" y2="20" />
+        <line x1="8.12" y1="8.12" x2="12" y2="12" />
+      </svg>
+    ),
+  },
+  {
+    id: "body",
+    name: "بهداشت بدن",
     href: "/products?category=moisturizers",
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A4B60" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-        <path d="M12 5v14" opacity="0.3" />
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        <path d="M7.5 12.5h2.2l1.3-2.5 1.8 5 1.4-2.5h2.3" strokeWidth="2" />
       </svg>
     ),
   },
   {
-    id: "sunscreens",
-    name: "ضدآفتاب و فلوئید محافظ",
-    countHint: "حفاظت وسیع‌الطیف SPF 50+ بدون چربی",
+    id: "sun",
+    name: "ضد آفتاب",
     href: "/products?category=sunscreens",
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A4B60" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="4" />
         <path d="M12 2v2" />
         <path d="M12 20v2" />
@@ -69,28 +68,12 @@ const CATEGORIES: CategoryItem[] = [
     ),
   },
   {
-    id: "b2b",
-    name: "سفارشات سازمانی و B2B",
-    countHint: "استعلام قیمت کلینیکال و OEM",
-    href: "/b2b/rfq",
+    id: "serums",
+    name: "سرم‌های درمانی",
+    href: "/products?category=serums",
     icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A4B60" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-      </svg>
-    ),
-  },
-  {
-    id: "catalog",
-    name: "مشاهده کل کاتالوگ",
-    countHint: "۸ فرمولاسیون فعال بالینی",
-    href: "/products",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A4B60" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7" />
-        <rect x="14" y="3" width="7" height="7" />
-        <rect x="14" y="14" width="7" height="7" />
-        <rect x="3" y="14" width="7" height="7" />
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
       </svg>
     ),
   },
@@ -101,41 +84,44 @@ export default function CategoryGrid() {
     <section
       className="dermalight-categories-section"
       style={{
-        paddingBlock: "clamp(48px, 6vw, 72px)",
+        position: "relative",
+        zIndex: 10,
+        backgroundColor: "#FFFFFF",
+        paddingBlock: "clamp(56px, 8vw, 92px)",
         width: "100%",
       }}
     >
       <div className="container" style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
         {/* Section Header */}
-        <div style={{ textAlign: "right", marginBottom: "clamp(24px, 3.5vw, 36px)" }}>
+        <div style={{ textAlign: "right", marginBottom: "clamp(32px, 4.5vw, 48px)" }}>
           <h2
             style={{
-              fontSize: "clamp(1.4rem, 2.2vw, 1.85rem)",
+              fontSize: "clamp(1.6rem, 2.5vw, 2.1rem)",
               fontWeight: 800,
-              color: "#172343",
-              marginBottom: 6,
+              color: "#1A2254",
+              marginBottom: 8,
               letterSpacing: "-0.02em",
             }}
           >
-            دسته‌بندی فرمولاسیون‌های بالینی
+            دسته‌بندی محصولات
           </h2>
           <p
             style={{
-              fontSize: "0.95rem",
-              color: "#705649",
+              fontSize: "1rem",
+              color: "#64748B",
               margin: 0,
             }}
           >
-            بر اساس نوع درمان، مرحله روتین یا نیاز بالینی پوست خود انتخاب کنید
+            براساس نیاز خود جستجو کنید
           </p>
         </div>
 
-        {/* 6 Category Cards in a Responsive Grid */}
+        {/* 5 Larger Sharp-Cornered Category Cards with Richer Blue Tint and Increased Spacing */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "clamp(14px, 2vw, 24px)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+            gap: "clamp(20px, 2.8vw, 36px)",
           }}
         >
           {CATEGORIES.map((cat) => (
@@ -143,72 +129,60 @@ export default function CategoryGrid() {
               key={cat.id}
               href={cat.href}
               style={{
-                background: "#FAF7F3",
-                borderRadius: 24,
-                padding: "clamp(24px, 3vw, 34px) 16px",
+                backgroundColor: "#E2EEFD",
+                borderRadius: 0,
+                border: "none",
+                minHeight: "clamp(230px, 26vw, 280px)",
+                padding: "clamp(38px, 4.5vw, 56px) 20px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 14,
+                gap: 22,
                 textDecoration: "none",
-                transition: "all 0.25s ease",
-                border: "1px solid rgba(216, 200, 188, 0.7)",
+                transition: "all 0.28s cubic-bezier(0.16, 1, 0.3, 1)",
+                boxShadow: "0 4px 16px rgba(37, 99, 235, 0.06)",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-4px)";
-                e.currentTarget.style.background = "#FFFFFF";
-                e.currentTarget.style.boxShadow = "0 14px 32px rgba(122, 75, 96, 0.12)";
-                e.currentTarget.style.borderColor = "#7A4B60";
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.backgroundColor = "#D4E6FC";
+                e.currentTarget.style.boxShadow = "0 18px 40px rgba(37, 99, 235, 0.16)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.background = "#FAF7F3";
-                e.currentTarget.style.boxShadow = "none";
-                e.currentTarget.style.borderColor = "rgba(216, 200, 188, 0.7)";
+                e.currentTarget.style.backgroundColor = "#E2EEFD";
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(37, 99, 235, 0.06)";
               }}
             >
-              {/* Icon Circle */}
+              {/* White Icon Circle Badge */}
               <div
                 style={{
-                  width: 60,
-                  height: 60,
+                  width: 86,
+                  height: 86,
                   borderRadius: "50%",
                   background: "#FFFFFF",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 6px 18px rgba(73, 46, 34, 0.06)",
-                  border: "1px solid rgba(216, 200, 188, 0.5)",
+                  boxShadow: "0 6px 20px rgba(37, 99, 235, 0.1)",
                 }}
               >
                 {cat.icon}
               </div>
 
-              {/* Title & Hint */}
-              <div style={{ textAlign: "center" }}>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: "0.98rem",
-                    fontWeight: 700,
-                    color: "#231a15",
-                    marginBottom: 4,
-                  }}
-                >
-                  {cat.name}
-                </span>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: "0.76rem",
-                    color: "#705649",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {cat.countHint}
-                </span>
-              </div>
+              {/* Title */}
+              <span
+                style={{
+                  display: "block",
+                  fontSize: "clamp(1.1rem, 1.35vw, 1.25rem)",
+                  fontWeight: 800,
+                  color: "#1E293B",
+                  textAlign: "center",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {cat.name}
+              </span>
             </Link>
           ))}
         </div>
